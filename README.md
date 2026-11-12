@@ -88,3 +88,8 @@ Plantillas de tareas frecuentes, recordatorios, filtro mensual avanzado, numerac
 - Android guarda el documento en Descargas/EYR Refrigeracion y abre el visor PDF o el selector de compartir (WhatsApp disponible según la instalación).
 - El botón Atrás cierra ventanas, vuelve a la pantalla anterior y evita salir por accidente; en Inicio se requiere pulsarlo dos veces para salir.
 - Se mantiene la misma base local y los respaldos JSON.
+
+
+## Calendario v1.6
+
+En Agenda > Ver calendario ahora hay tres vistas: **Mes**, **Semana** (tira de siete días desplazable horizontalmente) y **Día** (franjas horarias con detalles de visitas). Las visitas se pueden abrir desde cualquiera de las vistas; los filtros por estado y búsqueda se mantienen. El botón Hoy vuelve a la fecha actual y las flechas recorren meses, semanas o días según la vista. Desde la vista diaria se puede agendar directamente una visita para ese día. Todo sigue guardado localmente.

@@ -1,0 +1,49 @@
+/* Agenda EYR: selector Mes / Semana / Día. Mantiene paleta de fuego y hielo. */
+.eyr-view-tabs{display:flex;gap:5px;margin:2px 0 15px;padding:4px;background:rgba(2,13,32,.86);border:1px solid #246aa0;border-radius:15px;max-width:500px}
+.eyr-view-tabs button{flex:1;min-width:0;border:0;border-radius:11px;padding:11px 6px;background:transparent;color:#c2e9ff;font-size:13px;font-weight:800;cursor:pointer}
+.eyr-view-tabs button.active{background:linear-gradient(120deg,#066da9,#08caff);box-shadow:0 0 13px rgba(0,191,255,.38);color:#00152b}
+.eyr-view-tabs button:focus-visible,.eyr-week-heading:focus-visible,.eyr-hour-event:focus-visible,.eyr-week-events button:focus-visible{outline:2px solid #ffc35b;outline-offset:2px}
+.calendar-date .eyr-day-number{display:inline-grid;place-items:center;min-width:23px;height:23px;padding:0 3px;color:inherit;background:transparent;border:0;border-radius:50%;font-size:inherit;font-weight:800;cursor:pointer}
+.calendar-day.is-today .eyr-day-number{background:#05b8f2;color:#001025}
+.calendar-date .eyr-day-number:hover{background:rgba(16,188,251,.3)}
+.eyr-cal-toolbar{gap:12px}
+.eyr-cal-toolbar h2{text-transform:none}
+.eyr-week-scroll{max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;border:1px solid #246a9e;border-radius:15px;background:rgba(2,18,38,.8);scrollbar-width:thin;scrollbar-color:#23caff #092742}
+.eyr-week-track{display:grid;grid-template-columns:repeat(7,minmax(153px,1fr));gap:7px;min-width:1110px;padding:10px;align-items:stretch}
+.eyr-week-card{min-width:0;min-height:215px;border:1px solid #2d729f;background:linear-gradient(165deg,#102e53,#06182d);border-radius:12px;overflow:hidden}
+.eyr-week-card.is-today{border-color:#0bd1ff;box-shadow:inset 0 0 0 1px #0bd1ff}
+.eyr-week-card.is-selected .eyr-week-heading{background:linear-gradient(130deg,#075c89,#0c3e63)}
+.eyr-week-heading{width:100%;display:flex;align-items:center;gap:4px;flex-direction:column;background:#0b2a4a;border:0;border-bottom:1px solid #2d6d96;color:#edfbff;min-height:102px;padding:9px 6px;cursor:pointer}
+.eyr-week-heading>span{color:#90e7ff;font-weight:800}
+.eyr-week-heading strong{font-size:25px;line-height:1.15;color:#fff;text-shadow:0 0 8px #0a9fe0}
+.eyr-week-heading small{color:#afccdf;font-size:11px}
+.eyr-week-heading em{font-style:normal;color:#ffe1a4;font-size:10px;font-weight:800}
+.eyr-week-events{display:flex;flex-direction:column;gap:6px;padding:7px 5px}
+.eyr-week-events .calendar-event{padding:7px;border-radius:7px}
+.eyr-week-events .calendar-event-time{display:block;font-size:11px}
+.eyr-week-events .calendar-event-client{font-size:11px}
+.eyr-week-description{display:block;overflow:hidden;line-height:1.2;font-size:10px;max-height:27px;margin-top:3px;opacity:.88;overflow-wrap:anywhere}
+.eyr-week-empty{font-size:11px;color:#819db6;text-align:center;margin-top:12px}
+.eyr-more{background:transparent;border:0;color:#5adaff;font-size:11px;font-weight:800;text-align:left;cursor:pointer}
+.eyr-week-hint{margin:8px 0 15px;color:#b1d5e8;font-size:11px}
+.eyr-day-actions{display:flex;justify-content:flex-end;margin:8px 0 15px}
+.eyr-day-timeline{border:1px solid #286d9a;border-radius:14px;background:rgba(3,17,39,.72);overflow:hidden}
+.eyr-hour-slot{display:grid;grid-template-columns:64px minmax(0,1fr);border-bottom:1px solid #194d72;min-height:48px}
+.eyr-hour-slot:last-child{border-bottom:none}
+.eyr-hour-slot time{padding:11px 7px;border-right:1px solid #256d99;text-align:center;font-size:12px;font-weight:800;color:#8fdfff}
+.eyr-hour-content{min-width:0;padding:5px;display:flex;flex-direction:column;gap:6px}
+.eyr-hour-empty{min-height:33px}
+.eyr-hour-event{border:1px solid #1481ae;border-left:4px solid #ffb233;border-radius:10px;background:linear-gradient(115deg,#243045,#071d36);padding:11px;display:flex;align-items:flex-start;gap:9px;text-align:left;cursor:pointer;color:#f2fbff;min-width:0;width:100%}
+.eyr-hour-event.status-confirmada{border-left-color:#14c9fc;background:#0c3155}
+.eyr-hour-event.status-realizada{border-left-color:#32db9b;background:#0d3d31}
+.eyr-hour-event.status-cancelada{border-left-color:#8191a4;background:#202b3d}
+.eyr-hour-time{font-size:13px;font-weight:900;color:#ffc975;min-width:45px}
+.eyr-hour-info{min-width:0;display:flex;flex-direction:column;gap:5px;flex:1}
+.eyr-hour-info strong{font-size:14px;color:white;overflow-wrap:anywhere}
+.eyr-hour-info small{color:#c3dded;font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.eyr-hour-status{white-space:nowrap;font-size:10px;color:#8edcfa}
+.eyr-untimed{padding:14px 0;display:grid;gap:7px}
+.eyr-untimed h3{font-size:15px;color:#d8f5ff}
+@media(max-width:640px){.eyr-cal-toolbar{align-items:flex-start;flex-wrap:wrap}.eyr-cal-toolbar .calendar-controls{margin-left:auto}.eyr-view-tabs{max-width:none}.eyr-week-track{grid-template-columns:repeat(7,170px);min-width:max-content}.eyr-hour-slot{grid-template-columns:51px minmax(0,1fr)}.eyr-hour-slot time{font-size:10px;padding:12px 3px}.eyr-hour-event{padding:9px;gap:5px;flex-wrap:wrap}.eyr-hour-status{display:none}.eyr-hour-time{min-width:40px}.eyr-hour-info strong{font-size:13px}.eyr-hour-info small{font-size:11px}}
+/* El contador de visitas conserva su aspecto en el día actual. */
+.calendar-day.is-today .calendar-date>span.calendar-count{background:#174872;color:#d7f8ff;width:auto;height:auto;border-radius:20px;display:inline-flex;padding:2px 6px}
