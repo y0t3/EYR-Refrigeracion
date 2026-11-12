@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "carrier-53hqv035",
+    "brand": "Carrier",
+    "model": "53HQV035",
+    "series": "XPower",
+    "type": "Split de pared · frío/calor",
+    "refrigerant": "",
+    "coolingKW": "",
+    "coolingBTU": "",
+    "indoorSize": "",
+    "outdoorSize": "",
+    "indoorWeight": "",
+    "outdoorWeight": "",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "",
+    "notes": "3.500 frigorías según Carrier. Unidad interior 42HQV035-R, conjunto 53HQV035. Refrigerante y cañerías no verificados.",
+    "url": "https://www.carrier.com.ar/manuales/xpower/",
+    "photo": "",
+    "photoCredit": ""
+  }
+}
