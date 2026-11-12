@@ -54,6 +54,14 @@ jobs:
           "$ANDROID_HOME/build-tools/35.0.0/zipalign" -f -p 4 android/app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/app-aligned.apk"
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks "$RUNNER_TEMP/eyr-release.p12" --ks-key-alias "$EYR_KEY_ALIAS" --ks-pass env:EYR_KEYSTORE_PASSWORD --key-pass env:EYR_KEY_PASSWORD --out "android/app/build/outputs/apk/release/EYR-Refrigeracion-Estable.apk" "$RUNNER_TEMP/app-aligned.apk"
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "android/app/build/outputs/apk/release/EYR-Refrigeracion-Estable.apk"
+          # Garantizar que todas las actualizaciones conservan exactamente la misma firma.
+          actual_sha256=$("$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --print-certs "android/app/build/outputs/apk/release/EYR-Refrigeracion-Estable.apk" | awk '/Signer #1 certificate SHA-256 digest:/ {print $NF; exit}' | tr '[:upper:]' '[:lower:]')
+          expected_sha256=$(tr -d '\r\n ' < android/signing-cert-sha256.txt | tr '[:upper:]' '[:lower:]')
+          if [[ -z "$actual_sha256" || "$actual_sha256" != "$expected_sha256" ]]; then
+            echo "::error::Firma distinta de la original EYR. Se bloquea la publicación para proteger las actualizaciones."
+            exit 1
+          fi
+          echo "Firma permanente EYR comprobada."
           rm -f "$RUNNER_TEMP/eyr-release.p12"
       - name: Publicar APK con firma permanente
         if: ${{ env.EYR_KEYSTORE_B64 != '' && env.EYR_KEYSTORE_PASSWORD != '' && env.EYR_KEY_ALIAS != '' && env.EYR_KEY_PASSWORD != '' }}
