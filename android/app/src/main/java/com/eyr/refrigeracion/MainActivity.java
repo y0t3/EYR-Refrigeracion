@@ -12,6 +12,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.Environment;
@@ -22,6 +24,8 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.graphics.BitmapFactory;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -47,6 +51,10 @@ public class MainActivity extends Activity {
     private static final int IMPORT_FILE = 34;
     private static final int EXPORT_FILE = 35;
     private WebView webView;
+    private ImageView startupImage;
+    private final Handler splashHandler = new Handler(Looper.getMainLooper());
+    private long splashShownAt;
+    private boolean splashDismissed=false;
     private final ExecutorService backupExecutor=Executors.newSingleThreadExecutor();
     private android.webkit.ValueCallback<Uri[]> uploadCallback;
     private byte[] pendingExport;
@@ -88,7 +96,7 @@ public class MainActivity extends Activity {
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(true);
         settings.setDefaultTextEncodingName("utf-8");
-        settings.setUserAgentString(settings.getUserAgentString() + " EYRAndroid/1.7");
+        settings.setUserAgentString(settings.getUserAgentString() + " EYRAndroid/1.9");
         webView.addJavascriptInterface(new NativeBridge(), "EYRAndroid");
         webView.setWebViewClient(new WebViewClient() {
             @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
@@ -153,6 +161,18 @@ public class MainActivity extends Activity {
         safeRoot.setBackgroundColor(android.graphics.Color.rgb(3, 10, 24));
         safeRoot.addView(webView, new FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        // Portada nativa Fuego & Hielo mientras carga la app.
+        startupImage = new ImageView(this);
+        startupImage.setBackgroundColor(android.graphics.Color.rgb(3,10,24));
+        startupImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        try (InputStream input = getAssets().open("assets/splash-eyr.jpg")) {
+            startupImage.setImageBitmap(BitmapFactory.decodeStream(input));
+        } catch (Exception ex) {
+            android.util.Log.w("EYRSplash","No se pudo cargar el arte",ex);
+        }
+        safeRoot.addView(startupImage,new FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,FrameLayout.LayoutParams.MATCH_PARENT));
+        splashShownAt=SystemClock.uptimeMillis();
         if (Build.VERSION.SDK_INT >= 35) {
             safeRoot.setOnApplyWindowInsetsListener((v, insets) -> {
                 android.graphics.Insets bars = insets.getInsets(
@@ -162,9 +182,27 @@ public class MainActivity extends Activity {
             });
         }
         setContentView(safeRoot);
+        // Si la página falla, el splash no bloquea el uso indefinidamente.
+        splashHandler.postDelayed(this::hideStartupImage,7000L);
         webView.loadUrl(ROOT + "index.html");
     }
 
+    private void hideStartupImage(){
+        if(splashDismissed||startupImage==null)return;
+        splashDismissed=true;
+        ImageView image=startupImage;
+        image.animate().alpha(0f).setDuration(360L).withEndAction(()->{
+            if(image.getParent() instanceof FrameLayout)
+                ((FrameLayout)image.getParent()).removeView(image);
+            if(startupImage==image)startupImage=null;
+        }).start();
+    }
+    private void splashReady(){
+        runOnUiThread(()->{
+            long elapsed=SystemClock.uptimeMillis()-splashShownAt;
+            splashHandler.postDelayed(this::hideStartupImage,Math.max(0L,1450L-elapsed));
+        });
+    }
     private void showMessage(String s) { runOnUiThread(() -> Toast.makeText(this,s,Toast.LENGTH_LONG).show()); }
 
     private void askPermissionForReminders(String json) {
@@ -214,6 +252,7 @@ public class MainActivity extends Activity {
     }
 
     public class NativeBridge {
+        @JavascriptInterface public void appReady(){splashReady();}
         @JavascriptInterface public void syncReminders(String visitsJson) {
             if(visitsJson==null||visitsJson.length()>4000000)return;
             runOnUiThread(()->{
@@ -337,5 +376,5 @@ public class MainActivity extends Activity {
               else{lastBackPress=now;showMessage("Tocá atrás otra vez para salir de EYR");}
           });
     }
-    @Override public void onDestroy(){backupExecutor.shutdown();if(webView!=null){webView.destroy();webView=null;}super.onDestroy();}
+    @Override public void onDestroy(){splashHandler.removeCallbacksAndMessages(null);backupExecutor.shutdown();if(webView!=null){webView.destroy();webView=null;}super.onDestroy();}
 }

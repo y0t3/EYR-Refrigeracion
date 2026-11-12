@@ -108,3 +108,9 @@ En Agenda > Ver calendario ahora hay tres vistas: **Mes**, **Semana** (tira de s
 - Icono monocromático EYR, blanco sobre fondo transparente, creado en resoluciones Android mdpi–xxxhdpi para el símbolo de notificaciones y barra de estado.
 - Notificación desplegada con logo azul de la app a color (`largeIcon`) y acento celeste. Se mantiene intacto el ícono del lanzador y el contenido de los recordatorios.
 - Recordatorios existentes siguen programados; los avisos nuevos mostrarán los íconos correctos. No se modifican los datos locales.
+
+## v1.9 · Portada de inicio y firma de actualizaciones
+
+La portada aprobada Fuego & Hielo se presenta sobre la WebView en Android hasta que termina de dibujarse la app (con un límite de seguridad). Se conserva íntegra usando ajuste de aspecto. En Android 12+ el sistema puede mostrar inicialmente su icono estándar durante una fracción de segundo, antes de esta portada nativa.
+
+Las APK previas se firmaban con claves de depuración temporales. Para actualizar futuras instalaciones conservando los datos es obligatorio reutilizar una clave de firma privada estable en todas las versiones. No se debe publicar la clave privada en este repositorio público. El proyecto de Android admite firma con las credenciales GitHub Secrets `EYR_KEYSTORE_B64`, `EYR_KEYSTORE_PASSWORD`, `EYR_KEY_ALIAS`, `EYR_KEY_PASSWORD`. Antes de instalar una versión con nueva firma, exportá JSON e importalo después de esa única migración.

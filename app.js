@@ -377,5 +377,8 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 window.addEventListener('storage',e=>{if(e.key===KEY){db=load();if(page!=='editar-presupuesto'&&page!=='editar-remito')render()}});
 if(!navigator.userAgent.includes('EYRAndroid')&&'serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(e=>console.warn('Modo offline no disponible:',e));
 render();
+if(window.EYRAndroid&&typeof window.EYRAndroid.appReady==='function'){
+  requestAnimationFrame(()=>requestAnimationFrame(()=>window.EYRAndroid.appReady()));
+}
 if(window.EYRAndroid&&typeof window.EYRAndroid.syncReminders==='function')try{window.EYRAndroid.syncReminders(JSON.stringify(db.visits.map(v=>({id:v.id,client:v.client,date:v.date,time:v.time,description:v.description||'',address:v.address||'',status:v.status,reminderMinutes:Number(v.reminderMinutes)||0}))))}catch(e){console.warn('Recordatorios locales',e)}
 })();
