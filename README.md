@@ -235,3 +235,13 @@ Las APK previas se firmaban con claves de depuración temporales. Para actualiza
 - OCR ampliado a EH60, EC52, EH0B, ELOC, EA, FL y formatos confirmados. Las alarmas numéricas Hitachi 60–65 solo se reconocen automáticamente con el controlador PSC-A128EX identificado.
 - Ver biblioteca permite recorrer códigos por familia y modelo sin foto. El cuadro de modelo sugiere los modelos incluidos en los manuales.
 - No se modifican los datos ni la firma: APK v2.8, versionCode 19, actualizable encima de v2.7.
+
+
+## v2.9 · Diagnóstico guiado con dos fotos (12/11/2026)
+
+- Nuevo acceso en **Inicio → Diagnóstico con dos fotos**, y desde el lector de códigos de error.
+- **Paso 1:** sacar foto de la etiqueta o importar foto recibida por WhatsApp. OCR local de Android, reconocimiento de marca/modelo contra los ejemplos locales, catálogo en GitHub si hay conectividad y la biblioteca de modelos documentados. Permite corregir los datos antes de continuar; nunca asume un modelo ambiguo.
+- **Paso 2:** sacar foto del display o importar foto de WhatsApp. El lector usa automáticamente marca/modelo del primer paso, propone los códigos observados y muestra la explicación técnica contextualizada de la biblioteca v2.8. Si hay códigos ambiguos se exige confirmar cuál aparece; nunca diagnostica sin modelo verificable.
+- **Guardar en visita:** al seleccionar una visita, se guardan marca, modelo, código, OCR textual y referencia bibliográfica; se respeta el informe existente (notas y fotografías). Las dos fotos utilizadas para leer **no se almacenan ni se envían**. Para guardar evidencias fotográficas debe utilizarse el registro de fotos de la visita.
+- El recorrido es **local-first**; las referencias incorporadas en APK se consultan sin conexión. El catálogo remoto es opcional. El resultado puede registrarse aunque no exista ficha técnica coincidente.
+- Se mantiene cámara/galería/OCR anterior, todas las pantallas, aplicación y clave de firma permanente. Android v2.9 (versionCode=20).

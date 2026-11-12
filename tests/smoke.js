@@ -2,7 +2,7 @@
 const fs=require('node:fs');
 const assert=require('node:assert/strict');
 const code=fs.readFileSync('app.js','utf8').replace(/\}\)\(\);\s*$/,
-  'window.__SMOKE={db,render,clients,clientCard,clientHistory,clientEquipments,visitModal,whatsappNumber,openQuote,visitDetail,equipmentDetail};})();');
+  'window.__SMOKE={db,render,home,clients,clientCard,clientHistory,clientEquipments,visitModal,whatsappNumber,openQuote,visitDetail,equipmentDetail};})();');
 assert(code.includes('window.__SMOKE='),'No se pudo cargar la app para prueba');
 const nodes={'#view':{innerHTML:''},'#modal-root':{innerHTML:''},'#toast':{textContent:'',classList:{add(){},remove(){}}}};
 const window={addEventListener(){},EYRAndroid:null,EYR_CATALOG_BASE:{models:[]}};
@@ -18,6 +18,8 @@ const workshop=fs.readFileSync('workshop.js','utf8');
 const errorCodes=fs.readFileSync('error-codes.js','utf8');
 new Function('window',errorCodes)(window);
 new Function('window','document','indexedDB','crypto',workshop)(window,document,undefined,{randomUUID:()=> 'smoke-uuid'});
+const duo=fs.readFileSync('diagnostico-duo.js','utf8');
+new Function('window','document',duo)(window,document);
 new Function('window','document','navigator','location','localStorage','scrollTo','confirm','alert',code)(
   window,document,navigator,location,localStorage,()=>{},()=>true,()=>{});
 const app=window.__SMOKE;assert(app,'La aplicación no inicia');
@@ -120,3 +122,14 @@ assert(window.EYRWorkshop.errorMeaning('Philco','E1','96PHIN55HA2AN').includes('
 window.EYRWorkshop.openStandalone();
 assert(nodes['#modal-root'].innerHTML.includes('work-error-library'),'Falta acceso a biblioteca desde lector');
 console.log('OK: 99 referencias, familias conflictivas, modelos y OCR extendido');
+
+assert(app.home().includes('data-action="duo-open"'),'Falta entrada al diagnóstico de dos fotos desde Inicio');
+window.EYRDoublePhoto.open();
+assert(nodes['#modal-root'].innerHTML.includes('Foto 1 · Etiqueta del equipo'),'No abre etapa 1 del diagnóstico');
+window.EYRDoublePhoto.onNativeResult({source:'duo-label-gallery',text:'BGH\nMODEL: BP30CN'});
+assert(nodes['#modal-root'].innerHTML.includes('BP30CN'),'No detecta modelo en foto 1');
+window.EYRDoublePhoto.handle('duo-next',{dataset:{}});
+assert(nodes['#modal-root'].innerHTML.includes('Foto 2 · Display del aire'),'No abre etapa 2');
+window.EYRDoublePhoto.onNativeResult({source:'duo-error-gallery',text:'E1'});
+assert(nodes['#modal-root'].innerHTML.includes('Sensor de ambiente'),'No presenta la interpretación para BGH BP30CN');
+console.log('OK: integración de dos fotos desde Inicio');

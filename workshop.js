@@ -411,7 +411,7 @@ function renderStandalone(){
  const visits=[...db().visits].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,120);
  const options='<option value="">Elegir visita para guardar</option>'+visits.map(v=>'<option value="'+esc(v.id)+'" '+(active.visitId===v.id?'selected':'')+'>'+esc(v.client+' · '+v.date+' · '+v.description)+'</option>').join('');
  hooks.modal('⚠️ Leer código de error','<div class="eyr-work"><p>Fotografiá el display o cargá una imagen recibida por WhatsApp. Elegí la marca para obtener una referencia técnica.</p>'+
- '<div class="eyr-work-photo-actions"><button class="btn btn-blue" data-action="work-error-camera">📷 Leer display</button>'+
+ '<div class="eyr-work-photo-actions"><button class="btn btn-primary" data-action="duo-open">📷 Diagnóstico con dos fotos</button><button class="btn btn-blue" data-action="work-error-camera">📷 Leer display</button>'+
  '<button class="btn" data-action="work-error-gallery">🖼️ Cargar foto</button></div>'+
  '<div class="form-grid"><div class="field"><label>Marca</label><select id="work-standalone-brand">'+brandOptions(active.brand||'')+'</select></div>'+
  '<div class="field"><label>Modelo (consultá etiqueta)</label><input id="work-standalone-model" list="eyr-known-error-models" maxlength="110" value="'+esc(active.model||'')+'" placeholder="Código exacto de modelo"><datalist id="eyr-known-error-models">'+modelSuggestions(active.brand)+'</datalist></div>'+

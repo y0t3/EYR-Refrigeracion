@@ -1,0 +1,40 @@
+/* EYR v2.9 · Diagnóstico guiado con dos fotografías */
+.eyr-duo-home{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;border:1px solid rgba(74,179,237,.7);border-radius:16px;padding:18px;margin:13px 0 16px;background:linear-gradient(125deg,rgba(5,54,98,.97),rgba(8,32,65,.95));box-shadow:inset 0 1px 0 rgba(157,218,255,.1)}
+.eyr-duo-home>div{flex:1 1 210px}
+.eyr-duo-home strong{display:block;color:#e8faff;font-size:17px}
+.eyr-duo-home p{font-size:12px;color:#b3d9f0;margin:6px 0 0;line-height:1.45}
+.eyr-duo-home .btn{flex:0 1 190px}
+.eyr-duo{gap:14px}
+.eyr-duo-lead{font-size:12px;color:#b2d3ea;line-height:1.5}
+.eyr-duo-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.eyr-duo-steps>div{border-radius:9px;background:rgba(5,32,59,.84);color:#739ebd;padding:11px 7px;text-align:center;font-size:12px;font-weight:750;border:1px solid rgba(62,139,199,.33)}
+.eyr-duo-steps>.current{border-color:#51baf0;background:rgba(16,100,148,.55);color:#d9f4ff}
+.eyr-duo-steps>.complete{border-color:rgba(74,206,165,.58);color:#8aebca}
+.eyr-duo h3{font-size:16px;font-weight:800;color:#e7f7ff;margin:2px 0}
+.eyr-duo-capture{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.eyr-duo-capture-btn{background:linear-gradient(145deg,rgba(4,69,111,.95),rgba(3,30,62,.96));border:1px solid #288dca;border-radius:13px;padding:14px 9px;color:#e2f6ff;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;text-align:center;font:inherit;cursor:pointer;min-height:111px}
+.eyr-duo-capture-btn>span{font-size:30px}
+.eyr-duo-capture-btn>b{font-size:14px}
+.eyr-duo-capture-btn>small{font-size:11px;color:#add2ea}
+.eyr-duo-capture-btn:focus-visible{outline:2px solid #ff9d4d}
+.eyr-duo-loading,.eyr-duo-notice,.eyr-duo-error{background:rgba(8,39,69,.7);border-radius:10px;padding:11px;font-size:12px;line-height:1.55;border:1px solid rgba(66,158,219,.48);color:#c9e8fb}
+.eyr-duo-loading{border-color:#ec9b4e;color:#ffd6ac}
+.eyr-duo-error{border-color:#db7272;color:#ffcccc}
+.eyr-duo-notice.good{border-color:#46b99b;color:#b1f3db}
+.eyr-duo-device{display:flex;align-items:center;gap:10px;border:1px solid #2884bd;border-radius:12px;padding:11px;background:rgba(8,60,98,.5)}
+.eyr-duo-device>span{font-size:25px}
+.eyr-duo-device>div{min-width:0;flex:1;display:flex;flex-direction:column;gap:3px}
+.eyr-duo-device small{color:#8ccbe9;font-size:11px}
+.eyr-duo-device strong{color:#fff;font-size:15px;overflow-wrap:anywhere}
+.eyr-duo .field input,.eyr-duo .field select,.eyr-duo-save select{max-width:100%;width:100%;background:#071d36;color:#eefaff;border:1px solid rgba(96,180,226,.58);border-radius:9px;padding:11px}
+.eyr-duo-matches{border:1px solid rgba(82,159,197,.46);border-radius:11px;background:rgba(3,30,57,.5);display:flex;flex-wrap:wrap;gap:7px;padding:12px}
+.eyr-duo-matches>b{width:100%;font-size:12px;color:#a0d6f0}
+.eyr-duo-matches .btn{overflow-wrap:anywhere;white-space:normal;text-align:left}
+.eyr-duo-ocr{border:1px solid rgba(75,152,198,.39);border-radius:9px;overflow:hidden}
+.eyr-duo-ocr>summary{cursor:pointer;font-size:12px;padding:12px;color:#a8dff9}
+.eyr-duo-ocr pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:180px;overflow:auto;font-size:11px;padding:12px;background:#07172b;color:#cce6f4;margin:0}
+.eyr-duo-actions,.eyr-duo-candidates{display:flex;flex-wrap:wrap;gap:8px}
+.eyr-duo-candidates .btn{min-width:70px}
+.eyr-duo-save{display:flex;flex-direction:column;gap:11px;border-top:1px solid rgba(74,162,208,.35);padding-top:12px}
+.eyr-duo-save>.form-actions{display:flex;flex-wrap:wrap;gap:8px}
+@media(max-width:550px){.eyr-duo-home .btn{flex:1 1 100%}.eyr-duo-capture-btn{min-height:108px}.eyr-duo-save .form-actions .btn{flex:1 1 135px}.eyr-duo-steps>div{font-size:11px}.eyr-duo-device>.btn{padding:7px;font-size:11px}}

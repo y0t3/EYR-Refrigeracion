@@ -136,6 +136,7 @@ function home(){
  return `<div class="hero-eyr"><picture><source media="(max-width: 600px)" srcset="assets/banner-mobile.jpg"><img src="assets/banner-eyr.jpg" alt="EYR Refrigeración: fuego, hielo y dos técnicos con anteojos azules y la frase Es una app de Orellana.. no la entenderías!"></picture></div>
   <div class="eyr-welcome"><h1>❄️ ¡Hola, Orellana! ❄️</h1><p>${new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p><div class="welcome-glow"></div></div>
   <div class="quick-grid" aria-label="Accesos directos"><button type="button" class="quick-card warm" data-page="agenda"><span class="quick-icon">📅</span><span class="quick-name">Agenda de visitas</span></button><button type="button" class="quick-card" data-page="presupuestos"><span class="quick-icon">📄</span><span class="quick-name">Presupuestos</span></button><button type="button" class="quick-card warm" data-page="remitos"><span class="quick-icon">📦</span><span class="quick-name">Remitos</span></button><button type="button" class="quick-card" data-page="clientes"><span class="quick-icon">👥</span><span class="quick-name">Clientes</span></button><button type="button" class="quick-card warm" data-page="frecuentes"><span class="quick-icon">🛠️</span><span class="quick-name">Trabajos frecuentes</span></button><button type="button" class="quick-card" data-page="configuracion"><span class="quick-icon">⚙️</span><span class="quick-name">Configuración</span></button></div>
+  <div class="eyr-duo-home"><div><strong>📷 Diagnóstico con dos fotos</strong><p>Foto de la etiqueta + foto del display: identificá el equipo y consultá el error en una misma pantalla.</p></div><button class="btn btn-primary" data-action="duo-open">Empezar diagnóstico</button></div>
   <div class="eyr-work-home-tools"><button type="button" class="btn btn-blue" data-action="work-open-error">⚠️ Leer error del display</button><button type="button" class="btn" data-action="work-scan-qr">▦ Escanear QR EYR</button></div>
   <div class="eyr-catalog-feature"><div><h2>📚 Catálogo técnico EYR</h2><p>Buscá modelos, refrigerantes, dimensiones, cañerías y fichas oficiales. Disponible sin conexión.</p></div><button class="btn btn-primary" data-page="catalogo">Ver catálogo técnico</button></div>
   <div class="stat-grid"><div class="stat"><div class="stat-label">Visitas pendientes</div><strong>${pending.length}</strong><span>Por realizar</span></div><div class="stat"><div class="stat-label">Presupuestos del mes</div><strong>${monthly}</strong><span>${new Date().toLocaleDateString('es-AR',{month:'long',year:'numeric'})}</span></div><div class="stat"><div class="stat-label">Enviados</div><strong>${sent}</strong><span>En seguimiento</span></div></div>
@@ -620,6 +621,15 @@ function restoreEYRDatabase(raw){
  delete db.catalogOnline;
  db.version=6;save();setPage('inicio');
 }
+function setupDoublePhoto(){
+ if(!window.EYRDoublePhoto)return;
+ window.EYRDoublePhoto.init({
+  modal,closeModal,toast,confirm:message=>confirm(message),
+  getDB:()=>db,saveDB:save,localModels:catalogItems,
+  remoteModels:()=>catalogIndex?.models||[],ensureIndex:catalogEnsureIndex,
+  openReport:visitId=>window.EYRWorkshop?.openReport(visitId)
+ });
+}
 function setupWorkshop(){
  if(!window.EYRWorkshop)return;
  window.EYRWorkshop.init({
@@ -628,6 +638,7 @@ function setupWorkshop(){
  });
 }
 function handleAction(b,event){const a=b.dataset.action,id=b.dataset.id;
+  if(a&&a.startsWith('duo-')&&window.EYRDoublePhoto?.handle(a,b))return;
   if(a&&a.startsWith('work-')&&window.EYRWorkshop?.handle(a,b))return;
   if(a==='label-open'){if(b.dataset.context==='quote')grabDraft();window.EYRLabelScan?.begin(b.dataset.context||'catalog',id||'');return;}
   if(a==='label-quote-clear'){grabDraft();delete draft.labelEquipment;render();return;}
@@ -750,6 +761,7 @@ document.addEventListener('input',e=>{const el=e.target;if(el.id==='catalog-sear
  if(el.closest('#quote-form')&&el.id!=='f-clientId'){grabDraft();if($('#current-total'))$('#current-total').textContent=fmt(quoteTotal(draft))}
  if(el.closest('#remito-form')&&el.id!=='remito-clientId'){grabRemitoDraft();refreshRemitoTotal()}});
 document.addEventListener('change',async e=>{const el=e.target;
+ if(window.EYRDoublePhoto?.fileChange(el))return;
  if(window.EYRWorkshop?.fileChange(el))return;
  if(el.id==='eyr-label-file'){window.EYRLabelScan?.browserFile(el.files?.[0]);return;}
  if(el.id==='catalog-brand'){catalogBrand=el.value;catalogRefreshResults();if(catalogQuery.trim().length>=2&&!catalogIndex&&catalogIndexStatus!=='offline')catalogEnsureIndex();return}
@@ -819,6 +831,7 @@ window.addEventListener('storage',e=>{if(e.key===KEY){db=load();if(page!=='edita
 if(!navigator.userAgent.includes('EYRAndroid')&&'serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(e=>console.warn('Modo offline no disponible:',e));
 setupLabelScanner();
 setupWorkshop();
+setupDoublePhoto();
 render();
 if(window.EYRAndroid&&typeof window.EYRAndroid.appReady==='function'){
   requestAnimationFrame(()=>requestAnimationFrame(()=>window.EYRAndroid.appReady()));

@@ -289,7 +289,7 @@ public class MainActivity extends Activity {
     /** EYR v2.5: foto de la etiqueta local, sin permisos de galería ni subida a servidores. */
     private void startLabelScan(String source) {
         if(labelScanRequested) return;
-        if(!source.matches("(camera|gallery|error-camera|error-gallery|qr-camera|qr-gallery)"))return;
+        if(!source.matches("(camera|gallery|error-camera|error-gallery|qr-camera|qr-gallery|duo-label-camera|duo-label-gallery|duo-error-camera|duo-error-gallery)"))return;
         labelScanSource=source;
         final boolean useCamera=source.endsWith("camera");
         labelScanRequested=true;
@@ -331,10 +331,18 @@ public class MainActivity extends Activity {
             result.put("cancelled",cancelled);
             result.put("source",source);
         }catch(Exception ex){return;}
-        final String target=source.startsWith("error-")
-            ?"window.EYRWorkshop&&window.EYRWorkshop.onNativeError"
-            :"window.EYRLabelScan&&window.EYRLabelScan.onNativeResult";
-        final String method=source.startsWith("error-")?"window.EYRWorkshop.onNativeError":"window.EYRLabelScan.onNativeResult";
+        final String method;
+        final String target;
+        if(source.startsWith("duo-")){
+            method="window.EYRDoublePhoto.onNativeResult";
+            target="window.EYRDoublePhoto&&window.EYRDoublePhoto.onNativeResult";
+        }else if(source.startsWith("error-")){
+            method="window.EYRWorkshop.onNativeError";
+            target="window.EYRWorkshop&&window.EYRWorkshop.onNativeError";
+        }else{
+            method="window.EYRLabelScan.onNativeResult";
+            target="window.EYRLabelScan&&window.EYRLabelScan.onNativeResult";
+        }
         final String script="if("+target+")"+method+"("+result.toString()+");";
         runOnUiThread(()->{if(webView!=null)webView.evaluateJavascript(script,null);});
     }
