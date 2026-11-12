@@ -205,3 +205,17 @@ Las APK previas se firmaban con claves de depuración temporales. Para actualiza
 - Desde el informe técnico podés tocar **Marcar con flechas** sobre una foto y deslizar el dedo para señalar el problema.
 - Las flechas se guardan como coordenadas editables separadas de la fotografía; se pueden deshacer y se muestran al volver al informe y al generar el PDF.
 - Límite de cinco flechas por foto; la fotografía original se conserva sin editar en el almacenamiento local.
+
+
+## v2.7 · Biblioteca offline de códigos de error en display
+
+- Se incorporan 16 referencias técnicas verificadas en soporte oficial argentino de LG y Samsung. Cada registro conserva marca, código, tipo de aviso (función/alarma), posible significado, comprobación orientativa y vínculo a la fuente original.
+- Fuentes oficiales:
+  - LG Argentina: https://www.lg.com/ar/soporte/ayuda-producto/CT32005513-20155047720009 y https://www.lg.com/ar/soporte/ayuda-producto/CT20084080-20155402835359
+  - Samsung Argentina: https://www.samsung.com/ar/support/home-appliances/check-out-the-displayed-error-codes-on-the-indoor-unit-air-conditioner/ y https://www.samsung.com/ar/support/home-appliances/error-codes-on-your-samsung-indoor-air-conditioner/
+- Desde Inicio → Leer error del display o desde una visita → Informe y fotos → Leer display se puede sacar una foto o cargar una imagen y confirmar los códigos OCR sugeridos. El resultado muestra posible problema y documentación original.
+- Se elige la marca antes de consultar; desde informes de visitas con equipo asociado se propone la marca/modelo. Si no existe una referencia, se conserva el código sin inventar una explicación.
+- Las fichas son guías GENERALES del fabricante: NO garantizan compatibilidad con el modelo exacto. Para diagnóstico, reparación o intervención se debe consultar el manual específico.
+- Se mantiene el registro asociado a la visita, se agrega una descripción breve en el informe PDF si existe referencia oficial y no se envían imágenes ni datos a servidores.
+- Marcas con documentación pendiente de incorporar para equipos específicos: Surrey, BGH, Hitachi, Philco y Carrier. No utilizar significados de LG o Samsung para estas marcas.
+- Identificador y firma estable conservados. APK v2.7 (versionCode=18).

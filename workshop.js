@@ -47,16 +47,61 @@ async function replaceAllPhotos(photos){
  });
 }
 function record(){return active?.mode==='report'?reportByVisit(active.visitId,false):null;}
+
+function errorLib(){return window.EYRErrorLibrary||null;}
+function errorContext(){
+ if(!active)return {brand:'',model:''};
+ if(active.mode==='standalone')return {brand:active.brand||'',model:active.model||''};
+ const v=db().visits.find(x=>x.id===active.visitId),r=record(),eq=db().equipment.find(x=>x.id===v?.equipmentId);
+ return {brand:r?.errorBrand||eq?.brand||'',model:r?.errorModel||eq?.model||''};
+}
+function brandOptions(chosen){
+ const brands=errorLib()?.brands||['Samsung','LG','Surrey','BGH','Hitachi','Philco','Carrier'];
+ return '<option value="">Elegir marca</option>'+brands.map(b=>'<option value="'+esc(b)+'" '+(b.toLowerCase()===String(chosen||'').toLowerCase()?'selected':'')+'>'+esc(b)+'</option>').join('');
+}
+function errorMeaning(brand,code,model){
+ const lib=errorLib(),normalized=lib?.normalizeCode(code)||String(code||'').trim().toUpperCase();
+ if(!normalized)return '';
+ if(!brand)return '<div class="eyr-error-result eyr-error-unverified"><strong>Código '+esc(normalized)+'</strong><p>Elegí primero la marca. El mismo código puede significar cosas distintas en otros equipos.</p></div>';
+ const info=lib?.lookup(brand,normalized,model);
+ if(!info)return '<div class="eyr-error-result eyr-error-unverified"><strong>'+esc(brand)+' · '+esc(normalized)+'</strong><p>No hay una explicación oficial incorporada para esta combinación de marca y código. Consultá el manual del modelo exacto antes de sacar conclusiones.</p></div>';
+ return '<div class="eyr-error-result '+(info.kind==='aviso'?'eyr-error-info':'')+'"><small>📚 Referencia oficial de '+esc(info.brand)+' · '+(info.kind==='aviso'?'Aviso del equipo':'Posible incidencia')+'</small>'+
+ '<strong>'+esc(info.code)+' · '+esc(info.title)+'</strong><p>'+esc(info.description)+'</p>'+
+ '<div class="eyr-error-check"><b>Qué revisar:</b> '+esc(info.check)+'</div>'+
+ '<div class="eyr-error-caveat">Guía general de la marca. Aplicabilidad al modelo '+esc(model||'exacto')+' todavía sin verificar; confirmar con su manual técnico.</div>'+
+ '<a class="eyr-error-source" href="'+esc(info.source)+'" target="_blank" rel="noopener noreferrer">🌐 Abrir documentación oficial</a></div>';
+}
+function setReportErrorContext(r,brand,model){
+ const lib=errorLib();
+ r.errorBrand=lib?.normalizeBrand(brand)||'';
+ r.errorModel=String(model||'').trim().slice(0,110);
+ const info=lib?.lookup(r.errorBrand,r.errorCode,r.errorModel);
+ r.errorMeaning=info?{code:info.code,title:info.title,description:info.description,source:info.source,kind:info.kind,scope:'guia-general-de-marca'}:null;
+}
+function rememberStandalone(){
+ if(active?.mode!=='standalone')return;
+ const brand=document.getElementById('work-standalone-brand'),model=document.getElementById('work-standalone-model'),
+       code=document.getElementById('work-standalone-code'),visit=document.getElementById('work-standalone-visit');
+ if(brand)active.brand=String(brand.value||'');
+ if(model)active.model=String(model.value||'').trim().slice(0,110);
+ if(code)active.chosenCode=errorLib()?.normalizeCode(code.value)||String(code.value||'').trim().toUpperCase();
+ if(visit)active.visitId=String(visit.value||'');
+}
 function sync(){
  const r=record();if(!r)return;
  const n=document.getElementById('work-notes'),c=document.getElementById('work-error-code'),t=document.getElementById('work-error-text');
+ const brandEl=document.getElementById('work-error-brand'),modelEl=document.getElementById('work-error-model');
+ const visit=db().visits.find(x=>x.id===active?.visitId),eq=db().equipment.find(x=>x.id===visit?.equipmentId);
  if(n)r.notes=String(n.value||'').slice(0,12000);
- if(c)r.errorCode=String(c.value||'').trim().toUpperCase().slice(0,24);
+ if(c)r.errorCode=(errorLib()?.normalizeCode(c.value)||String(c.value||'').trim().toUpperCase()).slice(0,24);
  if(t)r.errorText=String(t.value||'').slice(0,1500);
+ setReportErrorContext(r,brandEl?brandEl.value:(r.errorBrand||eq?.brand||''),modelEl?modelEl.value:(r.errorModel||eq?.model||''));
  r.updatedAt=new Date().toISOString();hooks.saveDB();
 }
 function reportHTML(r,v){
  const photos=r.photos||[],eq=db().equipment.find(x=>x.id===v.equipmentId);
+ const brand=r.errorBrand||eq?.brand||'',model=r.errorModel||eq?.model||'';
+ const found=errorMeaning(brand,r.errorCode,model);
  const images=photos.map(p=>'<div class="eyr-work-photo"><div class="eyr-work-photo-image"><img data-work-photo="'+esc(p.id)+'" alt="Fotografía de '+esc(p.kind)+'"><span>'+esc(({antes:'ANTES',despues:'DESPUÉS',detalle:'DETALLE'})[p.kind]||'FOTO')+'</span></div>'+
   '<input type="text" data-work-caption="'+esc(p.id)+'" value="'+esc(p.caption||'')+'" maxlength="110" placeholder="Descripción de la foto">'+
   '<div class="eyr-work-photo-actions"><button class="btn btn-small btn-blue" data-action="work-mark-photo" data-id="'+esc(p.id)+'">↗ Marcar con flechas</button><button class="btn btn-small btn-danger" data-action="work-remove-photo" data-id="'+esc(p.id)+'">Quitar</button></div></div>').join('');
@@ -70,12 +115,16 @@ function reportHTML(r,v){
  '<h3>🎙️ Observaciones técnicas</h3><textarea id="work-notes" rows="5" maxlength="12000" placeholder="Qué encontraste, qué hiciste y cómo quedó el equipo...">'+esc(r.notes||'')+'</textarea>'+
  '<button type="button" class="btn btn-small" data-action="work-voice">🎙️ Dictar observaciones</button>'+
  '<p class="eyr-work-help">El dictado depende del reconocimiento de voz instalado en el teléfono; revisá el texto antes de guardar.</p>'+
- '<h3>⚠️ Código mostrado en display</h3><div class="form-grid"><div class="field"><label>Código observado</label>'+
- '<input id="work-error-code" value="'+esc(r.errorCode||'')+'" maxlength="24" placeholder="Ej.: CH05, E1, F0"></div>'+
- '<div class="field"><label>Texto de la foto / observación</label><input id="work-error-text" value="'+esc(r.errorText||'')+'" maxlength="1500" placeholder="Anotación o lectura del display"></div></div>'+
+ '<h3>⚠️ Código mostrado en display</h3><div class="form-grid">'+
+ '<div class="field"><label>Marca</label><select id="work-error-brand">'+brandOptions(brand)+'</select></div>'+
+ '<div class="field"><label>Modelo (si lo conocés)</label><input id="work-error-model" value="'+esc(model)+'" maxlength="110" placeholder="Código de modelo"></div>'+
+ '<div class="field"><label>Código observado</label><input id="work-error-code" value="'+esc(r.errorCode||'')+'" maxlength="24" placeholder="Ej.: CH05, E5, CF"></div>'+
+ '<div class="field"><label>Texto leído / anotación</label><input id="work-error-text" value="'+esc(r.errorText||'')+'" maxlength="1500" placeholder="Lectura original de la foto"></div></div>'+
  '<div class="eyr-work-photo-actions"><button type="button" class="btn btn-small btn-blue" data-action="work-error-camera">📷 Leer display</button>'+
- '<button type="button" class="btn btn-small" data-action="work-error-gallery">🖼️ Cargar foto</button></div>'+
- '<div class="eyr-work-warning">El código se guarda como evidencia. Su significado depende del fabricante y del modelo exacto; EYR no inventa diagnósticos ni procedimientos.</div>'+
+ '<button type="button" class="btn btn-small" data-action="work-error-gallery">🖼️ Cargar foto</button>'+
+ '<button type="button" class="btn btn-small" data-action="work-error-review">📚 Consultar código</button></div>'+
+ found+
+ '<div class="eyr-work-warning">La lectura de una foto no equivale a un diagnóstico. Las referencias generales por marca deben confirmarse contra el manual del modelo exacto.</div>'+
  '<div class="form-actions"><button class="btn" data-action="work-save">Guardar informe</button>'+
  '<button class="btn btn-blue" data-action="work-pdf" data-mode="view">👁 Ver informe PDF</button>'+
  '<button class="btn btn-primary" data-action="work-pdf" data-mode="share">↗ Compartir PDF</button></div></div>';
@@ -238,26 +287,28 @@ function onNativeVoice(value){
  tx.value=(tx.value?tx.value.trim()+'\n':'')+s;sync();hooks.toast('Dictado agregado. Revisá el texto.');
 }
 function possibleCodes(raw){
- const text=String(raw||'').toUpperCase().replace(/\u00a0/g,' '),regex=/\b(?:CH\s*[-]?\s*\d{2,3}|[EFPUHC]\s*[-]?\s*\d{1,3})\b/g;
- const matches=(text.match(regex)||[]).map(s=>s.replace(/\s|-/g,'')).filter(s=>s.length>=2);
- return [...new Set(matches)].slice(0,7);
+ const text=String(raw||'').toUpperCase().replace(/\u00a0/g,' ');
+ const re=/\b(?:CH\s*[-]?\s*\d{1,3}|[EFPUHC]\s*[-]?\s*\d{1,3}|CF|CL|CI|DF)\b/g;
+ const codes=(text.match(re)||[]).map(x=>errorLib()?.normalizeCode(x)||x.replace(/[\s-]/g,'')).filter(Boolean);
+ return [...new Set(codes)].slice(0,7);
 }
 function errorPicker(){
  if(!active)return;
- const raw=String(active.lastErrorOCR||''),matches=possibleCodes(raw);
- const choices=matches.map(v=>'<button class="btn btn-small btn-blue" data-action="work-error-select" data-code="'+esc(v)+'">'+esc(v)+'</button>').join('');
- hooks.modal('Lectura del display','<div class="eyr-work"><p>Texto leído desde el display:</p>'+
-  '<pre class="eyr-work-ocr">'+esc(raw||'No se detectó ningún texto claro')+'</pre>'+
-  '<p class="eyr-work-help">Elegí un código posible y confirmalo contra la pantalla real.</p>'+
-  '<div class="eyr-work-photo-actions">'+(choices||'<span>No hay códigos claros; ingresalo manualmente en el informe.</span>')+'</div>'+
-  '<div class="form-actions"><button class="btn btn-blue" data-action="work-error-manual">Escribir código manualmente</button>'+
+ const raw=String(active.lastErrorOCR||''),matches=possibleCodes(raw),context=errorContext();
+ const choices=matches.map(code=>'<div class="eyr-error-choice"><button type="button" class="btn btn-small btn-primary" data-action="work-error-select" data-code="'+esc(code)+'">✓ Confirmar '+esc(code)+'</button>'+
+ errorMeaning(context.brand,code,context.model)+'</div>').join('');
+ hooks.modal('Código detectado en el display','<div class="eyr-work"><p>Texto leído desde la foto:</p>'+
+  '<pre class="eyr-work-ocr">'+esc(raw||'No se pudo reconocer texto claro')+'</pre>'+
+  '<p class="eyr-work-help">EYR encontró posibles códigos. Confirmalos visualmente antes de guardarlos. Marca: <strong>'+esc(context.brand||'sin seleccionar')+'</strong>.</p>'+
+  '<div class="eyr-work-error-matches">'+(choices||'<div class="eyr-work-warning">No reconocimos un código. Podés escribirlo manualmente.</div>')+'</div>'+
+  '<div class="form-actions"><button class="btn btn-blue" data-action="work-error-manual">Escribir manualmente</button>'+
   '<button class="btn" data-action="work-back-report">Volver</button></div></div>',true);
 }
 function errorCamera(source){
  if(!active)return;
- if(active.mode==='report')sync();
+ if(active.mode==='report')sync();else rememberStandalone();
  if(window.EYRAndroid?.scanLabel)window.EYRAndroid.scanLabel('error-'+source);
- else hooks.toast('La lectura automática de displays requiere la APK Android.');
+ else hooks.toast('La lectura automática requiere la APK Android.');
 }
 function onNativeError(value){
  if(value?.cancelled){if(active?.mode==='report')renderReport();return;}
@@ -268,32 +319,42 @@ function onNativeError(value){
 function selectError(code){
  if(!active)return;
  const raw=String(active.lastErrorOCR||'').slice(0,1500);
+ const normalized=errorLib()?.normalizeCode(code)||String(code||'').trim().toUpperCase();
  if(active.mode==='report'){
-  const r=record();if(!r)return;r.errorCode=String(code||'').toUpperCase().slice(0,24);r.errorText=raw;
+  const r=record();if(!r)return;
+  const context=errorContext();
+  r.errorCode=normalized.slice(0,24);r.errorText=raw;
+  setReportErrorContext(r,context.brand,context.model);
   hooks.saveDB();renderReport();
  }else{
-  active.chosenCode=code||'';active.raw=raw;renderStandalone();
+  active.chosenCode=normalized;active.raw=raw;renderStandalone();
  }
 }
 function renderStandalone(){
  if(!active||active.mode!=='standalone')return;
  const visits=[...db().visits].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,120);
- const options='<option value="">Elegir visita para guardar</option>'+visits.map(v=>'<option value="'+esc(v.id)+'">'+esc(v.client+' · '+v.date+' · '+v.description)+'</option>').join('');
- hooks.modal('⚠️ Leer código de error','<div class="eyr-work"><p>Fotografiá el display del aire o cargá la foto que envió el cliente.</p>'+
+ const options='<option value="">Elegir visita para guardar</option>'+visits.map(v=>'<option value="'+esc(v.id)+'" '+(active.visitId===v.id?'selected':'')+'>'+esc(v.client+' · '+v.date+' · '+v.description)+'</option>').join('');
+ hooks.modal('⚠️ Leer código de error','<div class="eyr-work"><p>Fotografiá el display o cargá una imagen recibida por WhatsApp. Elegí la marca para obtener una referencia técnica.</p>'+
  '<div class="eyr-work-photo-actions"><button class="btn btn-blue" data-action="work-error-camera">📷 Leer display</button>'+
  '<button class="btn" data-action="work-error-gallery">🖼️ Cargar foto</button></div>'+
- '<div class="field"><label>Código leído (confirmar)</label><input id="work-standalone-code" value="'+esc(active.chosenCode||'')+'" maxlength="24" placeholder="Ej.: CH05, E1, F0"></div>'+
- '<div class="eyr-work-warning">No existe un significado universal para los códigos de error. Consultá el manual del modelo exacto antes de interpretarlos.</div>'+
+ '<div class="form-grid"><div class="field"><label>Marca</label><select id="work-standalone-brand">'+brandOptions(active.brand||'')+'</select></div>'+
+ '<div class="field"><label>Modelo (si lo conocés)</label><input id="work-standalone-model" maxlength="110" value="'+esc(active.model||'')+'" placeholder="Código de modelo"></div>'+
+ '<div class="field full"><label>Código leído (confirmar)</label><input id="work-standalone-code" value="'+esc(active.chosenCode||'')+'" maxlength="24" placeholder="Ej.: CH05, E5, CF"></div></div>'+
+ '<button class="btn btn-small btn-blue" data-action="work-error-review">📚 Consultar posible problema</button>'+
+ errorMeaning(active.brand,active.chosenCode,active.model)+
+ '<div class="eyr-work-warning">El significado mostrado es orientativo para la marca. Confirmá siempre su aplicabilidad al modelo antes de diagnosticar o intervenir el equipo.</div>'+
  '<div class="field"><label>Registrar en una visita</label><select id="work-standalone-visit">'+options+'</select></div>'+
  '<div class="form-actions"><button class="btn btn-primary" data-action="work-error-save">Guardar código en visita</button>'+
  '<button class="btn" data-action="work-close">Cerrar</button></div></div>',true);
 }
-function openStandalone(){active={mode:'standalone',chosenCode:'',raw:''};renderStandalone();}
+function openStandalone(){active={mode:'standalone',chosenCode:'',raw:'',brand:'',model:'',visitId:''};renderStandalone();}
 function saveStandalone(){
- const code=String(document.getElementById('work-standalone-code')?.value||'').trim().toUpperCase();
- const visitId=document.getElementById('work-standalone-visit')?.value;
+ rememberStandalone();
+ const code=errorLib()?.normalizeCode(active.chosenCode)||'',visitId=active.visitId;
  if(!code||!visitId){hooks.toast('Confirmá el código y elegí una visita');return;}
- const r=reportByVisit(visitId,true);r.errorCode=code.slice(0,24);r.errorText=String(active?.raw||'').slice(0,1500);
+ const r=reportByVisit(visitId,true);
+ r.errorCode=code.slice(0,24);r.errorText=String(active?.raw||'').slice(0,1500);
+ setReportErrorContext(r,active.brand,active.model);
  hooks.saveDB();openReport(visitId);hooks.toast('Código registrado en informe');
 }
 async function makePDF(mode){
@@ -362,6 +423,18 @@ async function importFull(file){
  }catch(e){hooks.toast('No se pudo importar copia: '+e.message);}
 }
 function fileChange(el){
+ if(el.id==='work-standalone-visit'&&active?.mode==='standalone'){
+  rememberStandalone();
+  const v=db().visits.find(x=>x.id===active.visitId),eq=db().equipment.find(x=>x.id===v?.equipmentId);
+  if(eq){active.brand=eq.brand||active.brand;active.model=eq.model||active.model;}
+  renderStandalone();return true;
+ }
+ if(['work-standalone-brand','work-standalone-model','work-standalone-code'].includes(el.id)&&active?.mode==='standalone'){
+  rememberStandalone();renderStandalone();return true;
+ }
+ if(['work-error-brand','work-error-model','work-error-code'].includes(el.id)&&active?.mode==='report'){
+  sync();renderReport();return true;
+ }
  if(el.id==='work-photo-file'){webPhoto(el.files?.[0]);el.value='';return true;}
  if(el.id==='work-import-zip'){importFull(el.files?.[0]);el.value='';return true;}
  if(el.hasAttribute('data-work-caption')){
@@ -381,7 +454,7 @@ function handle(action,el){
  if(action==='work-photo-choose'){photoSelect(el.dataset.kind);return true;}
  if(action==='work-photo-camera'){beginPhoto('camera');return true;}
  if(action==='work-photo-gallery'){beginPhoto('gallery');return true;}
- if(action==='work-back-report'){renderReport();return true;}
+ if(action==='work-back-report'){if(active?.mode==='standalone')renderStandalone();else renderReport();return true;}
  if(action==='work-remove-photo'){removePhoto(el.dataset.id);return true;}
  if(action==='work-mark-photo'){markPhoto(el.dataset.id).catch(e=>hooks.toast('No se pudo marcar la foto'));return true;}
  if(action==='work-arrow-undo'){undoArrow();return true;}
@@ -390,7 +463,12 @@ function handle(action,el){
  if(action==='work-error-camera'||action==='work-error-gallery'){errorCamera(action.endsWith('camera')?'camera':'gallery');return true;}
  if(action==='work-error-select'){selectError(el.dataset.code);return true;}
  if(action==='work-error-manual'){if(active?.mode==='report'){const r=record();r.errorText=String(active.lastErrorOCR||'');hooks.saveDB();renderReport();}else renderStandalone();return true;}
- if(action==='work-error-save'){saveStandalone();return true;}
+ if(action==='work-error-review'){
+   if(active?.mode==='standalone'){rememberStandalone();renderStandalone();}
+   else if(active?.mode==='report'){sync();renderReport();}
+   return true;
+  }
+  if(action==='work-error-save'){saveStandalone();return true;}
  if(action==='work-open-error'){openStandalone();return true;}
  if(action==='work-pdf'){makePDF(el.dataset.mode==='share'?'share':'view');return true;}
  if(action==='work-qr-open'){showQr(el.dataset.id);return true;}
@@ -406,5 +484,5 @@ function init(h){
  db().reports=Array.isArray(db().reports)?db().reports:[];
 }
 window.EYRWorkshop={init,openReport,openStandalone,showQr,scanQr,handle,fileChange,onNativePhoto,onNativeVoice,onNativeError,onNativeQR,onNativeQRImage,
- possibleCodes,exportFull,importFull,onDeleteVisit,photoStore:store};
+ possibleCodes,errorMeaning,errorContext,exportFull,importFull,onDeleteVisit,photoStore:store};
 })();

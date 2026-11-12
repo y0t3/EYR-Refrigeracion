@@ -49,7 +49,13 @@ async function report(rec,visit,photos,client,eq){
  y=field(g,'Trabajo',visit.description||'Servicio técnico',y);
  y=field(g,'Fecha y horario',String(visit.date||'')+' · '+String(visit.time||''),y);
  if(eq)y=field(g,'Equipo',(eq.brand||'')+' '+(eq.model||''),y);
- if(rec.errorCode)y=field(g,'Código visto en display',String(rec.errorCode),y);
+ if(rec.errorCode){
+  y=field(g,'Código observado',String(rec.errorBrand||'')+' '+String(rec.errorCode),y);
+  if(rec.errorMeaning?.title){
+   y=field(g,'Referencia oficial de la marca (orientativa)',String(rec.errorMeaning.title),y);
+   y=field(g,'Posible problema',String(rec.errorMeaning.description||'').slice(0,250),y);
+  }
+ }
  rule(g,y);y+=48;g.font='bold 28px Arial';g.fillStyle='#114c7a';g.fillText('Observaciones técnicas',67,y);y+=46;
  const note=String(rec.notes||'Sin observaciones adicionales').slice(0,10000),words=note.split(/\s+/);let paragraphs=[],buffer=[];
  for(const w of words){if((buffer.join(' ')+' '+w).length>650){paragraphs.push(buffer.join(' '));buffer=[];}buffer.push(w);}

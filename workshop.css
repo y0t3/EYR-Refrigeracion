@@ -33,3 +33,21 @@
 
 .eyr-work-arrow-canvas{display:block;width:100%;height:auto;max-height:65vh;object-fit:contain;border:2px solid #2baaf3;border-radius:11px;background:#061528;touch-action:none;cursor:crosshair}
 .eyr-work-arrow-canvas:focus-visible{outline:2px solid #ffad50}
+
+/* EYR v2.7 · Biblioteca técnica de errores */
+.eyr-error-result{display:flex;flex-direction:column;gap:8px;margin:10px 0;padding:15px;border:1px solid #36a9e2;border-radius:13px;background:linear-gradient(140deg,rgba(3,58,91,.94),rgba(7,27,51,.93));color:#e7f9ff;text-align:left}
+.eyr-error-result strong{display:block;color:#fff;font-size:17px;line-height:1.4;overflow-wrap:anywhere}
+.eyr-error-result small{display:block;font-size:11px;color:#80defb;font-weight:700}
+.eyr-error-result p{font-size:13px;line-height:1.55;margin:0;color:#d4eefa}
+.eyr-error-check{padding:11px 12px;background:rgba(48,159,225,.12);border-radius:8px;font-size:12px;line-height:1.5}
+.eyr-error-check b{color:#a1e8ff}
+.eyr-error-caveat{font-size:11px;line-height:1.5;color:#ffdbad}
+.eyr-error-source{display:inline-flex;align-self:flex-start;gap:7px;font-size:12px;font-weight:700;color:#aff0ff;text-decoration:underline;text-underline-offset:3px}
+.eyr-error-unverified{border-color:rgba(252,157,77,.6);background:rgba(95,52,23,.18)}
+.eyr-error-unverified strong{color:#ffdbaf}
+.eyr-error-info{border-color:rgba(91,225,163,.62);background:rgba(10,76,70,.28)}
+.eyr-work-error-matches{display:flex;flex-direction:column;gap:13px}
+.eyr-error-choice{border:1px solid rgba(67,159,212,.34);border-radius:12px;padding:10px;background:rgba(5,31,58,.50)}
+.eyr-error-choice>.btn{width:100%;margin-bottom:6px}
+.eyr-error-choice .eyr-error-result{margin:3px 0}
+@media(max-width:540px){.eyr-error-result{padding:12px}.eyr-error-result strong{font-size:15px}.eyr-work-error-matches .btn{width:100%}}
