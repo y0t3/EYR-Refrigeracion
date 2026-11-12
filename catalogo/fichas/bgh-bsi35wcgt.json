@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "bgh-bsi35wcgt",
+    "brand": "BGH",
+    "model": "BSI35WCGT",
+    "series": "Silent Air Inverter",
+    "type": "Split de pared · frío/calor · Inverter",
+    "refrigerant": "",
+    "coolingKW": "3,50 kW",
+    "coolingBTU": "",
+    "indoorSize": "",
+    "outdoorSize": "",
+    "indoorWeight": "",
+    "outdoorWeight": "",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "",
+    "notes": "Modelo y potencia confirmados por BGH. Refrigerante, dimensiones y cañerías no verificados para esta variante.",
+    "url": "https://www.bgh.com.ar/institucional/legales",
+    "photo": "",
+    "photoCredit": ""
+  }
+}
