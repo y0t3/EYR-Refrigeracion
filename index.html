@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#13263d" />
+  <meta name="description" content="Gestión local de visitas y presupuestos para EYR Refrigeración" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="assets/icon-192.jpg" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>EYR Refrigeración · Gestión</title>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand"><img src="assets/logo-marca.jpg" alt="Logo EYR fuego y agua"><div><strong>EYR Refrigeración</strong><small>Gestión de servicios</small></div></div>
+      <nav id="desktop-nav" aria-label="Navegación principal">
+        <button data-page="inicio" class="nav-link active"><span>⌂</span> Inicio</button>
+        <button data-page="agenda" class="nav-link"><span>▦</span> Agenda</button>
+        <button data-page="presupuestos" class="nav-link"><span>▤</span> Presupuestos</button>
+        <button data-page="clientes" class="nav-link"><span>♙</span> Clientes</button>
+        <button data-page="configuracion" class="nav-link"><span>⚙</span> Configuración</button>
+      </nav>
+      <div class="sidebar-foot"><div class="status-light"></div> Datos guardados en este dispositivo</div>
+    </aside>
+    <div class="workarea">
+      <header class="topbar"><div class="mobile-brand"><img src="assets/logo-marca.jpg" alt=""><span>EYR <strong>Refrigeración</strong></span></div><div id="today-label"></div><button id="top-new-quote" class="btn btn-primary top-action">+ Presupuesto</button></header>
+      <main id="view" tabindex="-1"></main>
+    </div>
+    <nav class="bottom-nav" aria-label="Navegación móvil">
+      <button data-page="inicio" class="active"><span>⌂</span>Inicio</button>
+      <button data-page="agenda"><span>▦</span>Agenda</button>
+      <button data-page="presupuestos"><span>▤</span>Presup.</button>
+      <button data-page="clientes"><span>♙</span>Clientes</button>
+      <button data-page="configuracion"><span>⚙</span>Ajustes</button>
+    </nav>
+  </div>
+  <div id="modal-root"></div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="logo-data.js"></script>
+  <script src="pdf.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
