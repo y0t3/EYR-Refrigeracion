@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "philco-96phin90hc3awfpi",
+    "brand": "Philco",
+    "model": "96PHIN90HC3AWFPI",
+    "series": "Eco Plus Inverter Wi-Fi",
+    "type": "Split de pared · frío/calor · Inverter",
+    "refrigerant": "",
+    "coolingKW": "8,75 kW",
+    "coolingBTU": "",
+    "indoorSize": "1.259 × 362 × 283 mm",
+    "outdoorSize": "890 × 673 × 342 mm",
+    "indoorWeight": "17,7 kg",
+    "outdoorWeight": "44,8 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "220–240 V",
+    "notes": "Capacidad 8.750 W indicada en la denominación del fabricante. Refrigerante y conexiones: consultar manual/placa.",
+    "url": "https://www.philco.com.ar/products/aire%20acondicionado/96PHIN90HC3AWFPI",
+    "photo": "",
+    "photoCredit": ""
+  }
+}
