@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "hitachi-hspe6400fcinv",
+    "brand": "Hitachi",
+    "model": "HSPE6400FCINV",
+    "series": "Neo Plus Inverter",
+    "type": "Split de pared · frío/calor · Inverter",
+    "refrigerant": "R410A",
+    "coolingKW": "6,40 kW",
+    "coolingBTU": "",
+    "indoorSize": "998 × 325 × 226 mm",
+    "outdoorSize": "860 × 667 × 310 mm",
+    "indoorWeight": "12,5 kg",
+    "outdoorWeight": "41,5 kg",
+    "liquidPipe": "9,52 mm (3/8″)",
+    "gasPipe": "15,88 mm (5/8″)",
+    "maxPipe": "15 m",
+    "maxElevation": "5 m",
+    "electrical": "220 V · 50 Hz · monofásico",
+    "notes": "Datos oficiales Hitachi. Carga nominal R410A 1,69 kg; verificar placa de la unidad.",
+    "url": "https://hitachi.radiovictoria.com.ar/prod-6400-watts-frio-calor",
+    "photo": "",
+    "photoCredit": ""
+  }
+}
