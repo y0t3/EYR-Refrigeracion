@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "carrier-53tca1306",
+    "brand": "Carrier",
+    "model": "53TCA1306",
+    "series": "Modelo T",
+    "type": "Split de pared · frío solo",
+    "refrigerant": "",
+    "coolingKW": "",
+    "coolingBTU": "",
+    "indoorSize": "",
+    "outdoorSize": "",
+    "indoorWeight": "",
+    "outdoorWeight": "",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "",
+    "notes": "3.100 frigorías, código de conjunto confirmado por Carrier Argentina. No confundir con 53TQA1306, frío/calor. Revisar placa para datos de instalación.",
+    "url": "https://www.carrier.com.ar/manuales/modelo-t/",
+    "photo": "",
+    "photoCredit": ""
+  }
+}
