@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "updated": "2026-11-12",
-  "description": "Catálogo inicial EYR. Modelos exactos con fuentes oficiales; los campos vacíos no han sido verificados.",
+  "description": "Catálogo técnico EYR con imágenes del modelo exacto. Foto principal obtenida de la fuente identificada; las imágenes requieren Internet. Los campos técnicos vacíos no han sido verificados.",
   "models": [
     {
       "id": "samsung-ar12ashqawk-bg",
@@ -22,7 +22,9 @@
       "maxElevation": "10 m",
       "electrical": "220–240 V · 50 Hz · monofásico",
       "notes": "Para instalación y carga, verificar placa y manual de la variante exacta.",
-      "url": "https://www.samsung.com/ar/air-conditioners/wall-mount/ar5000hm-wind-free-ar12ashqawk-bg/"
+      "url": "https://www.samsung.com/ar/air-conditioners/wall-mount/ar5000hm-wind-free-ar12ashqawk-bg/",
+      "photo": "https://images.samsung.com/is/image/samsung/p6pim/ar/ar12ashqawk-bg/gallery/ar-wall-mount-ar5000hm-426475-ar12ashqawk-bg-532764905?$1164_776_PNG$=",
+      "photoCredit": "Samsung (imagen oficial)"
     },
     {
       "id": "samsung-ar40f12c0am2bg",
@@ -43,7 +45,9 @@
       "maxElevation": "10 m",
       "electrical": "220–240 V · 50 Hz · monofásico",
       "notes": "R32: seguir normas de seguridad y especificaciones del fabricante.",
-      "url": "https://www.samsung.com/ar/air-conditioners/wall-mount/ar5000h-wall-mount-air-conditioner-with-energy-savingfast-cooling-ar40f12c0am2bg/"
+      "url": "https://www.samsung.com/ar/air-conditioners/wall-mount/ar5000h-wall-mount-air-conditioner-with-energy-savingfast-cooling-ar40f12c0am2bg/",
+      "photo": "https://images.samsung.com/is/image/samsung/p6pim/ar/ar40f12c0am2bg/gallery/ar-wall-mount-ar5000hm-ar40f12c0am-ar40f12c0am2bg-549043286?$1164_776_PNG$=",
+      "photoCredit": "Samsung (imagen oficial)"
     },
     {
       "id": "samsung-ar40f18c0am2bg",
@@ -64,7 +68,9 @@
       "maxElevation": "20 m",
       "electrical": "220–240 V · 50 Hz · monofásico",
       "notes": "Confirmar placa de unidad y sufijo del modelo antes de intervenir.",
-      "url": "https://www.samsung.com/ar/air-conditioners/wall-mount/ar5000h-wall-mount-air-conditioner-with-energy-savingfast-cooling-ar40f18c0am2bg/"
+      "url": "https://www.samsung.com/ar/air-conditioners/wall-mount/ar5000h-wall-mount-air-conditioner-with-energy-savingfast-cooling-ar40f18c0am2bg/",
+      "photo": "https://images.samsung.com/is/image/samsung/p6pim/ar/ar40f18c0am2bg/gallery/ar-wall-mount-ar5000hm-ar40f12c0am-564528-ar40f18c0am2bg-549043757?$1164_776_PNG$=",
+      "photoCredit": "Samsung (imagen oficial)"
     },
     {
       "id": "samsung-ar40f24c0am2bg",
@@ -85,7 +91,9 @@
       "maxElevation": "20 m",
       "electrical": "220–240 V · 50 Hz · monofásico",
       "notes": "Las conexiones de este modelo son diferentes de las de equipos más pequeños.",
-      "url": "https://www.samsung.com/ar/air-conditioners/wall-mount/ar5000h-wall-mount-air-conditioner-with-energy-savingfast-cooling-ar40f24c0am2bg/"
+      "url": "https://www.samsung.com/ar/air-conditioners/wall-mount/ar5000h-wall-mount-air-conditioner-with-energy-savingfast-cooling-ar40f24c0am2bg/",
+      "photo": "https://images.samsung.com/is/image/samsung/p6pim/ar/ar40f24c0am2bg/gallery/ar-wall-mount-ar5000hm-ar40f12c0am-564530-ar40f24c0am2bg-549044624?$1164_776_PNG$=",
+      "photoCredit": "Samsung (imagen oficial)"
     },
     {
       "id": "lg-s3-w120a1da",
@@ -106,7 +114,9 @@
       "maxElevation": "",
       "electrical": "220 V · 50 Hz",
       "notes": "LG no publica medidas de cañerías en esta ficha comercial. Consultar manual/placa.",
-      "url": "https://www.lg.com/ar/aire-acondicionado/lg-s3-w120a1da"
+      "url": "https://www.lg.com/ar/aire-acondicionado/lg-s3-w120a1da",
+      "photo": "https://d2pr1pn9ywx3vo.cloudfront.net/spree/products/48472/large/LGAI300S3_primera_con_logo.jpg?1785360783=",
+      "photoCredit": "Ortiz & Ortega (foto comercial del modelo)"
     }
   ]
 }

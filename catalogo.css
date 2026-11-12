@@ -33,3 +33,23 @@
 .eyr-catalog-new{border:1px dashed rgba(64,185,255,.6);border-radius:14px;padding:15px;margin-top:20px;background:rgba(4,25,53,.74)}
 .eyr-catalog-empty{margin:12px 0;color:#c9e4f6}
 @media(max-width:600px){.eyr-catalog-tools select{flex:1 1 120px}.eyr-model-detail{grid-template-columns:1fr 1fr}.eyr-equipment-actions{width:100%}}
+/* Ficha visual: una única fotografía principal y reserva clara si no hay conexión. */
+.eyr-model-photo{margin:0;background:#fff;border-radius:13px;overflow:hidden;border:1px solid rgba(61,184,244,.28);position:relative;min-width:0}
+.eyr-model-photo img{display:block;width:100%;height:170px;object-fit:contain;object-position:center;padding:8px;background:#fff}
+.eyr-model-photo figcaption{background:#071c33;color:#b5cfe5;font-size:10px;padding:6px 10px;line-height:1.3}
+.eyr-model-photo.detail{margin-bottom:14px}
+.eyr-model-photo.detail img{height:clamp(195px,36vh,340px);padding:15px}
+.eyr-model-photo.mini{flex:0 0 100px;align-self:center}
+.eyr-model-photo.mini img{height:78px;padding:5px}
+.eyr-model-photo.mini figcaption{display:none}
+.eyr-model-photo .eyr-photo-fallback{min-height:170px;display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;background:linear-gradient(140deg,#0a2543,#15365b);color:#c5eafa;text-align:center;padding:15px}
+.eyr-model-photo .eyr-photo-fallback span{font-size:34px}
+.eyr-model-photo .eyr-photo-fallback strong{font-size:12px}
+.eyr-model-photo .eyr-photo-fallback small{font-size:10px}
+.eyr-model-photo.has-error img{display:none}
+.eyr-model-photo.has-error .eyr-photo-fallback{display:flex}
+.eyr-model-photo.mini .eyr-photo-fallback{min-height:80px;padding:4px}
+.eyr-model-photo.mini .eyr-photo-fallback small{display:none}
+.eyr-model-photo.mini .eyr-photo-fallback span{font-size:18px}
+.eyr-model-photo.mini .eyr-photo-fallback strong{font-size:9px}
+@media(max-width:600px){.eyr-model-photo.detail img{height:230px}.eyr-model-photo.mini{flex-basis:80px}}

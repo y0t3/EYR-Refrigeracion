@@ -124,3 +124,10 @@ Las APK previas se firmaban con claves de depuración temporales. Para actualiza
 - Asociación de equipos a clientes: ubicación, serie, fecha de instalación, observaciones; se conservan fichas en una instantánea para consultas posteriores. Un modelo no incluido puede registrarse manualmente y queda marcado sin especificaciones verificadas.
 - Equipos visibles desde Clientes y su historial, y relacionables con visitas. Se mantiene el almacenamiento local y el respaldo JSON.
 - **Seguridad técnica:** la app nunca deduce refrigerante ni conexiones de modelos similares. Siempre confirmar placa, modelo exacto y manual antes de trabajar.
+
+## v2.1: foto principal por modelo
+
+- Fotos de los cinco modelos iniciales: cuatro imágenes oficiales Samsung y una publicación comercial del modelo LG exacto (con fuente identificada).
+- Imagen única en tarjeta, ficha grande y equipo asociado al cliente. Si falla la carga o no hay conexión, aparece «Foto no disponible», nunca una imagen inventada de un equipo distinto.
+- Las imágenes se cargan bajo demanda por HTTPS; para verlas por primera vez se necesita Internet. La ficha técnica de texto sigue disponible sin conexión.
+- Catálogo actualizable: el archivo JSON admite `photo` y `photoCredit` para modelos nuevos, con validación de dominios conocidos y sin permitir inyección de HTML.
