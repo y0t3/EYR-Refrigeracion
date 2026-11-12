@@ -1,0 +1,29 @@
+/* Remitos: formulario técnico en el tema EYR Fuego y Hielo; PDF independiente en blanco. */
+.remito-intro{display:flex;gap:16px;align-items:center;padding:14px 15px;margin-bottom:16px;background:linear-gradient(115deg,#092d4d,#071d3c);border:1px solid #23a8e777;border-radius:13px}
+.remito-intro strong{color:#fff;font-size:15px}.remito-intro p{font-size:12px;line-height:1.55;margin:6px 0 0;color:#a9cce1}
+.remito-stamp{display:inline-flex;justify-content:center;align-items:center;flex:none;color:#09233a;background:linear-gradient(135deg,#23d0ff,#a9fbff);box-shadow:0 0 13px #08aefc73;border-radius:11px;padding:12px;font-size:14px;font-weight:950}
+#remito-form .form-section h3{display:flex;align-items:center;gap:8px}
+#remito-form .section-desc{line-height:1.55}
+.remito-line-item{background:linear-gradient(135deg,rgba(13,49,84,.91),rgba(4,20,43,.95));border:1px solid #27b8f080;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:inset 0 1px 0 #a0eaff22}
+.remito-line-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;color:#c9f2ff;font-size:13px;font-weight:800}
+.remito-line-fields{display:grid;grid-template-columns:minmax(85px,.6fr) minmax(180px,3fr) minmax(125px,1.1fr);gap:10px;align-items:start}
+.remito-line-fields>.field{min-width:0;display:flex;flex-direction:column;gap:6px;margin:0}
+.remito-line-fields label{font-size:11px;color:#abdef8;font-weight:750}
+.remito-line-fields input{min-width:0;width:100%;background:#061a35;color:#f3fbff;border:1px solid #2b7cad;border-radius:10px;padding:11px 12px}
+.remito-line-subtotal{margin-top:11px;text-align:right;color:#b8d3e8;font-size:12px}.remito-line-subtotal strong{font-size:14px;color:#fff}
+.remito-total{margin-top:16px;box-shadow:0 0 25px #02b4ff33}
+.remito-copy-icons{display:flex;flex-wrap:wrap;gap:10px}.remito-copy-icons span{background:#0c3152;border:1px solid #28c6ff77;color:#d8f8ff;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:750}
+.remito-preview{border:1px solid #cfdce8;background:#fff!important;color:#182432!important;font-size:11px}
+.remito-preview-header{display:grid;grid-template-columns:100px minmax(0,1fr) minmax(100px,.65fr);align-items:start;gap:8px;padding:3px 0 14px;border-bottom:1px solid #b9c2cb;line-height:1.5}
+.remito-preview-header>img{width:100%;max-width:100px;background:white}
+.remito-preview-header>div{color:#1b2839!important;font-size:10px;min-width:0;overflow-wrap:anywhere}
+.remito-preview-header>div:last-child{border:1px solid #b1becb;border-radius:2px;padding:7px;text-align:center}
+.remito-preview-customer{padding:14px 4px;line-height:1.8;border-bottom:1px solid #d1d8de;color:#172634}
+.remito-preview-table{width:100%;border-collapse:collapse;margin:17px 0;color:#172634;table-layout:fixed}
+.remito-preview-table th,.remito-preview-table td{border:1px solid #bfc8d1;padding:9px 6px;text-align:left;overflow-wrap:anywhere}
+.remito-preview-table th:first-child{width:20%}.remito-preview-table th:last-child{width:26%}.remito-preview-table td:last-child{text-align:right}
+.remito-preview-signatures{display:grid;grid-template-columns:1fr 1fr;margin:25px 0 12px;border:1px solid #bfc8d1;background:#fff;color:#182432;min-height:75px}
+.remito-preview-signatures span{padding:10px 6px;font-size:9px;font-weight:700;border-right:1px solid #bfc8d1}.remito-preview-signatures span:last-child{border-right:0}
+.remito-preview-note{font-size:10px;color:#64748b!important}
+@media(max-width:710px){.remito-line-fields{grid-template-columns:1fr 1fr}.remito-line-fields .remito-desc{grid-column:1/-1;grid-row:1}.remito-qty{grid-column:1}.remito-unit{grid-column:2}}
+@media(max-width:450px){.remito-intro{align-items:flex-start;padding:11px;gap:10px}.remito-stamp{font-size:11px;padding:10px 7px}.remito-line-fields .field label{font-size:10px}.remito-line-fields input{padding:10px 8px}.remito-preview-header{grid-template-columns:70px 1fr 100px;gap:5px}.remito-preview-header>div{font-size:8px}.remito-preview-table th,.remito-preview-table td{font-size:9px}.remito-preview-signatures span{font-size:8px}}

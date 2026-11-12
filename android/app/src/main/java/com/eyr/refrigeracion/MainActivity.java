@@ -12,6 +12,8 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.View;
+import android.view.WindowInsets;
+import android.widget.FrameLayout;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -110,7 +112,20 @@ public class MainActivity extends Activity {
                 return true;
             }
         });
-        setContentView(webView);
+        // Android 15 fuerza edge-to-edge: desplazamos toda la WebView dentro de los insets.
+        // El relleno se aplica al contenedor nativo, no a los estilos de la página.
+        FrameLayout safeRoot = new FrameLayout(this);
+        safeRoot.addView(webView, new FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        if (Build.VERSION.SDK_INT >= 35) {
+            safeRoot.setOnApplyWindowInsetsListener((v, insets) -> {
+                android.graphics.Insets bars = insets.getInsets(
+                    WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+                v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+                return insets;
+            });
+        }
+        setContentView(safeRoot);
         webView.loadUrl(ROOT + "index.html");
     }
 
