@@ -147,8 +147,15 @@ Las APK previas se firmaban con claves de depuración temporales. Para actualiza
 
 ## v2.3 · Cinco nuevas marcas en Catálogo técnico
 
-- Se suman **Surrey, BGH, Hitachi, Philco y Carrier**. Hay cinco ejemplos offline por marca, 35 en total, con **44 modelos** para buscar en GitHub Pages.
+- Se suman **Surrey, BGH, Hitachi, Philco y Carrier**. Hay cinco ejemplos offline por marca, 35 en total. La biblioteca remota arrancó con **44 modelos**.
 - Se publican las 25 fichas nuevas como archivos individuales bajo `catalogo/fichas/`; consulta sin descargarlas todas.
 - Se amplía la lista de dominios de fabricantes y servicios oficiales permitidos y las fotos HTTPS verificadas para series y modelos puntuales.
 - En la migración desde v2.2 se añaden nuevas marcas sin reemplazar las selecciones previas ni modificar clientes, visitas, presupuestos, remitos o equipos guardados.
 - Los datos técnicos no confirmados permanecen vacíos («No verificado»), jamás se infieren por semejanza.
+
+## Ampliación de biblioteca online · 12/11/2026 (sin nueva APK)
+
+- Se añadieron **11 fichas bajo demanda**: Surrey 553NIQ09GN81F y 553NIQ12KN81F; BGH BSI35WCGT y BSI53WCGT; Hitachi HSPE2700FCINV y HSPE6400FCINV; Philco 96PHIN39HC2AWFPI y 96PHIN90HC3AWFPI; Carrier 53TCA1006, 53TCA1306 y 53HQV035.
+- Total: **55 modelos** en `catalogo-modelos.json` e `catalogo-indice.json`; se añadieron 11 archivos en `catalogo/fichas/`.
+- No cambian `catalogo-destacados.json` ni `catalogo-data.js`: siguen siendo **35 ejemplos offline, cinco por marca**. No requiere recompilar APK, instalar ni migrar datos.
+- Los campos sin evidencia técnica oficial se dejaron vacíos. Antes de instalar, cargar refrigerante o intervenir, verificar manual y placa de la unidad exacta.
