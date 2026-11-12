@@ -26,6 +26,19 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.speech.RecognizerIntent;
+import androidx.exifinterface.media.ExifInterface;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.mlkit.vision.barcode.BarcodeScanner;
+import com.google.mlkit.vision.barcode.BarcodeScanning;
+import com.google.mlkit.vision.barcode.BarcodeScannerOptions;
+import com.google.mlkit.vision.barcode.common.Barcode;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import androidx.core.content.FileProvider;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.TextRecognizer;
@@ -60,6 +73,9 @@ public class MainActivity extends Activity {
     private static final int EXPORT_FILE = 35;
     private static final int LABEL_PICK_IMAGE = 36;
     private static final int LABEL_TAKE_PHOTO = 37;
+    private static final int WORK_PHOTO_CAMERA = 38;
+    private static final int WORK_PHOTO_PICK = 39;
+    private static final int WORK_VOICE = 40;
     private WebView webView;
     private ImageView startupImage;
     private final Handler splashHandler = new Handler(Looper.getMainLooper());
@@ -70,6 +86,10 @@ public class MainActivity extends Activity {
     private Uri labelPhotoUri;
     private File labelPhotoFile;
     private boolean labelScanRequested=false;
+    private String labelScanSource="gallery";
+    private Uri workPhotoUri;
+    private File workPhotoFile;
+    private boolean workPhotoRequested=false;
     private byte[] pendingExport;
     private String pendingMime;
     private String pendingAction="save";
@@ -269,7 +289,9 @@ public class MainActivity extends Activity {
     /** EYR v2.5: foto de la etiqueta local, sin permisos de galería ni subida a servidores. */
     private void startLabelScan(String source) {
         if(labelScanRequested) return;
-        final boolean useCamera="camera".equals(source);
+        if(!source.matches("(camera|gallery|error-camera|error-gallery|qr-camera|qr-gallery)"))return;
+        labelScanSource=source;
+        final boolean useCamera=source.endsWith("camera");
         labelScanRequested=true;
         try {
             if(useCamera){
@@ -293,7 +315,7 @@ public class MainActivity extends Activity {
         }catch(Exception ex){
             labelScanRequested=false;
             clearLabelPhoto();
-            dispatchLabelResult("", "No se pudo abrir la cámara o galería.",false,useCamera?"camera":"gallery");
+            dispatchLabelResult("", "No se pudo abrir la cámara o galería.",false,source);
         }
     }
     private void clearLabelPhoto(){
@@ -309,7 +331,11 @@ public class MainActivity extends Activity {
             result.put("cancelled",cancelled);
             result.put("source",source);
         }catch(Exception ex){return;}
-        final String script="if(window.EYRLabelScan&&window.EYRLabelScan.onNativeResult)window.EYRLabelScan.onNativeResult("+result.toString()+");";
+        final String target=source.startsWith("error-")
+            ?"window.EYRWorkshop&&window.EYRWorkshop.onNativeError"
+            :"window.EYRLabelScan&&window.EYRLabelScan.onNativeResult";
+        final String method=source.startsWith("error-")?"window.EYRWorkshop.onNativeError":"window.EYRLabelScan.onNativeResult";
+        final String script="if("+target+")"+method+"("+result.toString()+");";
         runOnUiThread(()->{if(webView!=null)webView.evaluateJavascript(script,null);});
     }
     private void recognizeLabelImage(Uri uri,String source) {
@@ -318,6 +344,7 @@ public class MainActivity extends Activity {
             dispatchLabelResult("","No se recibió una imagen.",false,source);
             return;
         }
+        if(source.startsWith("qr-")){recognizeQrImage(uri);return;}
         final TextRecognizer recognizer=TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
         try{
             InputImage image=InputImage.fromFilePath(this,uri);
@@ -336,6 +363,141 @@ public class MainActivity extends Activity {
             recognizer.close();
             clearLabelPhoto();
             dispatchLabelResult("","No se pudo abrir la imagen. Probá en JPG o PNG.",false,source);
+        }
+    }
+
+
+    /** Mensajes JS codificados con JSONObject: no se evalúa código originado por el usuario. */
+    private void dispatchWorkshop(String callback,JSONObject json){
+        if(!callback.matches("onNativePhoto|onNativeVoice|onNativeQR|onNativeQRImage"))return;
+        final String js="if(window.EYRWorkshop&&window.EYRWorkshop."+callback+")window.EYRWorkshop."+callback+"("+json.toString()+");";
+        runOnUiThread(()->{if(webView!=null)webView.evaluateJavascript(js,null);});
+    }
+    private JSONObject workResult(String key,String value,String error,boolean cancelled){
+        JSONObject obj=new JSONObject();
+        try{
+            obj.put(key,value==null?"":value);
+            obj.put("error",error==null?"":error);
+            obj.put("cancelled",cancelled);
+        }catch(Exception ignored){}
+        return obj;
+    }
+    private void recognizeQrImage(Uri uri){
+        BarcodeScannerOptions opts=new BarcodeScannerOptions.Builder()
+            .setBarcodeFormats(Barcode.FORMAT_QR_CODE).build();
+        final BarcodeScanner scanner=BarcodeScanning.getClient(opts);
+        try{
+            scanner.process(InputImage.fromFilePath(this,uri))
+                .addOnSuccessListener(codes->{
+                    String match="";
+                    for(Barcode b:codes)if(b.getRawValue()!=null&&b.getRawValue().startsWith("EYR:EQ:1:")){
+                        match=b.getRawValue();break;
+                    }
+                    dispatchWorkshop("onNativeQR",workResult("text",match,match.isEmpty()?"No se reconoció un QR de EYR.":null,false));
+                })
+                .addOnFailureListener(e->dispatchWorkshop("onNativeQR",workResult("text","","No se pudo leer el QR.",false)))
+                .addOnCompleteListener(task->{scanner.close();clearLabelPhoto();});
+        }catch(Exception ex){
+            scanner.close();clearLabelPhoto();
+            dispatchWorkshop("onNativeQR",workResult("text","","No se pudo abrir la foto del QR.",false));
+        }
+    }
+    private void makeEquipmentQR(String equipmentId){
+        if(equipmentId==null||!equipmentId.matches("[A-Za-z0-9_-]{4,100}"))return;
+        backupExecutor.submit(()->{
+            try{
+                String data="EYR:EQ:1:"+equipmentId;
+                BitMatrix bits=new MultiFormatWriter().encode(data,BarcodeFormat.QR_CODE,460,460);
+                Bitmap bitmap=Bitmap.createBitmap(bits.getWidth(),bits.getHeight(),Bitmap.Config.ARGB_8888);
+                for(int y=0;y<bits.getHeight();y++)for(int x=0;x<bits.getWidth();x++)
+                    bitmap.setPixel(x,y,bits.get(x,y)?android.graphics.Color.BLACK:android.graphics.Color.WHITE);
+                ByteArrayOutputStream out=new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.PNG,100,out);bitmap.recycle();
+                JSONObject obj=workResult("image","data:image/png;base64,"+
+                    Base64.encodeToString(out.toByteArray(),Base64.NO_WRAP),null,false);
+                obj.put("id",equipmentId);dispatchWorkshop("onNativeQRImage",obj);
+            }catch(Exception ex){
+                dispatchWorkshop("onNativeQRImage",workResult("image","","No se pudo generar QR.",false));
+            }
+        });
+    }
+    private void startWorkPhoto(String source){
+        if(workPhotoRequested)return;
+        if(!"camera".equals(source)&&!"gallery".equals(source))return;
+        workPhotoRequested=true;
+        try{
+            if("camera".equals(source)){
+                File dir=new File(getCacheDir(),"eyr-label-ocr");
+                if(!dir.exists()&&!dir.mkdirs())throw new IOException("Sin almacenamiento temporal");
+                workPhotoFile=File.createTempFile("trabajo_",".jpg",dir);
+                workPhotoUri=FileProvider.getUriForFile(this,getPackageName()+".fileprovider",workPhotoFile);
+                Intent camera=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                camera.putExtra(MediaStore.EXTRA_OUTPUT,workPhotoUri);
+                camera.setClipData(ClipData.newUri(getContentResolver(),"Foto EYR",workPhotoUri));
+                camera.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                startActivityForResult(camera,WORK_PHOTO_CAMERA);
+            }else{
+                clearWorkPhoto();
+                Intent picker=new Intent(Intent.ACTION_GET_CONTENT);
+                picker.setType("image/*");picker.addCategory(Intent.CATEGORY_OPENABLE);
+                startActivityForResult(Intent.createChooser(picker,"Elegir foto del trabajo"),WORK_PHOTO_PICK);
+            }
+        }catch(Exception ex){
+            workPhotoRequested=false;clearWorkPhoto();
+            dispatchWorkshop("onNativePhoto",workResult("image","","No se pudo abrir la cámara o galería.",false));
+        }
+    }
+    private void clearWorkPhoto(){
+        workPhotoUri=null;
+        if(workPhotoFile!=null){try{workPhotoFile.delete();}catch(Exception ignored){}}
+        workPhotoFile=null;
+    }
+    private void readWorkPhoto(Uri uri){
+        backupExecutor.submit(()->{
+            try{
+                if(uri==null)throw new IOException("No se recibió una foto");
+                BitmapFactory.Options bounds=new BitmapFactory.Options();bounds.inJustDecodeBounds=true;
+                try(InputStream in=getContentResolver().openInputStream(uri)){BitmapFactory.decodeStream(in,null,bounds);}
+                if(bounds.outWidth<=0||bounds.outHeight<=0)throw new IOException("Imagen inválida");
+                int factor=1;
+                while(Math.max(bounds.outWidth,bounds.outHeight)/factor>1700)factor*=2;
+                BitmapFactory.Options opts=new BitmapFactory.Options();opts.inSampleSize=factor;
+                Bitmap bmp;
+                try(InputStream in=getContentResolver().openInputStream(uri)){bmp=BitmapFactory.decodeStream(in,null,opts);}
+                if(bmp==null)throw new IOException("No se pudo leer la imagen");
+                try(InputStream in=getContentResolver().openInputStream(uri)){
+                    int rot=new ExifInterface(in).getAttributeInt(ExifInterface.TAG_ORIENTATION,ExifInterface.ORIENTATION_NORMAL);
+                    float angle=rot==ExifInterface.ORIENTATION_ROTATE_90?90:rot==ExifInterface.ORIENTATION_ROTATE_180?180:rot==ExifInterface.ORIENTATION_ROTATE_270?270:0;
+                    if(angle!=0){Matrix matrix=new Matrix();matrix.postRotate(angle);
+                        Bitmap turned=Bitmap.createBitmap(bmp,0,0,bmp.getWidth(),bmp.getHeight(),matrix,true);
+                        if(turned!=bmp){bmp.recycle();bmp=turned;}}
+                }catch(Exception ignored){}
+                int m=Math.max(bmp.getWidth(),bmp.getHeight());
+                if(m>1150){float k=1150f/m;Bitmap small=Bitmap.createScaledBitmap(bmp,
+                    Math.max(1,Math.round(bmp.getWidth()*k)),Math.max(1,Math.round(bmp.getHeight()*k)),true);
+                    if(small!=bmp){bmp.recycle();bmp=small;}}
+                ByteArrayOutputStream stream=new ByteArrayOutputStream();
+                bmp.compress(Bitmap.CompressFormat.JPEG,65,stream);bmp.recycle();
+                byte[] bytes=stream.toByteArray();
+                if(bytes.length>330000)throw new IOException("Foto muy compleja para guardar; probá otra");
+                dispatchWorkshop("onNativePhoto",workResult("image","data:image/jpeg;base64,"+
+                    Base64.encodeToString(bytes,Base64.NO_WRAP),null,false));
+            }catch(Exception ex){
+                dispatchWorkshop("onNativePhoto",workResult("image","",ex.getMessage(),false));
+            }finally{runOnUiThread(this::clearWorkPhoto);}
+        });
+    }
+    private void beginVoiceInput(){
+        try{
+            Intent intent=new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE,"es-AR");
+            intent.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE,true);
+            intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,1);
+            intent.putExtra(RecognizerIntent.EXTRA_PROMPT,"Dictá las observaciones del trabajo");
+            startActivityForResult(intent,WORK_VOICE);
+        }catch(Exception ex){
+            dispatchWorkshop("onNativeVoice",workResult("text","","No hay un servicio de dictado disponible en este teléfono.",false));
         }
     }
 
@@ -358,6 +520,9 @@ public class MainActivity extends Activity {
     }
 
     public class NativeBridge {
+        @JavascriptInterface public void startVoiceInput(){runOnUiThread(MainActivity.this::beginVoiceInput);}
+        @JavascriptInterface public void generateEquipmentQR(String equipmentId){makeEquipmentQR(equipmentId);}
+        @JavascriptInterface public void captureWorkPhoto(String source){runOnUiThread(()->startWorkPhoto(source));}
         @JavascriptInterface public void scanLabel(String source) {
             runOnUiThread(()->startLabelScan(source));
         }
@@ -379,11 +544,12 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void saveFile(String dataUrl, String fileName, String mimeType, String action) {
             try {
                 int comma = dataUrl.indexOf(',');
-                if (comma<0 || dataUrl.length()>12000000)
+                if (comma<0 || dataUrl.length()>95000000)
                     throw new IllegalArgumentException("Archivo demasiado grande");
                 byte[] bytes=Base64.decode(dataUrl.substring(comma+1),Base64.DEFAULT);
                 final String safe=fileName.replaceAll("[^a-zA-Z0-9._ -]","_");
-                final String mime="application/pdf".equals(mimeType)?"application/pdf":"application/json";
+                final String mime="application/pdf".equals(mimeType)?"application/pdf":
+                    "application/zip".equals(mimeType)?"application/zip":"application/json";
                 final String mode="share".equals(action)||"view".equals(action)?action:"save";
                 runOnUiThread(()->saveBytes(bytes,safe,mime,mode));
             }catch(Exception ex){showMessage("No se pudo preparar el documento: "+ex.getMessage());}
@@ -463,13 +629,28 @@ public class MainActivity extends Activity {
     }
     @Override protected void onActivityResult(int code,int result,Intent data){
         super.onActivityResult(code,result,data);
+        if(code==WORK_VOICE){
+            if(result==RESULT_OK&&data!=null){
+                ArrayList<String> found=data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                dispatchWorkshop("onNativeVoice",workResult("text",found!=null&&!found.isEmpty()?found.get(0):"",null,false));
+            }else dispatchWorkshop("onNativeVoice",workResult("text","",null,true));
+            return;
+        }
+        if(code==WORK_PHOTO_CAMERA||code==WORK_PHOTO_PICK){
+            workPhotoRequested=false;
+            final Uri selected=code==WORK_PHOTO_CAMERA?workPhotoUri:(data==null?null:data.getData());
+            if(result!=RESULT_OK){clearWorkPhoto();dispatchWorkshop("onNativePhoto",workResult("image","",null,true));}
+            else readWorkPhoto(selected);
+            return;
+        }
         if(code==LABEL_PICK_IMAGE||code==LABEL_TAKE_PHOTO){
             labelScanRequested=false;
-            final String source=code==LABEL_TAKE_PHOTO?"camera":"gallery";
+            final String source=labelScanSource;
             final Uri selected=code==LABEL_TAKE_PHOTO?labelPhotoUri:(data==null?null:data.getData());
             if(result!=RESULT_OK){
                 clearLabelPhoto();
-                dispatchLabelResult("",null,true,source);
+                if(source.startsWith("qr-"))dispatchWorkshop("onNativeQR",workResult("text","",null,true));
+                else dispatchLabelResult("",null,true,source);
             }else recognizeLabelImage(selected,source);
             return;
         }
@@ -498,5 +679,5 @@ public class MainActivity extends Activity {
               else{lastBackPress=now;showMessage("Tocá atrás otra vez para salir de EYR");}
           });
     }
-    @Override public void onDestroy(){splashHandler.removeCallbacksAndMessages(null);backupExecutor.shutdown();clearLabelPhoto();if(webView!=null){webView.destroy();webView=null;}super.onDestroy();}
+    @Override public void onDestroy(){splashHandler.removeCallbacksAndMessages(null);backupExecutor.shutdown();clearLabelPhoto();clearWorkPhoto();if(webView!=null){webView.destroy();webView=null;}super.onDestroy();}
 }

@@ -187,3 +187,15 @@ Las APK previas se firmaban con claves de depuración temporales. Para actualiza
 - En Clientes, la coincidencia abre **Asociar equipo** con modelo y serie precompletados. En Presupuestos se asocia una referencia estructurada al borrador, con ficha técnica verificable, sin modificar automáticamente el PDF. En Catálogo permite consultar la ficha.
 - En la versión web la selección de foto funciona, pero la lectura OCR automática es exclusiva de la APK Android.
 - Permanece el `applicationId` y certificado de firma estable; versión Android `2.5` (`versionCode=16`).
+
+
+## v2.6 · Informes fotográficos, QR, voz y errores del display
+
+- **Visitas → Informe y fotos:** hasta seis fotos por visita, clasificadas como Antes, Después y Detalle. Se toman con la cámara o se cargan desde WhatsApp o galería, comprimidas y guardadas solo localmente en IndexedDB. Se pueden agregar descripciones a las imágenes.
+- **Informe PDF:** cliente, trabajo, horario, equipo vinculado, observaciones, código del display y páginas con fotografías. El PDF puede verse o compartirse mediante Android.
+- **Dictado de observaciones:** integración con el servicio de reconocimiento de voz de Android, preferentemente sin conexión cuando esté disponible en el dispositivo. El motor de voz del sistema puede necesitar internet o procesar audio con su proveedor. El texto se revisa antes de guardarlo.
+- **QR del equipo:** la ficha ofrece QR imprimible en PDF con el identificador `EYR:EQ:1:<id>`. El lector EYR abre el equipo registrado en el teléfono; en otro teléfono hay que importar los datos primero.
+- **Registro del error del display:** foto en cámara o desde galería, OCR local, selección y confirmación del código. Se guarda como evidencia dentro del informe de la visita. EYR no asigna significados ni diagnósticos sin documentación oficial del fabricante y modelo exactos.
+- **Ajustes → Copia completa ZIP con fotos:** respalda registros JSON y todos los JPG guardados en informes, y permite restaurarlos en otro dispositivo. El respaldo JSON tradicional **no incluye** fotografías. Se recomienda conservar el ZIP fuera del teléfono.
+- No se agrega Firebase ni servidor. Se mantienen el `applicationId`, las pantallas anteriores y la misma firma permanente Android.
+- APK Android v2.6 (`versionCode=17`).
