@@ -1,0 +1,26 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "lg-s4-w24k231e",
+    "brand": "LG",
+    "model": "S4-W24K231E",
+    "series": "DUALCOOL Dual Inverter",
+    "refrigerant": "R410A",
+    "coolingKW": "6,448 kW",
+    "coolingBTU": "22.016 BTU/h",
+    "indoorSize": "998 × 345 × 210 mm",
+    "outdoorSize": "",
+    "indoorWeight": "11,3 kg",
+    "outdoorWeight": "",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "electrical": "220 V · 50 Hz",
+    "notes": "Dimensiones exteriores y cañerías sin verificar.",
+    "url": "https://www.lg.com/ar/aire-acondicionado/lg-s4-w24k231e",
+    "maxPipe": "",
+    "maxElevation": "",
+    "photo": "",
+    "photoCredit": ""
+  }
+}

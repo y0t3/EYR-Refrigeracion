@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "samsung-ar40f24c0am2bg",
+    "brand": "Samsung",
+    "model": "AR40F24C0AM2BG",
+    "series": "AR5000H 2025",
+    "type": "Split de pared · frío/calor · Inverter",
+    "refrigerant": "R32",
+    "coolingKW": "6,15 kW",
+    "coolingBTU": "",
+    "indoorSize": "1.082 × 337 × 234 mm",
+    "outdoorSize": "805 × 554 × 330 mm",
+    "indoorWeight": "14,8 kg",
+    "outdoorWeight": "33,1 kg",
+    "liquidPipe": "9,52 mm (3/8″)",
+    "gasPipe": "15,88 mm (5/8″)",
+    "maxPipe": "30 m",
+    "maxElevation": "20 m",
+    "electrical": "220–240 V · 50 Hz · monofásico",
+    "notes": "Las conexiones de este modelo son diferentes de las de equipos más pequeños.",
+    "url": "https://www.samsung.com/ar/air-conditioners/wall-mount/ar5000h-wall-mount-air-conditioner-with-energy-savingfast-cooling-ar40f24c0am2bg/",
+    "photo": "https://images.samsung.com/is/image/samsung/p6pim/ar/ar40f24c0am2bg/gallery/ar-wall-mount-ar5000hm-ar40f12c0am-564530-ar40f24c0am2bg-549044624?$1164_776_PNG$=",
+    "photoCredit": "Samsung (imagen oficial)"
+  }
+}

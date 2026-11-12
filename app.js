@@ -7,8 +7,39 @@ const DEFAULT_SETTINGS = {
  validity:15, conditions:'La fecha y horario de ejecución se coordinarán previamente con el cliente.\nLos trabajos se realizarán siguiendo los procedimientos técnicos y medidas de seguridad aplicables a cada intervención.',
  lastNumber:0, lastRemitoNumber:0
 };
-const blankDB = () => ({version:4,clients:[],visits:[],quotes:[],remitos:[],serviceTemplates:[],equipment:[],catalogOnline:[],catalogUpdatedAt:'',settings:{...DEFAULT_SETTINGS}});
-function load(){try {const raw=JSON.parse(localStorage.getItem(KEY));if(!raw||!Array.isArray(raw.clients)||!Array.isArray(raw.visits)||!Array.isArray(raw.quotes))throw Error('incompatible');return {...blankDB(),...raw,remitos:Array.isArray(raw.remitos)?raw.remitos:[],serviceTemplates:Array.isArray(raw.serviceTemplates)?raw.serviceTemplates:[],equipment:Array.isArray(raw.equipment)?raw.equipment:[],catalogOnline:Array.isArray(raw.catalogOnline)?raw.catalogOnline:[],settings:{...DEFAULT_SETTINGS,...raw.settings,lastRemitoNumber:Math.max(Number(raw.settings?.lastRemitoNumber)||0,...(Array.isArray(raw.remitos)?raw.remitos:[]).map(x=>Number(x.number)||0))}}}catch{return blankDB()}}
+function pickFivePerBrand(models){
+  const list=[],counts=new Map(),seen=new Set();
+  for(const m of Array.isArray(models)?models:[]){
+   if(!m||typeof m.brand!=='string'||typeof m.model!=='string'||typeof m.id!=='string'||seen.has(m.id))continue;
+   const key=m.brand.trim().toLowerCase();
+   if((counts.get(key)||0)>=5)continue;
+   counts.set(key,(counts.get(key)||0)+1);seen.add(m.id);list.push(m);
+  }
+  return list;
+ }
+ const blankDB = () => ({version:5,clients:[],visits:[],quotes:[],remitos:[],serviceTemplates:[],equipment:[],catalogFeatured:[],catalogUpdatedAt:'',settings:{...DEFAULT_SETTINGS}});
+function load(){
+ try{
+  const raw=JSON.parse(localStorage.getItem(KEY));
+  if(!raw||!Array.isArray(raw.clients)||!Array.isArray(raw.visits)||!Array.isArray(raw.quotes))throw Error('incompatible');
+  const previouslySaved=Array.isArray(raw.catalogFeatured)?raw.catalogFeatured:(raw.catalogOnline||[]);
+  const next={...blankDB(),...raw,
+   remitos:Array.isArray(raw.remitos)?raw.remitos:[],
+   serviceTemplates:Array.isArray(raw.serviceTemplates)?raw.serviceTemplates:[],
+   equipment:Array.isArray(raw.equipment)?raw.equipment:[],
+   catalogFeatured:pickFivePerBrand(previouslySaved),
+   settings:{...DEFAULT_SETTINGS,...raw.settings,
+    lastRemitoNumber:Math.max(Number(raw.settings?.lastRemitoNumber)||0,...(Array.isArray(raw.remitos)?raw.remitos:[]).map(x=>Number(x.number)||0))}
+  };
+  delete next.catalogOnline;
+  // Migración v2.1 -> v2.2: se libera la lista completa, sin tocar equipos de clientes.
+  if(Array.isArray(raw.catalogOnline)||!Array.isArray(raw.catalogFeatured)){
+   try{localStorage.setItem(KEY,JSON.stringify(next))}catch(e){console.warn('Migración de catálogo',e)}
+  }
+  return next;
+ }catch{return blankDB()}
+ }
+ 
 let db=load(), page='inicio', draft=null, search='', filter='todos', agendaView='lista', calendarMonth=null, calendarMode='mes', calendarSelectedDate=null, remitoDraft=null;
 const navHistory=[];
 function rememberScreen(){if(page && navHistory[navHistory.length-1]!==page)navHistory.push(page)}
@@ -42,6 +73,8 @@ function setPage(p){
    if(navHistory[navHistory.length-1]===p)navHistory.pop();
   }else rememberScreen();
  }
+ if(page!==p&&page==='catalogo'){catalogTransient=null;catalogIndex=null;catalogIndexStatus='idle';catalogIndexPromise=null;catalogCloudRequest++;if(catalogSearchTimer)clearTimeout(catalogSearchTimer)}
+ if(page!==p&&p==='catalogo'){catalogQuery='';catalogBrand='todas'}
  page=p;draft=null;remitoDraft=null;search='';filter='todos';closeModal();render();scrollTo({top:0,behavior:'instant'});
 }
 function returnToPreviousScreen(){
@@ -175,27 +208,81 @@ function visitQuoteList(v){
  return list?'<div class="visit-detail-row"><span>📄 Presupuestos vinculados</span><div class="eyr-related-links">'+list+'</div></div>':'';
 }
 
-/* EYR Catálogo técnico — datos técnicos contrastados por modelo; cliente/equipo locales. */
-let catalogQuery='',catalogBrand='todas',catalogClientId='';
-const catalogRemoteUrl='https://y0t3.github.io/EYR-Refrigeracion/catalogo-modelos.json';
-function officialCatalogUrl(url){
- try{const u=new URL(String(url||''));return u.protocol==='https:'&&['www.samsung.com','samsung.com','www.lg.com','lg.com','www.bgh.com.ar','bgh.com.ar'].includes(u.hostname)?u.href:''}
- catch{return ''}
-}
-function validCatalogModel(m){
- return m&&typeof m==='object'&&/^[a-z0-9][a-z0-9_-]{3,90}$/.test(m.id||'')&&typeof m.brand==='string'&&m.brand.length<70&&typeof m.model==='string'&&m.model.length<100&&!!officialCatalogUrl(m.url);
-}
-function catalogItems(){
- const list=new Map();
- for(const m of window.EYR_CATALOG_BASE?.models||[])if(validCatalogModel(m))list.set(m.id,m);
- for(const m of db.catalogOnline||[])if(validCatalogModel(m))list.set(m.id,m);
- return [...list.values()].sort((a,b)=>a.brand.localeCompare(b.brand,'es')||a.model.localeCompare(b.model,'es'));
-}
-function findCatalogModel(id){return catalogItems().find(x=>x.id===id)||null}
-function catalogMatches(){
- const needle=catalogQuery.toLocaleLowerCase('es-AR').trim(),all=catalogItems();
- return all.filter(m=>(catalogBrand==='todas'||m.brand===catalogBrand)&&(!needle||[m.brand,m.model,m.series,m.refrigerant,m.type].join(' ').toLocaleLowerCase('es-AR').includes(needle)));
-}
+/* EYR Catálogo híbrido — 5 fichas por marca sin conexión y consultas temporales. */
+ let catalogQuery='', catalogBrand='todas', catalogClientId='';
+ let catalogIndex=null, catalogIndexPromise=null, catalogIndexStatus='idle';
+ let catalogTransient=null, catalogSearchTimer=null, catalogCloudRequest=0;
+ const catalogCloudBase='https://y0t3.github.io/EYR-Refrigeracion';
+ function officialCatalogUrl(url){
+  try{const u=new URL(String(url||''));return u.protocol==='https:'&&['www.samsung.com','samsung.com','www.lg.com','lg.com','www.bgh.com.ar','bgh.com.ar'].includes(u.hostname)?u.href:''}
+  catch{return ''}
+ }
+ function validCatalogModel(m){
+  return m&&typeof m==='object'&&/^[a-z0-9][a-z0-9_-]{3,90}$/.test(m.id||'')&&typeof m.brand==='string'&&m.brand.length<70&&typeof m.model==='string'&&m.model.length<100&&!!officialCatalogUrl(m.url);
+ }
+ function catalogItems(){
+  const featured=Array.isArray(db.catalogFeatured)&&db.catalogFeatured.length?db.catalogFeatured:window.EYR_CATALOG_BASE?.models||[];
+  return pickFivePerBrand(featured.filter(validCatalogModel)).sort((a,b)=>a.brand.localeCompare(b.brand,'es')||a.model.localeCompare(b.model,'es'));
+ }
+ function findCatalogModel(id){return catalogItems().find(m=>m.id===id)||(catalogTransient?.id===id?catalogTransient:null)}
+ function catalogMatches(){
+  const query=catalogQuery.toLocaleLowerCase('es-AR').trim();
+  return catalogItems().filter(m=>(catalogBrand==='todas'||m.brand===catalogBrand)&&(!query||[m.brand,m.model,m.series,m.refrigerant,m.type].join(' ').toLocaleLowerCase('es-AR').includes(query)));
+ }
+ function catalogIndexMatches(){
+  const query=catalogQuery.toLocaleLowerCase('es-AR').trim();
+  if(query.length<2||!catalogIndex)return [];
+  const known=new Set(catalogItems().map(x=>x.id));
+  return catalogIndex.models.filter(m=>!known.has(m.id)&&(catalogBrand==='todas'||m.brand===catalogBrand)&&[m.brand,m.model,m.series,m.refrigerant,m.type].join(' ').toLocaleLowerCase('es-AR').includes(query)).slice(0,30);
+ }
+ function catalogBrandOptions(){
+  const brands=[...new Set([...catalogItems(),...(catalogIndex?.models||[])].map(m=>m.brand))].sort((a,b)=>a.localeCompare(b,'es'));
+  return '<option value="todas">Todas las marcas</option>'+brands.map(x=>'<option value="'+esc(x)+'" '+(catalogBrand===x?'selected':'')+'>'+esc(x)+'</option>').join('');
+ }
+ async function catalogFetchJson(path){
+  const url=catalogCloudBase+'/'+path+'?v='+Date.now();
+  const response=await fetch(url,{cache:'no-store'});
+  if(!response.ok)throw new Error('Sin respuesta del catálogo ('+response.status+')');
+  return response.json();
+ }
+ function catalogRefreshResults(){
+  if(page!=='catalogo')return;
+  const box=$('#catalog-results');if(box)box.innerHTML=catalogResults();
+  const select=$('#catalog-brand');if(select){select.innerHTML=catalogBrandOptions();select.value=catalogBrand}
+ }
+ async function catalogEnsureIndex(){
+  if(catalogIndex)return catalogIndex;
+  if(catalogIndexPromise)return catalogIndexPromise;
+  catalogIndexStatus='loading';catalogRefreshResults();
+  catalogIndexPromise=(async()=>{
+   const data=await catalogFetchJson('catalogo-indice.json');
+   if(data?.schema!==2||!Array.isArray(data.models)||data.models.length>30000)throw Error('Índice no compatible');
+   const ids=new Set();
+   for(const m of data.models){
+    if(!m||!/^[a-z0-9][a-z0-9_-]{3,90}$/.test(m.id||'')||typeof m.brand!=='string'||m.brand.length>70||typeof m.model!=='string'||m.model.length>100||ids.has(m.id))throw Error('Modelo incorrecto en índice');
+    ids.add(m.id);
+   }
+   catalogIndex={models:data.models,updated:data.updated||''};
+   catalogIndexStatus='ready';return catalogIndex;
+  })();
+  try{return await catalogIndexPromise}
+  catch(e){console.warn('Catálogo remoto',e);catalogIndexStatus='offline';return null}
+  finally{catalogIndexPromise=null;catalogRefreshResults()}
+ }
+ async function catalogCloudDetail(id){
+  const entry=catalogIndex?.models.find(m=>m.id===id);if(!entry)return toast('No se encontró ese modelo en línea.');
+  const serial=++catalogCloudRequest;
+  toast('Consultando ficha en GitHub…');
+  try{
+   const doc=await catalogFetchJson('catalogo/fichas/'+encodeURIComponent(id)+'.json');
+   const m=doc?.model;
+   if(doc.schema!==2||!validCatalogModel(m)||m.id!==id||m.brand!==entry.brand||m.model!==entry.model)throw Error('Ficha técnica no verificada');
+   if(serial!==catalogCloudRequest)return;
+   catalogTransient=m;
+   catalogDetail(id);
+  }catch(e){console.warn('Ficha en línea',e);toast('No pudimos abrir esa ficha. Comprobá la conexión e intentá nuevamente.')}
+ }
+ 
 function catalogPhotoUrl(m){
  try{
   const value=String(m?.photo||'');
@@ -212,36 +299,47 @@ function catalogPhoto(m,variation='card'){
  return `<figure class="eyr-model-photo ${esc(variation)} ${url?'':'has-error'}">${url?`<img src="${esc(url)}" alt="${esc(label)}" loading="lazy" decoding="async" referrerpolicy="no-referrer">`:''}<div class="eyr-photo-fallback"><span aria-hidden="true">❄️</span><strong>Foto no disponible</strong><small>Consultá la ficha del fabricante</small></div><figcaption>${esc(caption)}</figcaption></figure>`;
 }
 function catalogCard(m){
- const online=!!officialCatalogUrl(m.url);
- return `<article class="eyr-model-card">${catalogPhoto(m,'card')}<div class="eyr-model-head"><span class="eyr-model-brand">${esc(m.brand)}</span><span class="eyr-model-tag">${online?'Fuente oficial':'Sin verificar'}</span></div><h3>${esc(m.model)}</h3><p>${esc(m.series||m.type||'Aire acondicionado')}</p><div class="eyr-model-specs"><div><small>Refrigerante</small><strong>${esc(m.refrigerant||'Sin verificar')}</strong></div><div><small>Capacidad frío</small><strong>${esc(m.coolingBTU||m.coolingKW||'Sin verificar')}</strong></div><div><small>Unidad interior (An. × Al. × Prof.)</small><strong>${esc(m.indoorSize||'Sin verificar')}</strong></div><div><small>Cañería gas</small><strong>${esc(m.gasPipe||'Sin verificar')}</strong></div></div><div class="eyr-model-actions"><button class="btn btn-small btn-blue" data-action="catalog-detail" data-id="${esc(m.id)}">📖 Ficha técnica</button><button class="btn btn-small btn-primary" data-action="catalog-associate" data-id="${esc(m.id)}">+ Asociar</button></div></article>`;
-}
-function catalogResults(){
- const items=catalogMatches();
- return `<p class="eyr-catalog-count">${items.length} ${items.length===1?'modelo encontrado':'modelos encontrados'} · ${catalogItems().length} fichas disponibles sin conexión</p><div class="eyr-catalog-grid">${items.map(catalogCard).join('')}</div>${items.length?'':`<div class="eyr-catalog-new"><p class="eyr-catalog-empty">No encontramos ese modelo exacto. Podés asociarlo a un cliente manualmente, sin inventar sus especificaciones.</p><button type="button" class="btn btn-blue" data-action="catalog-manual">+ Registrar equipo sin ficha</button></div>`}`;
-}
-function catalogo(){
- const all=catalogItems(),brands=[...new Set(all.map(x=>x.brand))].sort((a,b)=>a.localeCompare(b,'es'));
- const who=catalogClientId?db.clients.find(c=>c.id===catalogClientId):null;
- return `${headings('Catálogo técnico','Modelos exactos y especificaciones verificadas en páginas oficiales de fabricantes.')}
- <section class="panel"><div class="eyr-catalog-intro"><div><h2>❄️ Biblioteca técnica EYR</h2><p>Consultá refrigerantes, capacidades, dimensiones, conexiones y fuentes. Los modelos ya descargados funcionan sin Internet. Antes de intervenir, confirmá el modelo y la placa del equipo.</p></div><button class="btn btn-small btn-blue" data-action="catalog-update">↻ Buscar actualizaciones</button></div>
- ${who?`<div class="eyr-catalog-client-cta"><span>Asociando a: <strong>${esc(who.name)}</strong></span><button class="btn btn-small" data-action="catalog-clear-client">Quitar selección</button></div>`:''}
- <div class="eyr-catalog-tools"><input id="catalog-search" autocomplete="off" placeholder="Buscar marca o código exacto de modelo…" aria-label="Buscar modelos" value="${esc(catalogQuery)}"><select id="catalog-brand" aria-label="Filtrar marca"><option value="todas">Todas las marcas</option>${brands.map(x=>`<option value="${esc(x)}" ${catalogBrand===x?'selected':''}>${esc(x)}</option>`).join('')}</select></div>
- <div id="catalog-results">${catalogResults()}</div>
- <div class="eyr-catalog-new"><strong>¿El equipo no aparece?</strong><p class="eyr-catalog-footer">Buscalo en el fabricante o registralo para el cliente sin completar datos técnicos no verificados. Podremos ampliar las fichas oficiales desde GitHub sin reinstalar la APK.</p><div class="eyr-model-actions"><button class="btn btn-small" data-action="catalog-manual">+ Registrar equipo manual</button><button class="btn btn-small" data-action="catalog-find-web">🔎 Buscar modelo en Internet</button></div></div>
- <p class="eyr-catalog-footer">Última revisión incluida: ${esc(window.EYR_CATALOG_BASE?.updated||'—')} · Actualización local: ${esc(db.catalogUpdatedAt||'No consultada')} · Fuentes: fichas oficiales Samsung y LG. Las especificaciones pueden variar por región, lote y sufijo.</p></section>`;
-}
+ const official=!!officialCatalogUrl(m.url);
+ return `<article class="eyr-model-card">${catalogPhoto(m,'card')}<div class="eyr-model-head"><span class="eyr-model-brand">${esc(m.brand)}</span><span class="eyr-model-tag">Disponible sin conexión</span></div><h3>${esc(m.model)}</h3><p>${esc(m.series||m.type||'Aire acondicionado')}</p><div class="eyr-model-specs"><div><small>Refrigerante</small><strong>${esc(m.refrigerant||'No verificado')}</strong></div><div><small>Capacidad frío</small><strong>${esc(m.coolingBTU||m.coolingKW||'No verificado')}</strong></div></div><div class="eyr-model-actions"><button class="btn btn-small btn-blue" data-action="catalog-detail" data-id="${esc(m.id)}">📖 Ver ficha</button><button class="btn btn-small btn-primary" data-action="catalog-associate" data-id="${esc(m.id)}">+ Asociar</button></div></article>`;
+ }
+ function catalogCloudCard(m){
+  return `<div class="eyr-cloud-hit"><div><strong>${esc(m.brand)} · ${esc(m.model)}</strong><small>${esc([m.series,m.refrigerant].filter(Boolean).join(' · ')||'Ficha del fabricante')}</small></div><button type="button" class="btn btn-small btn-blue" data-action="catalog-cloud-detail" data-id="${esc(m.id)}">☁️ Ver ficha</button></div>`;
+ }
+ function catalogResults(){
+  const all=catalogItems(),local=catalogMatches(),remote=catalogIndexMatches(),query=catalogQuery.trim();
+  if(!query){
+   const brands=[...new Set(local.map(m=>m.brand))].sort((a,b)=>a.localeCompare(b,'es'));
+   const groups=brands.map(brand=>{
+     const models=local.filter(m=>m.brand===brand);
+     return '<details class="eyr-featured-brand"><summary><span>❄️ '+esc(brand)+'</span><small>'+models.length+' ejemplos sin conexión</small></summary><div class="eyr-catalog-grid">'+models.map(catalogCard).join('')+'</div></details>';
+   }).join('');
+   return '<p class="eyr-catalog-count">5 ejemplos por marca · Tocá una marca para verlos</p><div class="eyr-featured-groups">'+groups+'</div>';
+  }
+  let note='';
+  if(query.length<2)note='<p class="eyr-catalog-hint">Escribí al menos 2 caracteres para buscar en GitHub.</p>';
+  else if(catalogIndexStatus==='loading')note='<p class="eyr-catalog-hint">☁️ Buscando modelos en GitHub…</p>';
+  else if(catalogIndexStatus==='offline')note='<p class="eyr-catalog-hint">Sin conexión al catálogo. Los ejemplos y equipos de clientes siguen disponibles. <button type="button" class="btn btn-small" data-action="catalog-search-retry">Reintentar</button></p>';
+  else if(catalogIndexStatus==='idle')note='<p class="eyr-catalog-hint">☁️ Consultando biblioteca en línea…</p>';
+  else if(!local.length&&!remote.length)note='<p class="eyr-catalog-hint">No se encontró ese modelo. Revisá el código exacto o registralo manualmente.</p>';
+  return `<p class="eyr-catalog-count">${local.length+remote.length} coincidencia${local.length+remote.length===1?'':'s'} ${catalogIndexStatus==='ready'?'entre ejemplos y GitHub':'en los ejemplos'}</p>${local.length?' <div class="eyr-catalog-grid">'+local.map(catalogCard).join('')+'</div>':''}${remote.length?'<h3 class="eyr-cloud-title">☁️ En GitHub · Consulta temporal</h3><div class="eyr-cloud-list">'+remote.map(catalogCloudCard).join('')+'</div>':''}${note}`;
+ }
+ function catalogo(){
+  const who=catalogClientId?db.clients.find(c=>c.id===catalogClientId):null;
+  return `${headings('Catálogo técnico','Encontrá un aire por marca o código de modelo.')}<section class="panel"><div class="eyr-catalog-intro"><div><h2>❄️ Fichas técnicas EYR</h2><p>Los ejemplos funcionan sin conexión. Si buscás otro modelo, EYR consulta GitHub y lo muestra sin guardarlo. Solo queda registrado si lo asociás a un cliente.</p></div><button class="btn btn-small btn-blue" data-action="catalog-update">↻ Renovar ejemplos</button></div>${who?'<div class="eyr-catalog-client-cta"><span>Asociando a: <strong>'+esc(who.name)+'</strong></span><button class="btn btn-small" data-action="catalog-clear-client">Quitar selección</button></div>':''}<div class="eyr-catalog-tools"><input id="catalog-search" autocomplete="off" placeholder="Buscar marca o modelo en GitHub…" aria-label="Buscar modelo" value="${esc(catalogQuery)}"><select id="catalog-brand" aria-label="Filtrar marca">${catalogBrandOptions()}</select></div><div id="catalog-results">${catalogResults()}</div><div class="eyr-catalog-new"><strong>¿No encontraste el equipo?</strong><p class="eyr-catalog-footer">Podés anotarlo para un cliente sin inventar datos técnicos. La búsqueda online requiere Internet; las fichas guardadas de tus clientes no.</p><div class="eyr-model-actions"><button class="btn btn-small" data-action="catalog-manual">+ Registrar equipo manual</button><button class="btn btn-small" data-action="catalog-find-web">🔎 Buscar en la web</button></div></div><p class="eyr-catalog-footer">Ejemplos locales: ${allNumberOfFeatured()} · Actualización: ${esc(db.catalogUpdatedAt||window.EYR_CATALOG_BASE?.updated||'No consultada')} · Confirmá la placa y el manual antes de intervenir.</p></section>`;
+ }
+ function allNumberOfFeatured(){return catalogItems().length}
+ 
 function catalogSpecGrid(m){
  const specs=[['Marca',m.brand],['Modelo exacto',m.model],['Línea',m.series],['Tipo',m.type],['Refrigerante',m.refrigerant],['Capacidad frío (kW)',m.coolingKW],['Capacidad frío (BTU/h)',m.coolingBTU],['Unidad interior · An × Al × Prof',m.indoorSize],['Unidad exterior · An × Al × Prof',m.outdoorSize],['Peso unidad interior',m.indoorWeight],['Peso unidad exterior',m.outdoorWeight],['Conexión líquido',m.liquidPipe],['Conexión gas',m.gasPipe],['Tubería máxima',m.maxPipe],['Desnivel máximo',m.maxElevation],['Alimentación eléctrica',m.electrical]];
  return `<div class="eyr-model-detail">${specs.map(([name,v])=>`<div><span>${esc(name)}</span><strong>${esc(v||'No verificado')}</strong></div>`).join('')}</div>`;
 }
 function catalogDetail(id){
  const m=findCatalogModel(id);if(!m){toast('No se encontró la ficha de ese modelo.');return}
- const source=officialCatalogUrl(m.url);
- modal('Ficha técnica · '+m.model,`${catalogPhoto(m,'detail')}<p class="eyr-model-warning">Los datos corresponden al modelo exacto <strong>${esc(m.model)}</strong>. Para intervenir, verificá la placa, el manual y las instrucciones de seguridad. Un código parecido puede usar otro refrigerante o cañería.</p>${catalogSpecGrid(m)}${m.notes?`<p class="eyr-catalog-footer">🛠 ${esc(m.notes)}</p>`:''}${source?`<p><a class="eyr-catalog-source" target="_blank" rel="noopener noreferrer" href="${esc(source)}">🌐 Ver ficha oficial y documentación del fabricante</a></p>`:''}<div class="form-actions"><button class="btn btn-primary" data-action="catalog-associate" data-id="${esc(m.id)}">+ Vincular a cliente</button><button class="btn" data-action="close-modal">Cerrar</button></div>`,true);
-}
-function equipmentForClient(clientId){return (db.equipment||[]).filter(x=>x.clientId===clientId)}
-function equipmentName(item){return (item.brand||'Equipo')+' '+(item.model||'sin modelo')}
-function equipmentModel(item){return findCatalogModel(item.catalogId)||item.specSnapshot||null}
+ const source=officialCatalogUrl(m.url),inCloud=catalogTransient?.id===id&&!catalogItems().some(x=>x.id===id);
+ modal('Ficha técnica · '+m.model,`${catalogPhoto(m,'detail')}${inCloud?'<p class="eyr-cloud-label">☁️ Consulta temporal: esta ficha no queda guardada hasta que la asocies a un cliente.</p>':''}<p class="eyr-model-warning">Los datos corresponden al modelo exacto <strong>${esc(m.model)}</strong>. Antes de intervenir, verificá la placa, el manual y las instrucciones de seguridad.</p>${catalogSpecGrid(m)}${m.notes?'<p class="eyr-catalog-footer">🛠 '+esc(m.notes)+'</p>':''}${source?'<p><a class="eyr-catalog-source" target="_blank" rel="noopener noreferrer" href="'+esc(source)+'">🌐 Ficha oficial y documentación del fabricante</a></p>':''}<div class="form-actions"><button class="btn btn-primary" data-action="catalog-associate" data-id="${esc(m.id)}">+ Asociar a cliente</button><button class="btn" data-action="close-modal">Cerrar</button></div>`,true);
+ }
+ 
+function equipmentModel(item){return item.specSnapshot||findCatalogModel(item.catalogId)||null}
 function clientEquipmentCards(clientId){
  const list=equipmentForClient(clientId);
  return `<div class="eyr-equipment-list">${list.map(item=>`<div class="eyr-equipment-card">${equipmentModel(item)?catalogPhoto(equipmentModel(item),'mini'):''}<div><strong>❄️ ${esc(equipmentName(item))}</strong><small>${esc(item.location||'Sin ubicación')}${item.serial?' · Serie: '+esc(item.serial):''}</small><small>${equipmentModel(item)?'Ficha técnica disponible':'Modelo anotado; ficha pendiente de verificar'}</small></div><div class="eyr-equipment-actions"><button type="button" class="btn btn-small btn-blue" data-action="equipment-detail" data-id="${esc(item.id)}">Ficha</button><button type="button" class="btn btn-small" data-action="equipment-edit" data-id="${esc(item.id)}">Editar</button></div></div>`).join('')||empty('Sin equipos registrados','Podés agregar los equipos de este cliente desde el Catálogo técnico.')}</div>`;
@@ -281,17 +379,18 @@ function catalogWebSearch(){
  window.open(u,'_blank','noopener,noreferrer');
 }
 async function catalogUpdate(){
- toast('Consultando catálogo actualizado…');
+ toast('Renovando los cinco ejemplos de cada marca…');
  try{
-  const resp=await fetch(catalogRemoteUrl+'?t='+Date.now(),{cache:'no-store'});
-  if(!resp.ok)throw new Error('Error de conexión '+resp.status);
-  const doc=await resp.json();
-  if(doc.schema!==1||!Array.isArray(doc.models)||doc.models.length>600||!doc.models.length)throw new Error('Archivo de catálogo no válido');
-  const models=doc.models.filter(validCatalogModel).map(m=>Object.fromEntries(Object.entries(m).filter(([k,v])=>['id','brand','model','series','type','refrigerant','coolingKW','coolingBTU','indoorSize','outdoorSize','indoorWeight','outdoorWeight','liquidPipe','gasPipe','maxPipe','maxElevation','electrical','notes','url','photo','photoCredit'].includes(k)&&typeof v==='string'&&v.length<=500)));
-  if(models.length!==doc.models.length)throw new Error('Modelos sin fuente oficial o con formato incorrecto');
-  db.catalogOnline=models;db.catalogUpdatedAt=String(doc.updated||isoToday()).slice(0,32);save();render();toast('Catálogo actualizado: '+catalogItems().length+' fichas disponibles.');
- }catch(e){console.warn('Catalog update:',e);toast('Sin actualización disponible. Las fichas guardadas siguen funcionando sin Internet.')}
-}
+  const doc=await catalogFetchJson('catalogo-destacados.json');
+  if(doc?.schema!==2||!Array.isArray(doc.models)||!doc.models.length||doc.models.length>80||doc.models.some(m=>!validCatalogModel(m)))throw Error('Archivo de ejemplos inválido');
+  const picked=pickFivePerBrand(doc.models);
+  if(picked.length!==doc.models.length)throw Error('Hay más de cinco ejemplos en una marca');
+  db.catalogFeatured=picked;delete db.catalogOnline;
+  db.catalogUpdatedAt=String(doc.updated||isoToday()).slice(0,32);
+  save();render();toast('Ejemplos actualizados: '+picked.length+' fichas sin conexión.');
+ }catch(e){console.warn('Actualización de ejemplos',e);toast('No se pudo actualizar. Los ejemplos actuales siguen disponibles.')}
+ }
+ 
 function clientCard(c){let count=db.quotes.filter(q=>recordClientMatches(q,c)).length;const equipmentCount=equipmentForClient(c.id).length;return `<div class="list-item"><div class="item-main"><strong>${esc(c.name)}</strong><small>${[c.phone,c.address,c.cuit].filter(Boolean).map(esc).join(' · ')||'Sin datos adicionales'}</small><small>${count} presupuesto${count===1?'':'s'} · ${equipmentCount} equipo${equipmentCount===1?'':'s'}</small></div><div class="item-actions"><button class="btn btn-small btn-blue" data-action="client-equipment" data-id="${c.id}">❄️ Equipos</button><button class="btn btn-small btn-primary" data-action="client-history" data-id="${c.id}">🕒 Historial técnico</button><button class="btn btn-small btn-blue" data-action="quote-from-client" data-id="${c.id}">Presupuestar</button><button class="btn btn-small" data-action="remito-from-client" data-id="${c.id}">Remito</button><button class="btn btn-small" data-action="edit-client" data-id="${c.id}">Editar</button><button class="btn btn-small btn-danger" data-action="delete-client" data-id="${c.id}">Eliminar</button></div></div>`}
 function clients(){const arr=db.clients.filter(c=>(c.name+' '+c.phone+' '+c.cuit).toLowerCase().includes(search.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name));return `${headings('Clientes','Visitas, presupuestos, remitos y equipos registrados en un mismo lugar.','<button class="btn btn-primary" data-action="new-client">+ Nuevo cliente</button>')}<section class="panel"><div class="searchbar"><input id="search-list" placeholder="Buscar por nombre, teléfono o CUIT" value="${esc(search)}" aria-label="Buscar clientes"></div><div id="list-results">${arr.length?`<div class="item-list">${arr.map(clientCard).join('')}</div>`:empty('Sin clientes','Agregá el primer cliente o crealo desde un presupuesto.')}</div></section>`}
 function settings(){let s=db.settings;return `${headings('Configuración','Datos fijos de EYR y respaldo de información.')}
@@ -389,6 +488,8 @@ function printQuote(q,action='save'){
 function handleAction(b,event){const a=b.dataset.action,id=b.dataset.id;
   
   if(a==='catalog-detail')return catalogDetail(id);
+ if(a==='catalog-cloud-detail')return catalogCloudDetail(id);
+ if(a==='catalog-search-retry'){catalogIndex=null;catalogIndexStatus='idle';return catalogEnsureIndex()}
  if(a==='catalog-associate')return equipmentModal(null,id);
  if(a==='catalog-manual')return equipmentModal(null,null,catalogClientId);
  if(a==='catalog-for-client'){catalogClientId=id;closeModal();setPage('catalogo');return}
@@ -483,14 +584,18 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('input',e=>{const el=e.target;if(el.id==='catalog-search'){
    catalogQuery=el.value;
-   const result=$('#catalog-results');if(result)result.innerHTML=catalogResults();
+   catalogRefreshResults();
+   if(catalogSearchTimer)clearTimeout(catalogSearchTimer);
+   if(catalogQuery.trim().length>=2&&!catalogIndex){
+     catalogSearchTimer=setTimeout(()=>catalogEnsureIndex(),280);
+   }
    return
  }
  if(el.id==='search-list'){search=el.value;const orig=page;let html=orig==='agenda'?agenda():orig==='presupuestos'?quotes():orig==='remitos'?remitos():orig==='clientes'?clients():'';const doc=new DOMParser().parseFromString(html,'text/html'),box=doc.querySelector('#list-results');if(box&&$('#list-results'))$('#list-results').innerHTML=box.innerHTML}
  if(el.closest('#quote-form')&&el.id!=='f-clientId'){grabDraft();if($('#current-total'))$('#current-total').textContent=fmt(quoteTotal(draft))}
  if(el.closest('#remito-form')&&el.id!=='remito-clientId'){grabRemitoDraft();refreshRemitoTotal()}});
 document.addEventListener('change',async e=>{const el=e.target;
- if(el.id==='catalog-brand'){catalogBrand=el.value;const results=$('#catalog-results');if(results)results.innerHTML=catalogResults();return}
+ if(el.id==='catalog-brand'){catalogBrand=el.value;catalogRefreshResults();if(catalogQuery.trim().length>=2&&!catalogIndex&&catalogIndexStatus!=='offline')catalogEnsureIndex();return}
  if(el.id==='filter-list'){filter=el.value;render();$('#search-list')?.focus();return}
  if(el.id==='remito-clientId'&&remitoDraft){grabRemitoDraft();if(el.value){applyRemitoClient(remitoDraft,el.value);render()}return}
  if(el.id==='f-clientId'&&draft){grabDraft();if(el.value){applyClient(draft,el.value);render()}return}
@@ -501,7 +606,7 @@ document.addEventListener('change',async e=>{const el=e.target;
     if(selected)selected.innerHTML='<option value="">Sin equipo asociado</option>'+equipmentForClient(el.value).map(item=>'<option value="'+esc(item.id)+'">'+esc(equipmentName(item)+' · '+(item.location||'Sin ubicación'))+'</option>').join('');
     return
  }
- if(el.id==='import-json'&&el.files?.[0]){try{const raw=JSON.parse(await el.files[0].text());if(!raw||!Array.isArray(raw.clients)||!Array.isArray(raw.visits)||!Array.isArray(raw.quotes)||typeof raw.settings!=='object')throw Error('El archivo no es un respaldo EYR válido');if(!confirm('Importar reemplazará todos los datos actuales de este dispositivo. ¿Continuar?'))return;db={...blankDB(),...raw,remitos:Array.isArray(raw.remitos)?raw.remitos:[],serviceTemplates:Array.isArray(raw.serviceTemplates)?raw.serviceTemplates:[],equipment:Array.isArray(raw.equipment)?raw.equipment:[],catalogOnline:Array.isArray(raw.catalogOnline)?raw.catalogOnline:[],settings:{...DEFAULT_SETTINGS,...raw.settings,lastRemitoNumber:Math.max(Number(raw.settings.lastRemitoNumber)||0,...(Array.isArray(raw.remitos)?raw.remitos:[]).map(r=>Number(r.number)||0))}};save();setPage('inicio');toast('Respaldo importado correctamente.')}catch(err){console.error(err);toast('Error al importar: archivo no válido.')}finally{el.value=''}return}
+ if(el.id==='import-json'&&el.files?.[0]){try{const raw=JSON.parse(await el.files[0].text());if(!raw||!Array.isArray(raw.clients)||!Array.isArray(raw.visits)||!Array.isArray(raw.quotes)||typeof raw.settings!=='object')throw Error('El archivo no es un respaldo EYR válido');if(!confirm('Importar reemplazará todos los datos actuales de este dispositivo. ¿Continuar?'))return;db={...blankDB(),...raw,remitos:Array.isArray(raw.remitos)?raw.remitos:[],serviceTemplates:Array.isArray(raw.serviceTemplates)?raw.serviceTemplates:[],equipment:Array.isArray(raw.equipment)?raw.equipment:[],catalogFeatured:pickFivePerBrand(Array.isArray(raw.catalogFeatured)?raw.catalogFeatured:raw.catalogOnline||[]),settings:{...DEFAULT_SETTINGS,...raw.settings,lastRemitoNumber:Math.max(Number(raw.settings.lastRemitoNumber)||0,...(Array.isArray(raw.remitos)?raw.remitos:[]).map(r=>Number(r.number)||0))}};delete db.catalogOnline;save();setPage('inicio');toast('Respaldo importado correctamente.')}catch(err){console.error(err);toast('Error al importar: archivo no válido.')}finally{el.value=''}return}
 });
 document.addEventListener('submit',e=>{const form=e.target;e.preventDefault();
  if(form.id==='equipment-form'){

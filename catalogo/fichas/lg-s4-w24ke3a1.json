@@ -1,0 +1,26 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "lg-s4-w24ke3a1",
+    "brand": "LG",
+    "model": "S4-W24KE3A1",
+    "series": "DUALCOOL Dual Inverter (discontinuado)",
+    "refrigerant": "R410A",
+    "coolingKW": "6,448 kW",
+    "coolingBTU": "22.016 BTU/h",
+    "indoorSize": "998 × 345 × 210 mm",
+    "outdoorSize": "870 × 655 × 320 mm",
+    "indoorWeight": "12,3 kg",
+    "outdoorWeight": "42 kg",
+    "liquidPipe": "6,35 mm (1/4″)",
+    "gasPipe": "15,88 mm (5/8″)",
+    "electrical": "220 V · 50 Hz",
+    "notes": "Discontinuado. LG publica carga R410A 1.450 g; contrastar con placa.",
+    "url": "https://www.lg.com/ar/aire-acondicionado/lg-s4-w24ke3a1",
+    "maxPipe": "",
+    "maxElevation": "",
+    "photo": "",
+    "photoCredit": ""
+  }
+}

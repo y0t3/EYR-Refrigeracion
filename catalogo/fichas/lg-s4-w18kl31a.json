@@ -1,0 +1,26 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "lg-s4-w18kl31a",
+    "brand": "LG",
+    "model": "S4-W18KL31A",
+    "series": "DUALCOOL Dual Inverter",
+    "refrigerant": "R410A",
+    "coolingKW": "5,275 kW",
+    "coolingBTU": "18.011 BTU/h",
+    "indoorSize": "998 × 345 × 210 mm",
+    "outdoorSize": "",
+    "indoorWeight": "11,3 kg",
+    "outdoorWeight": "",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "electrical": "220 V · 50 Hz",
+    "notes": "Cañerías y dimensiones exteriores pendientes de confirmar.",
+    "url": "https://www.lg.com/ar/aire-acondicionado/lg-s4-w18kl31a",
+    "maxPipe": "",
+    "maxElevation": "",
+    "photo": "",
+    "photoCredit": ""
+  }
+}

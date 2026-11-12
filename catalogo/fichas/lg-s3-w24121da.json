@@ -1,0 +1,26 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "lg-s3-w24121da",
+    "brand": "LG",
+    "model": "S3-W24121DA",
+    "series": "DualCool AI Air",
+    "refrigerant": "R32",
+    "coolingKW": "6,448 kW",
+    "coolingBTU": "22.000 BTU/h",
+    "indoorSize": "895 × 307 × 235 mm",
+    "outdoorSize": "870 × 650 × 330 mm",
+    "indoorWeight": "11,3 kg",
+    "outdoorWeight": "39,5 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "electrical": "220 V · 50 Hz",
+    "notes": "AI Air 2025: confirmar conexiones en manual.",
+    "url": "https://www.lg.com/ar/aire-acondicionado/lg-s3-w24121da",
+    "maxPipe": "",
+    "maxElevation": "",
+    "photo": "",
+    "photoCredit": ""
+  }
+}

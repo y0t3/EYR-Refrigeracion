@@ -1,0 +1,26 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "lg-s4-w18klrpa",
+    "brand": "LG",
+    "model": "S4-W18KLRPA",
+    "series": "ARTCOOL Dual Inverter",
+    "refrigerant": "R410A",
+    "coolingKW": "5,275 kW",
+    "coolingBTU": "18.011 BTU/h",
+    "indoorSize": "998 × 345 × 212 mm",
+    "outdoorSize": "770 × 545 × 288 mm",
+    "indoorWeight": "12,8 kg",
+    "outdoorWeight": "33,8 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "electrical": "220 V · 50 Hz",
+    "notes": "ARTCOOL; instalación según manual específico.",
+    "url": "https://www.lg.com/ar/aire-acondicionado/lg-S4-W18KLRPA",
+    "maxPipe": "",
+    "maxElevation": "",
+    "photo": "https://www.lg.com/ar/images/spec/S4-W18KLRPA_Spec_DESKTOP.jpg",
+    "photoCredit": "LG Argentina · imagen de dimensiones"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "lg-s4-w12jarpa",
+    "brand": "LG",
+    "model": "S4-W12JARPA",
+    "series": "ARTCOOL Dual Inverter",
+    "refrigerant": "R410A",
+    "coolingKW": "3,517 kW",
+    "coolingBTU": "12.009 BTU/h",
+    "indoorSize": "837 × 308 × 192 mm",
+    "outdoorSize": "717 × 495 × 230 mm",
+    "indoorWeight": "9,7 kg",
+    "outdoorWeight": "25,5 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "electrical": "220 V · 50 Hz",
+    "notes": "Conexiones pendientes de verificar.",
+    "url": "https://www.lg.com/ar/aire-acondicionado/lg-S4-W12JARPA",
+    "maxPipe": "",
+    "maxElevation": "",
+    "photo": "",
+    "photoCredit": ""
+  }
+}

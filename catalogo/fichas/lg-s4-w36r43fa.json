@@ -1,0 +1,26 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "lg-s4-w36r43fa",
+    "brand": "LG",
+    "model": "S4-W36R43FA",
+    "series": "DUALCOOL Dual Inverter",
+    "refrigerant": "R410A",
+    "coolingKW": "",
+    "coolingBTU": "33.000 BTU/h",
+    "indoorSize": "1.200 × 360 × 265 mm",
+    "outdoorSize": "950 × 832 × 330 mm",
+    "indoorWeight": "18,5 kg",
+    "outdoorWeight": "67,1 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "electrical": "220 V · 50 Hz",
+    "notes": "Capacidad nominal de frío 33.000 BTU/h; ficha LG indica 9.789 W como potencia máxima de calefacción.",
+    "url": "https://www.lg.com/ar/aire-acondicionado/lg-s4-w36r43fa",
+    "maxPipe": "",
+    "maxElevation": "",
+    "photo": "",
+    "photoCredit": ""
+  }
+}

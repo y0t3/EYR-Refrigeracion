@@ -1,0 +1,26 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "lg-s4-w12ja3aa",
+    "brand": "LG",
+    "model": "S4-W12JA3AA",
+    "series": "DUALCOOL Dual Inverter (discontinuado)",
+    "refrigerant": "R410A",
+    "coolingKW": "3,517 kW",
+    "coolingBTU": "12.009 BTU/h",
+    "indoorSize": "837 × 308 × 189 mm",
+    "outdoorSize": "717 × 495 × 230 mm",
+    "indoorWeight": "8,4 kg",
+    "outdoorWeight": "25,5 kg",
+    "liquidPipe": "6,35 mm (1/4″)",
+    "gasPipe": "9,52 mm (3/8″)",
+    "electrical": "220 V · 50 Hz",
+    "notes": "Discontinuado. LG publica carga R410A 850 g; contrastar con placa.",
+    "url": "https://www.lg.com/ar/aire-acondicionado/lg-S4-W12JA3AA",
+    "maxPipe": "",
+    "maxElevation": "",
+    "photo": "",
+    "photoCredit": ""
+  }
+}

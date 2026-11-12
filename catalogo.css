@@ -53,3 +53,22 @@
 .eyr-model-photo.mini .eyr-photo-fallback span{font-size:18px}
 .eyr-model-photo.mini .eyr-photo-fallback strong{font-size:9px}
 @media(max-width:600px){.eyr-model-photo.detail img{height:230px}.eyr-model-photo.mini{flex-basis:80px}}
+
+/* V2.2: cinco destacados por marca, plegables, y consultas temporales en la nube. */
+.eyr-featured-groups{display:flex;flex-direction:column;gap:10px;margin:12px 0}
+.eyr-featured-brand{border:1px solid rgba(55,182,240,.55);border-radius:13px;background:rgba(4,33,60,.85);overflow:hidden}
+.eyr-featured-brand summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 17px;font-weight:800;color:#e3f9ff;font-size:16px;list-style:none}
+.eyr-featured-brand summary::-webkit-details-marker{display:none}
+.eyr-featured-brand summary:after{content:'⌄';color:#78d9fb;font-size:24px;line-height:1}
+.eyr-featured-brand[open] summary:after{transform:rotate(180deg)}
+.eyr-featured-brand summary small{font-weight:500;font-size:11px;color:#acd2eb;margin-left:auto}
+.eyr-featured-brand[open] .eyr-catalog-grid{padding:0 12px 13px}
+.eyr-cloud-title{font-size:14px;color:#a8eaff;margin:16px 0 8px}
+.eyr-cloud-list{display:flex;flex-direction:column;gap:8px}
+.eyr-cloud-hit{border:1px solid rgba(63,175,232,.35);background:rgba(6,42,71,.7);border-radius:12px;padding:12px 13px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.eyr-cloud-hit strong{display:block;color:#f1faff;font-size:13px;overflow-wrap:anywhere}
+.eyr-cloud-hit small{display:block;color:#b5d4e8;font-size:11px;margin-top:5px}
+.eyr-cloud-hit .btn{flex-shrink:0}
+.eyr-catalog-hint{padding:14px 8px;color:#bad9ea;font-size:12px;line-height:1.6}
+.eyr-cloud-label{background:rgba(12,111,175,.2);border:1px solid rgba(55,183,234,.38);border-radius:9px;padding:12px;color:#a4e3f8;font-size:12px;line-height:1.5}
+@media(max-width:600px){.eyr-cloud-hit{align-items:start;flex-direction:column}.eyr-cloud-hit .btn{align-self:flex-end}.eyr-featured-brand summary{font-size:14px}.eyr-featured-brand summary small{font-size:10px}}

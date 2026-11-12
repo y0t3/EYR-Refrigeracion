@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "lg-s3-w120a1da",
+    "brand": "LG",
+    "model": "S3-W120A1DA",
+    "series": "Dual Inverter AI Air",
+    "type": "Split de pared · frío/calor · Inverter",
+    "refrigerant": "R32",
+    "coolingKW": "",
+    "coolingBTU": "12.000 BTU/h",
+    "indoorSize": "799 × 307 × 235 mm",
+    "outdoorSize": "717 × 483 × 230 mm",
+    "indoorWeight": "10 kg",
+    "outdoorWeight": "23 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "220 V · 50 Hz",
+    "notes": "LG no publica medidas de cañerías en esta ficha comercial. Consultar manual/placa.",
+    "url": "https://www.lg.com/ar/aire-acondicionado/lg-s3-w120a1da",
+    "photo": "https://d2pr1pn9ywx3vo.cloudfront.net/spree/products/48472/large/LGAI300S3_primera_con_logo.jpg?1785360783=",
+    "photoCredit": "Ortiz & Ortega (foto comercial del modelo)"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "lg-s4-w12ja31a",
+    "brand": "LG",
+    "model": "S4-W12JA31A",
+    "series": "DUALCOOL Dual Inverter",
+    "refrigerant": "R410A",
+    "coolingKW": "3,517 kW",
+    "coolingBTU": "12.009 BTU/h",
+    "indoorSize": "837 × 308 × 189 mm",
+    "outdoorSize": "",
+    "indoorWeight": "8,4 kg",
+    "outdoorWeight": "",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "electrical": "220 V · 50 Hz",
+    "notes": "Sin cañerías verificadas en ficha consultada.",
+    "url": "https://www.lg.com/ar/aire-acondicionado/lg-s4-w12ja31a",
+    "maxPipe": "",
+    "maxElevation": "",
+    "photo": "",
+    "photoCredit": ""
+  }
+}

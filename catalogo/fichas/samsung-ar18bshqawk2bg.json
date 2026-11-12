@@ -1,0 +1,26 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "samsung-ar18bshqawk2bg",
+    "brand": "Samsung",
+    "model": "AR18BSHQAWK2BG",
+    "series": "AR18BSH",
+    "refrigerant": "",
+    "coolingKW": "4,770 kW",
+    "coolingBTU": "",
+    "indoorSize": "",
+    "outdoorSize": "",
+    "indoorWeight": "",
+    "outdoorWeight": "",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "electrical": "",
+    "notes": "Samsung Argentina confirma código y línea frío/calor. Refrigerante y medidas a confirmar en manual.",
+    "url": "https://www.samsung.com/ar/support/model/AR18BSHQAWK2BG/",
+    "maxPipe": "",
+    "maxElevation": "",
+    "photo": "",
+    "photoCredit": ""
+  }
+}

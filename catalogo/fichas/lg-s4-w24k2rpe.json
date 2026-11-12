@@ -1,0 +1,26 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "lg-s4-w24k2rpe",
+    "brand": "LG",
+    "model": "S4-W24K2RPE",
+    "series": "ARTCOOL Dual Inverter",
+    "refrigerant": "R410A",
+    "coolingKW": "6,448 kW",
+    "coolingBTU": "22.016 BTU/h",
+    "indoorSize": "998 × 345 × 212 mm",
+    "outdoorSize": "870 × 655 × 320 mm",
+    "indoorWeight": "12,8 kg",
+    "outdoorWeight": "42,9 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "electrical": "220 V · 50 Hz",
+    "notes": "ARTCOOL con frente oscuro. Confirmar placa/manual de instalación.",
+    "url": "https://www.lg.com/ar/aire-acondicionado/lg-s4-w24k2rpe",
+    "maxPipe": "",
+    "maxElevation": "",
+    "photo": "",
+    "photoCredit": ""
+  }
+}

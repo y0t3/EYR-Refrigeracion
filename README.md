@@ -131,3 +131,15 @@ Las APK previas se firmaban con claves de depuración temporales. Para actualiza
 - Imagen única en tarjeta, ficha grande y equipo asociado al cliente. Si falla la carga o no hay conexión, aparece «Foto no disponible», nunca una imagen inventada de un equipo distinto.
 - Las imágenes se cargan bajo demanda por HTTPS; para verlas por primera vez se necesita Internet. La ficha técnica de texto sigue disponible sin conexión.
 - Catálogo actualizable: el archivo JSON admite `photo` y `photoCredit` para modelos nuevos, con validación de dominios conocidos y sin permitir inyección de HTML.
+
+
+## v2.2 — Catálogo híbrido: 5 por marca + nube temporal
+
+- La pantalla principal muestra secciones plegables por marca, con **cinco fichas de ejemplo disponibles sin Internet** por cada una. La versión inicial incluye cinco Samsung y cinco LG.
+- Con al menos dos caracteres en el buscador, EYR consulta bajo demanda `catalogo-indice.json` de GitHub Pages (índice de nombres/modelos, no ficha completa). El índice solo vive en memoria mientras se consulta, sin guardarse en localStorage.
+- Al abrir un resultado en línea, se descarga **solo** `catalogo/fichas/<id>.json`; se comprueba modelo e identidad de la fuente oficial y se muestra la ficha temporalmente. No se guarda si solo se consulta.
+- **Asociar a cliente** sí guarda una copia técnica en `equipment[].specSnapshot` y conserva la serie, ubicación, notas y visitas vinculadas. La ficha puede consultarse después sin Internet.
+- **Renovar ejemplos** descarga únicamente `catalogo-destacados.json`, con máximo cinco fichas por marca. No descarga toda la biblioteca, y no requiere APK nueva para cambiar destacados.
+- Migración de EYR v2.1: la colección antigua `catalogOnline` pasa a cinco destacados por marca, se elimina del almacenamiento persistente y **no se borran los equipos de clientes**. Los respaldos JSON de versiones anteriores siguen admitidos.
+- El Service Worker no cachea el índice, destacados remotos ni las fichas individuales en línea; el navegador puede aplicar caché de imágenes/HTTP temporal según sus propias reglas.
+- Fichas en GitHub Pages: `catalogo-modelos.json` se mantiene como archivo maestro de edición, `catalogo-indice.json` índice, `catalogo-destacados.json` destacados y `catalogo/fichas/` fichas individuales. Para ampliar, se publican esos archivos coordinadamente.

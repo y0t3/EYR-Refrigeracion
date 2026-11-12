@@ -1,0 +1,144 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "models": [
+    {
+      "id": "samsung-ar12ashqawk-bg",
+      "brand": "Samsung",
+      "model": "AR12ASHQAWK/BG",
+      "series": "AR5000HM",
+      "refrigerant": "R410A",
+      "type": "Split de pared · frío/calor · Inverter"
+    },
+    {
+      "id": "samsung-ar40f12c0am2bg",
+      "brand": "Samsung",
+      "model": "AR40F12C0AM2BG",
+      "series": "AR5000H 2025",
+      "refrigerant": "R32",
+      "type": "Split de pared · frío/calor · Inverter"
+    },
+    {
+      "id": "samsung-ar40f18c0am2bg",
+      "brand": "Samsung",
+      "model": "AR40F18C0AM2BG",
+      "series": "AR5000H 2025",
+      "refrigerant": "R32",
+      "type": "Split de pared · frío/calor · Inverter"
+    },
+    {
+      "id": "samsung-ar40f24c0am2bg",
+      "brand": "Samsung",
+      "model": "AR40F24C0AM2BG",
+      "series": "AR5000H 2025",
+      "refrigerant": "R32",
+      "type": "Split de pared · frío/calor · Inverter"
+    },
+    {
+      "id": "lg-s3-w120a1da",
+      "brand": "LG",
+      "model": "S3-W120A1DA",
+      "series": "Dual Inverter AI Air",
+      "refrigerant": "R32",
+      "type": "Split de pared · frío/calor · Inverter"
+    },
+    {
+      "id": "lg-s3-w181l1da",
+      "brand": "LG",
+      "model": "S3-W181L1DA",
+      "series": "Dual Inverter AI Air",
+      "refrigerant": "R32"
+    },
+    {
+      "id": "lg-s3-w24121da",
+      "brand": "LG",
+      "model": "S3-W24121DA",
+      "series": "DualCool AI Air",
+      "refrigerant": "R32"
+    },
+    {
+      "id": "lg-s4-w36r43fa",
+      "brand": "LG",
+      "model": "S4-W36R43FA",
+      "series": "DUALCOOL Dual Inverter",
+      "refrigerant": "R410A"
+    },
+    {
+      "id": "lg-s4-w24k2rpe",
+      "brand": "LG",
+      "model": "S4-W24K2RPE",
+      "series": "ARTCOOL Dual Inverter",
+      "refrigerant": "R410A"
+    },
+    {
+      "id": "lg-s4-w24k231e",
+      "brand": "LG",
+      "model": "S4-W24K231E",
+      "series": "DUALCOOL Dual Inverter",
+      "refrigerant": "R410A"
+    },
+    {
+      "id": "lg-s4-w18kl31a",
+      "brand": "LG",
+      "model": "S4-W18KL31A",
+      "series": "DUALCOOL Dual Inverter",
+      "refrigerant": "R410A"
+    },
+    {
+      "id": "lg-s4-w12ja31a",
+      "brand": "LG",
+      "model": "S4-W12JA31A",
+      "series": "DUALCOOL Dual Inverter",
+      "refrigerant": "R410A"
+    },
+    {
+      "id": "lg-s4-w18klrpa",
+      "brand": "LG",
+      "model": "S4-W18KLRPA",
+      "series": "ARTCOOL Dual Inverter",
+      "refrigerant": "R410A"
+    },
+    {
+      "id": "lg-s4-w12jarpa",
+      "brand": "LG",
+      "model": "S4-W12JARPA",
+      "series": "ARTCOOL Dual Inverter",
+      "refrigerant": "R410A"
+    },
+    {
+      "id": "lg-s4-w24ke3a1",
+      "brand": "LG",
+      "model": "S4-W24KE3A1",
+      "series": "DUALCOOL Dual Inverter (discontinuado)",
+      "refrigerant": "R410A"
+    },
+    {
+      "id": "lg-s4-w12ja3aa",
+      "brand": "LG",
+      "model": "S4-W12JA3AA",
+      "series": "DUALCOOL Dual Inverter (discontinuado)",
+      "refrigerant": "R410A"
+    },
+    {
+      "id": "lg-s4-w18kl3aa",
+      "brand": "LG",
+      "model": "S4-W18KL3AA",
+      "series": "DUALCOOL Dual Inverter (discontinuado)",
+      "refrigerant": "R410A"
+    },
+    {
+      "id": "samsung-ar18bshqawk2bg",
+      "brand": "Samsung",
+      "model": "AR18BSHQAWK2BG",
+      "series": "AR18BSH",
+      "refrigerant": ""
+    },
+    {
+      "id": "samsung-ar24bshqawk2bg",
+      "brand": "Samsung",
+      "model": "AR24BSHQAWK2BG",
+      "series": "AR24BSH",
+      "refrigerant": ""
+    }
+  ]
+}
