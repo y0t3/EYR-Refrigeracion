@@ -339,6 +339,94 @@
       "series": "XPower",
       "type": "Split de pared · frío/calor",
       "refrigerant": ""
+    },
+    {
+      "id": "surrey-553niq09gn81f",
+      "brand": "Surrey",
+      "model": "553NIQ09GN81F",
+      "series": "Inverter Smart R32",
+      "type": "Split de pared · frío/calor · Inverter",
+      "refrigerant": "R32"
+    },
+    {
+      "id": "surrey-553niq12kn81f",
+      "brand": "Surrey",
+      "model": "553NIQ12KN81F",
+      "series": "Inverter Smart R32",
+      "type": "Split de pared · frío/calor · Inverter",
+      "refrigerant": "R32"
+    },
+    {
+      "id": "bgh-bsi35wcgt",
+      "brand": "BGH",
+      "model": "BSI35WCGT",
+      "series": "Silent Air Inverter",
+      "type": "Split de pared · frío/calor · Inverter",
+      "refrigerant": ""
+    },
+    {
+      "id": "bgh-bsi53wcgt",
+      "brand": "BGH",
+      "model": "BSI53WCGT",
+      "series": "Silent Air Inverter",
+      "type": "Split de pared · frío/calor · Inverter",
+      "refrigerant": ""
+    },
+    {
+      "id": "hitachi-hspe2700fcinv",
+      "brand": "Hitachi",
+      "model": "HSPE2700FCINV",
+      "series": "Neo Plus Inverter",
+      "type": "Split de pared · frío/calor · Inverter",
+      "refrigerant": "R410A"
+    },
+    {
+      "id": "hitachi-hspe6400fcinv",
+      "brand": "Hitachi",
+      "model": "HSPE6400FCINV",
+      "series": "Neo Plus Inverter",
+      "type": "Split de pared · frío/calor · Inverter",
+      "refrigerant": "R410A"
+    },
+    {
+      "id": "philco-96phin39hc2awfpi",
+      "brand": "Philco",
+      "model": "96PHIN39HC2AWFPI",
+      "series": "Pure Energy Inverter Wi-Fi",
+      "type": "Split de pared · frío/calor · Inverter",
+      "refrigerant": ""
+    },
+    {
+      "id": "philco-96phin90hc3awfpi",
+      "brand": "Philco",
+      "model": "96PHIN90HC3AWFPI",
+      "series": "Eco Plus Inverter Wi-Fi",
+      "type": "Split de pared · frío/calor · Inverter",
+      "refrigerant": ""
+    },
+    {
+      "id": "carrier-53tca1006",
+      "brand": "Carrier",
+      "model": "53TCA1006",
+      "series": "Modelo T",
+      "type": "Split de pared · frío solo",
+      "refrigerant": ""
+    },
+    {
+      "id": "carrier-53tca1306",
+      "brand": "Carrier",
+      "model": "53TCA1306",
+      "series": "Modelo T",
+      "type": "Split de pared · frío solo",
+      "refrigerant": ""
+    },
+    {
+      "id": "carrier-53hqv035",
+      "brand": "Carrier",
+      "model": "53HQV035",
+      "series": "XPower",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": ""
     }
   ]
 }
