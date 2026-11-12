@@ -1,0 +1,35 @@
+/* EYR Fuego & Hielo: catálogo técnico local y biblioteca de equipos por cliente */
+.eyr-catalog-intro{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center}
+.eyr-catalog-intro p{color:#b9d7ee;font-size:13px;max-width:750px;line-height:1.5;margin:4px 0}
+.eyr-catalog-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.eyr-catalog-tools input{flex:1 1 230px;min-width:0}
+.eyr-catalog-tools select{flex:0 0 170px;max-width:100%}
+.eyr-catalog-count{color:#9fe6ff;font-weight:700;font-size:12px;margin:8px 0 15px}
+.eyr-catalog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:13px}
+.eyr-model-card{display:flex;flex-direction:column;gap:12px;border:1px solid rgba(43,181,252,.52);background:linear-gradient(145deg,rgba(4,35,63,.97),rgba(9,19,40,.98));box-shadow:0 8px 20px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.04);border-radius:16px;padding:17px;min-width:0}
+.eyr-model-head{display:flex;align-items:center;justify-content:space-between;gap:7px}
+.eyr-model-brand{letter-spacing:.085em;font-weight:850;color:#88eaff;font-size:12px;text-transform:uppercase}
+.eyr-model-tag{border:1px solid rgba(0,213,255,.55);padding:3px 7px;border-radius:999px;color:#d4f5ff;background:rgba(5,83,126,.35);font-size:10px;font-weight:700}
+.eyr-model-card h3{font-size:18px;margin:0;overflow-wrap:anywhere;color:#fff}
+.eyr-model-card p{margin:0;font-size:12px;line-height:1.5;color:#b5cfe5}
+.eyr-model-specs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.eyr-model-specs>div{border-radius:9px;background:rgba(3,107,158,.25);padding:9px;min-width:0}
+.eyr-model-specs small{display:block;color:#afcedf;font-size:10px;margin-bottom:4px}
+.eyr-model-specs strong{display:block;color:#fff;font-size:13px;overflow-wrap:anywhere}
+.eyr-model-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:auto}
+.eyr-model-actions button{flex:1 1 100px}
+.eyr-model-detail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.eyr-model-detail>div{padding:11px;background:rgba(0,151,231,.11);border:1px solid rgba(45,163,224,.24);border-radius:10px;min-width:0}
+.eyr-model-detail span{display:block;color:#a9c8dc;font-size:11px;margin-bottom:5px}
+.eyr-model-detail strong{font-size:13px;color:#effcff;line-height:1.45;overflow-wrap:anywhere}
+.eyr-model-warning{border-left:3px solid #ffae51;background:rgba(245,141,35,.11);padding:10px 13px;border-radius:7px;line-height:1.45;color:#ffeacb;font-size:12px}
+.eyr-equipment-list{display:flex;flex-direction:column;gap:9px;margin:14px 0}
+.eyr-equipment-card{border:1px solid rgba(26,174,240,.5);background:rgba(5,43,75,.78);padding:13px 14px;border-radius:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.eyr-equipment-card strong{display:block;color:#ecfaff;font-size:14px}.eyr-equipment-card small{display:block;color:#bdd7e8;font-size:12px;margin-top:4px}
+.eyr-equipment-actions{display:flex;gap:6px;flex-wrap:wrap}
+.eyr-catalog-footer{color:#b7cfdf;font-size:12px;line-height:1.55;margin-top:15px}
+.eyr-catalog-client-cta{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap;background:rgba(5,56,92,.45);padding:12px;border-radius:12px;border:1px solid rgba(35,181,243,.3);margin-top:15px}
+.eyr-catalog-source{display:inline-flex;align-items:center;gap:5px;color:#84e7ff!important;text-decoration:underline;text-underline-offset:3px;font-weight:700}
+.eyr-catalog-new{border:1px dashed rgba(64,185,255,.6);border-radius:14px;padding:15px;margin-top:20px;background:rgba(4,25,53,.74)}
+.eyr-catalog-empty{margin:12px 0;color:#c9e4f6}
+@media(max-width:600px){.eyr-catalog-tools select{flex:1 1 120px}.eyr-model-detail{grid-template-columns:1fr 1fr}.eyr-equipment-actions{width:100%}}

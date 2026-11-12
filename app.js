@@ -7,8 +7,8 @@ const DEFAULT_SETTINGS = {
  validity:15, conditions:'La fecha y horario de ejecución se coordinarán previamente con el cliente.\nLos trabajos se realizarán siguiendo los procedimientos técnicos y medidas de seguridad aplicables a cada intervención.',
  lastNumber:0, lastRemitoNumber:0
 };
-const blankDB = () => ({version:3,clients:[],visits:[],quotes:[],remitos:[],serviceTemplates:[],settings:{...DEFAULT_SETTINGS}});
-function load(){try {const raw=JSON.parse(localStorage.getItem(KEY));if(!raw||!Array.isArray(raw.clients)||!Array.isArray(raw.visits)||!Array.isArray(raw.quotes))throw Error('incompatible');return {...blankDB(),...raw,remitos:Array.isArray(raw.remitos)?raw.remitos:[],serviceTemplates:Array.isArray(raw.serviceTemplates)?raw.serviceTemplates:[],settings:{...DEFAULT_SETTINGS,...raw.settings,lastRemitoNumber:Math.max(Number(raw.settings?.lastRemitoNumber)||0,...(Array.isArray(raw.remitos)?raw.remitos:[]).map(x=>Number(x.number)||0))}}}catch{return blankDB()}}
+const blankDB = () => ({version:4,clients:[],visits:[],quotes:[],remitos:[],serviceTemplates:[],equipment:[],catalogOnline:[],catalogUpdatedAt:'',settings:{...DEFAULT_SETTINGS}});
+function load(){try {const raw=JSON.parse(localStorage.getItem(KEY));if(!raw||!Array.isArray(raw.clients)||!Array.isArray(raw.visits)||!Array.isArray(raw.quotes))throw Error('incompatible');return {...blankDB(),...raw,remitos:Array.isArray(raw.remitos)?raw.remitos:[],serviceTemplates:Array.isArray(raw.serviceTemplates)?raw.serviceTemplates:[],equipment:Array.isArray(raw.equipment)?raw.equipment:[],catalogOnline:Array.isArray(raw.catalogOnline)?raw.catalogOnline:[],settings:{...DEFAULT_SETTINGS,...raw.settings,lastRemitoNumber:Math.max(Number(raw.settings?.lastRemitoNumber)||0,...(Array.isArray(raw.remitos)?raw.remitos:[]).map(x=>Number(x.number)||0))}}}catch{return blankDB()}}
 let db=load(), page='inicio', draft=null, search='', filter='todos', agendaView='lista', calendarMonth=null, calendarMode='mes', calendarSelectedDate=null, remitoDraft=null;
 const navHistory=[];
 function rememberScreen(){if(page && navHistory[navHistory.length-1]!==page)navHistory.push(page)}
@@ -57,7 +57,7 @@ function returnToPreviousScreen(){
  return false;
 }
 window.EYRGoBack=returnToPreviousScreen;
-function render(){document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));const view=$('#view');view.innerHTML=`<div class="page">${page==='inicio'?home():page==='agenda'?agenda():page==='presupuestos'?quotes():page==='clientes'?clients():page==='configuracion'?settings():page==='remitos'?remitos():page==='frecuentes'?frecuentes():page==='editar-remito'?remitoForm():page==='editar-presupuesto'?quoteForm():home()}</div>`}
+function render(){document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));const view=$('#view');view.innerHTML=`<div class="page">${page==='inicio'?home():page==='agenda'?agenda():page==='presupuestos'?quotes():page==='clientes'?clients():page==='configuracion'?settings():page==='remitos'?remitos():page==='frecuentes'?frecuentes():page==='catalogo'?catalogo():page==='editar-remito'?remitoForm():page==='editar-presupuesto'?quoteForm():home()}</div>`}
 function home(){
  const pending=db.visits.filter(v=>['pendiente','confirmada'].includes(v.status)).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
  const sent=db.quotes.filter(q=>q.status==='enviado').length, month=isoToday().slice(0,7);
@@ -65,6 +65,7 @@ function home(){
  return `<div class="hero-eyr"><picture><source media="(max-width: 600px)" srcset="assets/banner-mobile.jpg"><img src="assets/banner-eyr.jpg" alt="EYR Refrigeración: fuego, hielo y dos técnicos con anteojos azules y la frase Es una app de Orellana.. no la entenderías!"></picture></div>
   <div class="eyr-welcome"><h1>❄️ ¡Hola, Orellana! ❄️</h1><p>${new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p><div class="welcome-glow"></div></div>
   <div class="quick-grid" aria-label="Accesos directos"><button type="button" class="quick-card warm" data-page="agenda"><span class="quick-icon">📅</span><span class="quick-name">Agenda de visitas</span></button><button type="button" class="quick-card" data-page="presupuestos"><span class="quick-icon">📄</span><span class="quick-name">Presupuestos</span></button><button type="button" class="quick-card warm" data-page="remitos"><span class="quick-icon">📦</span><span class="quick-name">Remitos</span></button><button type="button" class="quick-card" data-page="clientes"><span class="quick-icon">👥</span><span class="quick-name">Clientes</span></button><button type="button" class="quick-card warm" data-page="frecuentes"><span class="quick-icon">🛠️</span><span class="quick-name">Trabajos frecuentes</span></button><button type="button" class="quick-card" data-page="configuracion"><span class="quick-icon">⚙️</span><span class="quick-name">Configuración</span></button></div>
+  <div class="eyr-catalog-feature"><div><h2>📚 Catálogo técnico EYR</h2><p>Buscá modelos, refrigerantes, dimensiones, cañerías y fichas oficiales. Disponible sin conexión.</p></div><button class="btn btn-primary" data-page="catalogo">Ver catálogo técnico</button></div>
   <div class="stat-grid"><div class="stat"><div class="stat-label">Visitas pendientes</div><strong>${pending.length}</strong><span>Por realizar</span></div><div class="stat"><div class="stat-label">Presupuestos del mes</div><strong>${monthly}</strong><span>${new Date().toLocaleDateString('es-AR',{month:'long',year:'numeric'})}</span></div><div class="stat"><div class="stat-label">Enviados</div><strong>${sent}</strong><span>En seguimiento</span></div></div>
  <div class="grid-2"><section class="panel"><div class="panel-head"><h2>Próximas visitas</h2><button class="btn btn-small" data-page="agenda">Ver agenda</button></div>${pending.length?`<div class="item-list">${pending.slice(0,5).map(v=>visitCard(v,true)).join('')}</div>`:empty('Agenda libre','Agregá una visita para empezar a organizar tus trabajos.')}</section>
  <section class="panel"><div class="panel-head"><h2>Últimos presupuestos</h2><button class="btn btn-small" data-page="presupuestos">Ver todos</button></div>${db.quotes.length?`<div class="item-list">${[...db.quotes].sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,4).map(quoteCard).join('')}</div>`:empty('Todavía no hay presupuestos','Creá el primero y generá un PDF con la identidad de EYR.')}</section></div>`
@@ -141,7 +142,7 @@ function clientHistory(id){
   const action=type==='visita'?'visit-detail':type==='presupuesto'?'preview-quote':'preview-remito';
   return '<button type="button" class="eyr-history-event" data-action="'+action+'" data-id="'+esc(v.id)+'"><span>'+esc(dateText(x.date))+'</span><strong>'+esc(title)+'</strong><small>'+esc(detail)+'</small></button>';
  }).join('');
- const body='<div class="eyr-history-header"><b>'+esc(c.name)+'</b><small>'+visits.length+' visitas · '+quotes.length+' presupuestos · '+remitos.length+' remitos</small><p>'+esc([c.address,c.phone,c.cuit].filter(Boolean).join(' · '))+'</p></div><div class="eyr-history-timeline">'+(rows||empty('Sin antecedentes','Los servicios y documentos que vayas registrando se mostrarán aquí.'))+'</div><div class="form-actions"><button class="btn btn-blue" data-action="new-visit-client" data-id="'+esc(c.id)+'">+ Visita</button><button class="btn" data-action="quote-from-client" data-id="'+esc(c.id)+'">+ Presupuesto</button><button class="btn" data-action="remito-from-client" data-id="'+esc(c.id)+'">+ Remito</button></div>';
+ const body='<div class="eyr-history-header"><b>'+esc(c.name)+'</b><small>'+visits.length+' visitas · '+quotes.length+' presupuestos · '+remitos.length+' remitos · '+equipmentForClient(c.id).length+' equipos</small><p>'+esc([c.address,c.phone,c.cuit].filter(Boolean).join(' · '))+'</p></div><div class="eyr-catalog-client-cta"><span>❄️ Equipos del cliente: <strong>'+equipmentForClient(c.id).length+'</strong></span><button class="btn btn-small btn-blue" data-action="client-equipment" data-id="'+esc(c.id)+'">Ver equipos</button></div><div class="eyr-history-timeline">'+(rows||empty('Sin antecedentes','Los servicios y documentos que vayas registrando se mostrarán aquí.'))+'</div><div class="form-actions"><button class="btn btn-blue" data-action="new-visit-client" data-id="'+esc(c.id)+'">+ Visita</button><button class="btn" data-action="quote-from-client" data-id="'+esc(c.id)+'">+ Presupuesto</button><button class="btn" data-action="remito-from-client" data-id="'+esc(c.id)+'">+ Remito</button></div>';
  modal('Historial técnico · '+c.name,body,true);
 }
 function templateOptions(){
@@ -174,8 +175,110 @@ function visitQuoteList(v){
  return list?'<div class="visit-detail-row"><span>📄 Presupuestos vinculados</span><div class="eyr-related-links">'+list+'</div></div>':'';
 }
 
-function clientCard(c){let count=db.quotes.filter(q=>recordClientMatches(q,c)).length;return `<div class="list-item"><div class="item-main"><strong>${esc(c.name)}</strong><small>${[c.phone,c.address,c.cuit].filter(Boolean).map(esc).join(' · ')||'Sin datos adicionales'}</small><small>${count} presupuesto${count===1?'':'s'}</small></div><div class="item-actions"><button class="btn btn-small btn-primary" data-action="client-history" data-id="${c.id}">🕒 Historial técnico</button><button class="btn btn-small btn-blue" data-action="quote-from-client" data-id="${c.id}">Presupuestar</button><button class="btn btn-small" data-action="remito-from-client" data-id="${c.id}">Remito</button><button class="btn btn-small" data-action="edit-client" data-id="${c.id}">Editar</button><button class="btn btn-small btn-danger" data-action="delete-client" data-id="${c.id}">Eliminar</button></div></div>`}
-function clients(){const arr=db.clients.filter(c=>(c.name+' '+c.phone+' '+c.cuit).toLowerCase().includes(search.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name));return `${headings('Clientes','Historial técnico de cada cliente: visitas, presupuestos y remitos en un mismo lugar.','<button class="btn btn-primary" data-action="new-client">+ Nuevo cliente</button>')}<section class="panel"><div class="searchbar"><input id="search-list" placeholder="Buscar por nombre, teléfono o CUIT" value="${esc(search)}" aria-label="Buscar clientes"></div><div id="list-results">${arr.length?`<div class="item-list">${arr.map(clientCard).join('')}</div>`:empty('Sin clientes','Agregá el primer cliente o crealo desde un presupuesto.')}</div></section>`}
+/* EYR Catálogo técnico — datos técnicos contrastados por modelo; cliente/equipo locales. */
+let catalogQuery='',catalogBrand='todas',catalogClientId='';
+const catalogRemoteUrl='https://y0t3.github.io/EYR-Refrigeracion/catalogo-modelos.json';
+function officialCatalogUrl(url){
+ try{const u=new URL(String(url||''));return u.protocol==='https:'&&['www.samsung.com','samsung.com','www.lg.com','lg.com','www.bgh.com.ar','bgh.com.ar'].includes(u.hostname)?u.href:''}
+ catch{return ''}
+}
+function validCatalogModel(m){
+ return m&&typeof m==='object'&&/^[a-z0-9][a-z0-9_-]{3,90}$/.test(m.id||'')&&typeof m.brand==='string'&&m.brand.length<70&&typeof m.model==='string'&&m.model.length<100&&!!officialCatalogUrl(m.url);
+}
+function catalogItems(){
+ const list=new Map();
+ for(const m of window.EYR_CATALOG_BASE?.models||[])if(validCatalogModel(m))list.set(m.id,m);
+ for(const m of db.catalogOnline||[])if(validCatalogModel(m))list.set(m.id,m);
+ return [...list.values()].sort((a,b)=>a.brand.localeCompare(b.brand,'es')||a.model.localeCompare(b.model,'es'));
+}
+function findCatalogModel(id){return catalogItems().find(x=>x.id===id)||null}
+function catalogMatches(){
+ const needle=catalogQuery.toLocaleLowerCase('es-AR').trim(),all=catalogItems();
+ return all.filter(m=>(catalogBrand==='todas'||m.brand===catalogBrand)&&(!needle||[m.brand,m.model,m.series,m.refrigerant,m.type].join(' ').toLocaleLowerCase('es-AR').includes(needle)));
+}
+function catalogCard(m){
+ const online=!!officialCatalogUrl(m.url);
+ return `<article class="eyr-model-card"><div class="eyr-model-head"><span class="eyr-model-brand">${esc(m.brand)}</span><span class="eyr-model-tag">${online?'Fuente oficial':'Sin verificar'}</span></div><h3>${esc(m.model)}</h3><p>${esc(m.series||m.type||'Aire acondicionado')}</p><div class="eyr-model-specs"><div><small>Refrigerante</small><strong>${esc(m.refrigerant||'Sin verificar')}</strong></div><div><small>Capacidad frío</small><strong>${esc(m.coolingBTU||m.coolingKW||'Sin verificar')}</strong></div><div><small>Unidad interior (An. × Al. × Prof.)</small><strong>${esc(m.indoorSize||'Sin verificar')}</strong></div><div><small>Cañería gas</small><strong>${esc(m.gasPipe||'Sin verificar')}</strong></div></div><div class="eyr-model-actions"><button class="btn btn-small btn-blue" data-action="catalog-detail" data-id="${esc(m.id)}">📖 Ficha técnica</button><button class="btn btn-small btn-primary" data-action="catalog-associate" data-id="${esc(m.id)}">+ Asociar</button></div></article>`;
+}
+function catalogResults(){
+ const items=catalogMatches();
+ return `<p class="eyr-catalog-count">${items.length} ${items.length===1?'modelo encontrado':'modelos encontrados'} · ${catalogItems().length} fichas disponibles sin conexión</p><div class="eyr-catalog-grid">${items.map(catalogCard).join('')}</div>${items.length?'':`<div class="eyr-catalog-new"><p class="eyr-catalog-empty">No encontramos ese modelo exacto. Podés asociarlo a un cliente manualmente, sin inventar sus especificaciones.</p><button type="button" class="btn btn-blue" data-action="catalog-manual">+ Registrar equipo sin ficha</button></div>`}`;
+}
+function catalogo(){
+ const all=catalogItems(),brands=[...new Set(all.map(x=>x.brand))].sort((a,b)=>a.localeCompare(b,'es'));
+ const who=catalogClientId?db.clients.find(c=>c.id===catalogClientId):null;
+ return `${headings('Catálogo técnico','Modelos exactos y especificaciones verificadas en páginas oficiales de fabricantes.')}
+ <section class="panel"><div class="eyr-catalog-intro"><div><h2>❄️ Biblioteca técnica EYR</h2><p>Consultá refrigerantes, capacidades, dimensiones, conexiones y fuentes. Los modelos ya descargados funcionan sin Internet. Antes de intervenir, confirmá el modelo y la placa del equipo.</p></div><button class="btn btn-small btn-blue" data-action="catalog-update">↻ Buscar actualizaciones</button></div>
+ ${who?`<div class="eyr-catalog-client-cta"><span>Asociando a: <strong>${esc(who.name)}</strong></span><button class="btn btn-small" data-action="catalog-clear-client">Quitar selección</button></div>`:''}
+ <div class="eyr-catalog-tools"><input id="catalog-search" autocomplete="off" placeholder="Buscar marca o código exacto de modelo…" aria-label="Buscar modelos" value="${esc(catalogQuery)}"><select id="catalog-brand" aria-label="Filtrar marca"><option value="todas">Todas las marcas</option>${brands.map(x=>`<option value="${esc(x)}" ${catalogBrand===x?'selected':''}>${esc(x)}</option>`).join('')}</select></div>
+ <div id="catalog-results">${catalogResults()}</div>
+ <div class="eyr-catalog-new"><strong>¿El equipo no aparece?</strong><p class="eyr-catalog-footer">Buscalo en el fabricante o registralo para el cliente sin completar datos técnicos no verificados. Podremos ampliar las fichas oficiales desde GitHub sin reinstalar la APK.</p><div class="eyr-model-actions"><button class="btn btn-small" data-action="catalog-manual">+ Registrar equipo manual</button><button class="btn btn-small" data-action="catalog-find-web">🔎 Buscar modelo en Internet</button></div></div>
+ <p class="eyr-catalog-footer">Última revisión incluida: ${esc(window.EYR_CATALOG_BASE?.updated||'—')} · Actualización local: ${esc(db.catalogUpdatedAt||'No consultada')} · Fuentes: fichas oficiales Samsung y LG. Las especificaciones pueden variar por región, lote y sufijo.</p></section>`;
+}
+function catalogSpecGrid(m){
+ const specs=[['Marca',m.brand],['Modelo exacto',m.model],['Línea',m.series],['Tipo',m.type],['Refrigerante',m.refrigerant],['Capacidad frío (kW)',m.coolingKW],['Capacidad frío (BTU/h)',m.coolingBTU],['Unidad interior · An × Al × Prof',m.indoorSize],['Unidad exterior · An × Al × Prof',m.outdoorSize],['Peso unidad interior',m.indoorWeight],['Peso unidad exterior',m.outdoorWeight],['Conexión líquido',m.liquidPipe],['Conexión gas',m.gasPipe],['Tubería máxima',m.maxPipe],['Desnivel máximo',m.maxElevation],['Alimentación eléctrica',m.electrical]];
+ return `<div class="eyr-model-detail">${specs.map(([name,v])=>`<div><span>${esc(name)}</span><strong>${esc(v||'No verificado')}</strong></div>`).join('')}</div>`;
+}
+function catalogDetail(id){
+ const m=findCatalogModel(id);if(!m){toast('No se encontró la ficha de ese modelo.');return}
+ const source=officialCatalogUrl(m.url);
+ modal('Ficha técnica · '+m.model,`<p class="eyr-model-warning">Los datos corresponden al modelo exacto <strong>${esc(m.model)}</strong>. Para intervenir, verificá la placa, el manual y las instrucciones de seguridad. Un código parecido puede usar otro refrigerante o cañería.</p>${catalogSpecGrid(m)}${m.notes?`<p class="eyr-catalog-footer">🛠 ${esc(m.notes)}</p>`:''}${source?`<p><a class="eyr-catalog-source" target="_blank" rel="noopener noreferrer" href="${esc(source)}">🌐 Ver ficha oficial y documentación del fabricante</a></p>`:''}<div class="form-actions"><button class="btn btn-primary" data-action="catalog-associate" data-id="${esc(m.id)}">+ Vincular a cliente</button><button class="btn" data-action="close-modal">Cerrar</button></div>`,true);
+}
+function equipmentForClient(clientId){return (db.equipment||[]).filter(x=>x.clientId===clientId)}
+function equipmentName(item){return (item.brand||'Equipo')+' '+(item.model||'sin modelo')}
+function equipmentModel(item){return findCatalogModel(item.catalogId)||item.specSnapshot||null}
+function clientEquipmentCards(clientId){
+ const list=equipmentForClient(clientId);
+ return `<div class="eyr-equipment-list">${list.map(item=>`<div class="eyr-equipment-card"><div><strong>❄️ ${esc(equipmentName(item))}</strong><small>${esc(item.location||'Sin ubicación')}${item.serial?' · Serie: '+esc(item.serial):''}</small><small>${equipmentModel(item)?'Ficha técnica disponible':'Modelo anotado; ficha pendiente de verificar'}</small></div><div class="eyr-equipment-actions"><button type="button" class="btn btn-small btn-blue" data-action="equipment-detail" data-id="${esc(item.id)}">Ficha</button><button type="button" class="btn btn-small" data-action="equipment-edit" data-id="${esc(item.id)}">Editar</button></div></div>`).join('')||empty('Sin equipos registrados','Podés agregar los equipos de este cliente desde el Catálogo técnico.')}</div>`;
+}
+function clientEquipments(id){
+ const c=db.clients.find(x=>x.id===id);if(!c)return;
+ modal('Equipos · '+c.name,`<p class="eyr-catalog-footer">Equipos registrados para este cliente. Podés consultar sus datos y asociarlos a visitas.</p>${clientEquipmentCards(id)}<div class="form-actions"><button class="btn btn-primary" data-action="catalog-for-client" data-id="${esc(c.id)}">📚 Buscar equipo en catálogo</button><button class="btn" data-action="equipment-manual" data-id="${esc(c.id)}">+ Equipo manual</button></div>`,true);
+}
+function equipmentModal(equipmentId,catalogId,preselectedClientId){
+ const old=(db.equipment||[]).find(x=>x.id===equipmentId);
+ const model=findCatalogModel(catalogId||old?.catalogId)||old?.specSnapshot||null;
+ if(!old&&!model&&!preselectedClientId&&db.clients.length===0){toast('Primero registrá un cliente para asociarle el equipo.');setPage('clientes');return}
+ const item=old||{id:'',clientId:preselectedClientId||catalogClientId||'',catalogId:catalogId||'',brand:model?.brand||'',model:model?.model||'',location:'',serial:'',installedAt:'',notes:''};
+ const fromCatalog=!!(model||item.catalogId);
+ const clients=db.clients.slice().sort((a,b)=>a.name.localeCompare(b.name,'es'));
+ const clientsHTML=`<div class="field full"><label>Cliente *</label><select name="clientId" required><option value="">Elegir cliente</option>${clients.map(c=>`<option value="${esc(c.id)}" ${item.clientId===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select></div>`;
+ const details=fromCatalog?`<div class="field full"><label>Equipo seleccionado</label><strong>${esc(equipmentName({brand:model?.brand||item.brand,model:model?.model||item.model}))}</strong><small>Las especificaciones técnicas se toman de la ficha verificada.</small></div>`:`${field('brand','Marca',item.brand,'','text','required')}${field('model','Código de modelo (etiqueta)',item.model,'','text','required')}`;
+ modal(old?'Editar equipo del cliente':'Asociar equipo a cliente',`<form id="equipment-form" data-id="${esc(item.id||'')}" data-catalog-id="${esc(model?.id||item.catalogId||'')}"><div class="form-grid">${clientsHTML}${details}${field('location','Ubicación (ej. dormitorio, cocina)',item.location,'full')}${field('serial','Número de serie (opcional)',item.serial,'full')}${field('installedAt','Fecha de instalación (opcional)',item.installedAt,'','date')}${area('notes','Observaciones particulares',item.notes,'full',3)}</div><p class="eyr-catalog-footer">Identificación por modelo: confirmá el código completo de la placa antes de usar especificaciones técnicas.</p><div class="form-actions"><button type="button" class="btn" data-action="close-modal">Cancelar</button><button type="submit" class="btn btn-primary">Guardar equipo</button></div></form>`,true);
+}
+function equipmentDetail(id){
+ const item=(db.equipment||[]).find(x=>x.id===id);if(!item)return;
+ const c=db.clients.find(x=>x.id===item.clientId),m=equipmentModel(item);
+ const visits=db.visits.filter(v=>v.equipmentId===item.id).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+ modal('Equipo · '+equipmentName(item),`<div class="eyr-history-header"><b>${esc(equipmentName(item))}</b><small>Cliente: ${esc(c?.name||'No encontrado')} · ${esc(item.location||'Ubicación no informada')}</small><p>${item.serial?'N.º de serie: '+esc(item.serial):'Sin número de serie'}${item.installedAt?' · Instalación: '+esc(dateText(item.installedAt)):''}</p></div>${item.notes?`<p class="eyr-catalog-footer">📝 ${esc(item.notes)}</p>`:''}${m?catalogSpecGrid(m):'<p class="eyr-model-warning">Equipo cargado manualmente. No se conocen aún las especificaciones del fabricante para este código.</p>'}${m&&officialCatalogUrl(m.url)?`<p><a class="eyr-catalog-source" target="_blank" rel="noopener noreferrer" href="${esc(officialCatalogUrl(m.url))}">🌐 Fuente técnica oficial</a></p>`:''}<h3>Historial de visitas de este equipo</h3>${visits.length?`<div class="eyr-history-timeline">${visits.map(v=>`<button class="eyr-history-event" data-action="visit-detail" data-id="${esc(v.id)}"><span>${esc(dateText(v.date))}</span><strong>${esc(v.description)}</strong></button>`).join('')}</div>`:empty('Sin intervenciones registradas','Cuando vinculás este equipo a una visita, su historial aparece aquí.')}<div class="form-actions"><button class="btn btn-blue" data-action="equipment-edit" data-id="${esc(item.id)}">Editar</button><button class="btn btn-primary" data-action="equipment-visit" data-id="${esc(item.id)}">+ Agendar visita</button><button class="btn btn-danger" data-action="equipment-delete" data-id="${esc(item.id)}">Eliminar equipo</button></div>`,true);
+}
+function equipmentVisit(id){
+ const item=(db.equipment||[]).find(x=>x.id===id);if(!item)return;
+ const c=db.clients.find(x=>x.id===item.clientId);closeModal();visitModal();
+ const form=$('#visit-form');if(!form)return;
+ if(c){form.elements.namedItem('clientId').value=c.id;form.elements.namedItem('client').value=c.name;form.elements.namedItem('address').value=c.address||''}
+ const el=form.elements.namedItem('equipmentId');if(el){el.innerHTML='<option value="">Sin equipo asociado</option>'+equipmentForClient(item.clientId).map(e=>'<option value="'+esc(e.id)+'">'+esc(equipmentName(e)+' · '+(e.location||'Sin ubicación'))+'</option>').join('');el.value=item.id;}
+ const desc=form.elements.namedItem('description');if(desc)desc.value='Servicio de '+equipmentName(item)+(item.location?' · '+item.location:'');
+}
+function catalogWebSearch(){
+ const query=catalogQuery.trim();
+ const u='https://www.google.com/search?q='+encodeURIComponent((query||'aire acondicionado split')+' ficha técnica manual site:samsung.com OR site:lg.com OR site:bgh.com.ar');
+ window.open(u,'_blank','noopener,noreferrer');
+}
+async function catalogUpdate(){
+ toast('Consultando catálogo actualizado…');
+ try{
+  const resp=await fetch(catalogRemoteUrl+'?t='+Date.now(),{cache:'no-store'});
+  if(!resp.ok)throw new Error('Error de conexión '+resp.status);
+  const doc=await resp.json();
+  if(doc.schema!==1||!Array.isArray(doc.models)||doc.models.length>600||!doc.models.length)throw new Error('Archivo de catálogo no válido');
+  const models=doc.models.filter(validCatalogModel).map(m=>Object.fromEntries(Object.entries(m).filter(([k,v])=>['id','brand','model','series','type','refrigerant','coolingKW','coolingBTU','indoorSize','outdoorSize','indoorWeight','outdoorWeight','liquidPipe','gasPipe','maxPipe','maxElevation','electrical','notes','url'].includes(k)&&typeof v==='string'&&v.length<=500)));
+  if(models.length!==doc.models.length)throw new Error('Modelos sin fuente oficial o con formato incorrecto');
+  db.catalogOnline=models;db.catalogUpdatedAt=String(doc.updated||isoToday()).slice(0,32);save();render();toast('Catálogo actualizado: '+catalogItems().length+' fichas disponibles.');
+ }catch(e){console.warn('Catalog update:',e);toast('Sin actualización disponible. Las fichas guardadas siguen funcionando sin Internet.')}
+}
+function clientCard(c){let count=db.quotes.filter(q=>recordClientMatches(q,c)).length;const equipmentCount=equipmentForClient(c.id).length;return `<div class="list-item"><div class="item-main"><strong>${esc(c.name)}</strong><small>${[c.phone,c.address,c.cuit].filter(Boolean).map(esc).join(' · ')||'Sin datos adicionales'}</small><small>${count} presupuesto${count===1?'':'s'} · ${equipmentCount} equipo${equipmentCount===1?'':'s'}</small></div><div class="item-actions"><button class="btn btn-small btn-blue" data-action="client-equipment" data-id="${c.id}">❄️ Equipos</button><button class="btn btn-small btn-primary" data-action="client-history" data-id="${c.id}">🕒 Historial técnico</button><button class="btn btn-small btn-blue" data-action="quote-from-client" data-id="${c.id}">Presupuestar</button><button class="btn btn-small" data-action="remito-from-client" data-id="${c.id}">Remito</button><button class="btn btn-small" data-action="edit-client" data-id="${c.id}">Editar</button><button class="btn btn-small btn-danger" data-action="delete-client" data-id="${c.id}">Eliminar</button></div></div>`}
+function clients(){const arr=db.clients.filter(c=>(c.name+' '+c.phone+' '+c.cuit).toLowerCase().includes(search.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name));return `${headings('Clientes','Visitas, presupuestos, remitos y equipos registrados en un mismo lugar.','<button class="btn btn-primary" data-action="new-client">+ Nuevo cliente</button>')}<section class="panel"><div class="searchbar"><input id="search-list" placeholder="Buscar por nombre, teléfono o CUIT" value="${esc(search)}" aria-label="Buscar clientes"></div><div id="list-results">${arr.length?`<div class="item-list">${arr.map(clientCard).join('')}</div>`:empty('Sin clientes','Agregá el primer cliente o crealo desde un presupuesto.')}</div></section>`}
 function settings(){let s=db.settings;return `${headings('Configuración','Datos fijos de EYR y respaldo de información.')}
  <div class="grid-2"><form class="panel" id="settings-form"><div class="panel-head"><h2>Datos para los PDF</h2></div><div class="form-grid">${field('business','Nombre comercial',s.business,'full')}${field('cuit','CUIT',s.cuit)}${field('tax','Condición fiscal',s.tax)}${field('address','Domicilio',s.address,'full')}${field('phone','Teléfono',s.phone,'full')}${field('validity','Validez habitual (días)',s.validity,'','number')}${area('conditions','Condiciones predeterminadas',s.conditions,'full')}</div><div class="form-actions"><button class="btn btn-primary" type="submit">Guardar cambios</button></div></form>
  <div><section class="panel"><h2>Identidad EYR</h2><img style="width:100%;max-width:250px;display:block;margin:10px auto;border-radius:15px" src="assets/logo-marca.jpg" alt="Nuevo logo de EYR Refrigeración"><p>Identidad EYR: ícono azul para la app y logo con fondo blanco exclusivo para los presupuestos formales.</p></section><section class="panel" style="margin-top:17px"><h2>Copias de seguridad</h2><p>Los datos permanecen en este dispositivo. En Android podés guardar automáticamente un archivo JSON en Descargas/EYR Refrigeracion cada vez que cambien los registros.</p><label class="eyr-check"><input type="checkbox" form="settings-form" name="autoBackup" ${s.autoBackup!==false?'checked':''}> Respaldo automático local (Android)</label><p class="footnote">El respaldo se actualiza en el mismo celular; para protegerte ante pérdida o rotura, exportá también una copia a otro lugar seguro.</p><div class="btn-row"><button class="btn btn-blue" data-action="export">↓ Exportar copia</button><button class="btn" data-action="choose-import">↑ Importar copia</button></div><input id="import-json" type="file" accept="application/json,.json" hidden><p class="footnote">Importar reemplaza los datos actuales. Hacé una copia antes de cambiar de celular o borrar el navegador.</p></section></div></div>`}
@@ -221,11 +324,11 @@ function persistQuote(){grabDraft();if(!validateQuote(draft))return null;const q
 function modal(title,body,large=false){$('#modal-root').innerHTML=`<div class="modal-backdrop" data-action="backdrop-close"><div class="modal ${large?'large':''}" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="modal-head"><h2>${esc(title)}</h2><button class="close" data-action="close-modal" aria-label="Cerrar">×</button></div>${body}</div></div>`}
 function closeModal(){$('#modal-root').innerHTML=''}
 function clientModal(id){const c=db.clients.find(x=>x.id===id)||{id:'',name:'',phone:'',cuit:'',iva:'',address:'',notes:''};modal(c.id?'Editar cliente':'Nuevo cliente',`<form id="client-form" data-id="${c.id}"><div class="form-grid">${field('name','Nombre / razón social',c.name,'full','text','required')}${field('phone','Teléfono',c.phone)}${field('cuit','CUIT / DNI',c.cuit)}${field('iva','Condición frente al IVA (opcional)',c.iva||'')}${field('address','Domicilio',c.address,'full')}${area('notes','Observaciones internas',c.notes,'full',3)}</div><div class="form-actions"><button type="button" class="btn" data-action="close-modal">Cancelar</button><button class="btn btn-primary" type="submit">Guardar cliente</button></div></form>`)}
-function visitModal(id,initialDate){const v=db.visits.find(x=>x.id===id)||{id:'',clientId:'',client:'',date:initialDate||isoToday(),time:'09:00',address:'',description:'',status:'pendiente',notes:'',reminderMinutes:60};const clientOpts=`<option value="">Cliente no guardado</option>${db.clients.map(c=>`<option value="${c.id}" ${v.clientId===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}`;modal(v.id?'Editar visita':'Nueva visita',`<form id="visit-form" data-id="${v.id}"><div class="form-grid"><div class="field full"><label for="f-visitClientId">Cliente guardado (opcional)</label><select name="clientId" id="f-visitClientId">${clientOpts}</select></div>${field('client','Cliente',v.client,'full','text','required')}${field('date','Fecha',v.date,'','date','required')}${field('time','Hora',v.time,'','time','required')}${field('address','Domicilio',v.address,'full')}<p class="address-hint">Para ubicarlo mejor en el mapa, indicá calle, número, localidad y provincia.</p><div class="field full"><label>Descripción frecuente</label><div class="eyr-picker"><select id="template-visit">${templateOptions()}</select><button type="button" class="btn btn-small btn-blue" data-action="use-template-visit">Usar</button></div></div>${field('description','Trabajo / motivo',v.description,'full','text','required')}<div class="field full"><label for="f-status">Estado</label><select name="status" id="f-status">${['pendiente','confirmada','realizada','cancelada'].map(x=>`<option value="${x}" ${v.status===x?'selected':''}>${statusLabel[x]}</option>`).join('')}</select></div>${area('notes','Notas internas',v.notes,'full',3)}<div class="field full"><label>Recordatorio en el celular (Android)</label><select name="reminderMinutes"><option value="0" ${!Number(v.reminderMinutes)?"selected":""}>Sin recordatorio</option><option value="60" ${Number(v.reminderMinutes)===60?"selected":""}>1 hora antes</option><option value="1440" ${Number(v.reminderMinutes)===1440?"selected":""}>24 horas antes</option></select><small>Android puede retrasar el aviso si está activado el ahorro de batería.</small></div></div><div class="form-actions">${v.id?`<button type="button" class="btn btn-danger" data-action="delete-visit" data-id="${v.id}">Eliminar</button>`:''}<button type="button" class="btn" data-action="close-modal">Cancelar</button><button class="btn btn-primary" type="submit">Guardar visita</button></div></form>`)}
+function visitModal(id,initialDate){const v=db.visits.find(x=>x.id===id)||{id:'',clientId:'',client:'',date:initialDate||isoToday(),time:'09:00',address:'',description:'',status:'pendiente',notes:'',reminderMinutes:60,equipmentId:''};const clientOpts=`<option value="">Cliente no guardado</option>${db.clients.map(c=>`<option value="${c.id}" ${v.clientId===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}`;modal(v.id?'Editar visita':'Nueva visita',`<form id="visit-form" data-id="${v.id}"><div class="form-grid"><div class="field full"><label for="f-visitClientId">Cliente guardado (opcional)</label><select name="clientId" id="f-visitClientId">${clientOpts}</select></div>${field('client','Cliente',v.client,'full','text','required')}${field('date','Fecha',v.date,'','date','required')}${field('time','Hora',v.time,'','time','required')}${field('address','Domicilio',v.address,'full')}<div class="field full"><label>Equipo del cliente (opcional)</label><select name="equipmentId" id="visit-equipment-id"><option value="">Sin equipo asociado</option>${equipmentForClient(v.clientId).map(item=>`<option value="${esc(item.id)}" ${v.equipmentId===item.id?'selected':''}>${esc(equipmentName(item))} · ${esc(item.location||'Sin ubicación')}</option>`).join('')}</select><small>Seleccioná primero un cliente guardado para ver sus equipos.</small></div><p class="address-hint">Para ubicarlo mejor en el mapa, indicá calle, número, localidad y provincia.</p><div class="field full"><label>Descripción frecuente</label><div class="eyr-picker"><select id="template-visit">${templateOptions()}</select><button type="button" class="btn btn-small btn-blue" data-action="use-template-visit">Usar</button></div></div>${field('description','Trabajo / motivo',v.description,'full','text','required')}<div class="field full"><label for="f-status">Estado</label><select name="status" id="f-status">${['pendiente','confirmada','realizada','cancelada'].map(x=>`<option value="${x}" ${v.status===x?'selected':''}>${statusLabel[x]}</option>`).join('')}</select></div>${area('notes','Notas internas',v.notes,'full',3)}<div class="field full"><label>Recordatorio en el celular (Android)</label><select name="reminderMinutes"><option value="0" ${!Number(v.reminderMinutes)?"selected":""}>Sin recordatorio</option><option value="60" ${Number(v.reminderMinutes)===60?"selected":""}>1 hora antes</option><option value="1440" ${Number(v.reminderMinutes)===1440?"selected":""}>24 horas antes</option></select><small>Android puede retrasar el aviso si está activado el ahorro de batería.</small></div></div><div class="form-actions">${v.id?`<button type="button" class="btn btn-danger" data-action="delete-visit" data-id="${v.id}">Eliminar</button>`:''}<button type="button" class="btn" data-action="close-modal">Cancelar</button><button class="btn btn-primary" type="submit">Guardar visita</button></div></form>`)}
 function visitDetail(id){
  const v=db.visits.find(x=>x.id===id);if(!v){toast('Esa visita ya no está en la agenda.');return}
  const address=String(v.address||'').trim();
- modal('Detalle de la visita',`<div class="visit-detail"><div class="visit-detail-header"><strong>${esc(v.client||'Cliente')}</strong>${tag(v.status)}</div><div class="visit-detail-row"><span>📅 Fecha y hora</span><strong>${esc(dateText(v.date))} · ${esc(v.time||'Sin hora')}</strong></div><div class="visit-detail-row"><span>🛠 Trabajo / motivo</span><div>${esc(v.description||'Sin descripción')}</div></div>${address?`<div class="visit-detail-row"><span>📍 Domicilio</span><a href="${mapSearchUrl(address)}" target="_blank" rel="noopener noreferrer">${esc(address)}</a></div>`:''}${v.notes?`<div class="visit-detail-row"><span>📝 Notas internas</span><div class="visit-detail-notes">${esc(v.notes)}</div></div>`:''}${visitQuoteList(v)}</div><div class="form-actions">${address?`<a class="btn btn-blue" href="${mapDirectionsUrl(address)}" target="_blank" rel="noopener noreferrer">↗ Cómo llegar</a>`:''}<button type="button" class="btn" data-action="edit-visit" data-id="${esc(v.id)}">Editar</button><button type="button" class="btn btn-primary" data-action="quote-from-visit" data-id="${esc(v.id)}">Crear presupuesto</button></div>`,true);
+ modal('Detalle de la visita',`<div class="visit-detail"><div class="visit-detail-header"><strong>${esc(v.client||'Cliente')}</strong>${tag(v.status)}</div><div class="visit-detail-row"><span>📅 Fecha y hora</span><strong>${esc(dateText(v.date))} · ${esc(v.time||'Sin hora')}</strong></div><div class="visit-detail-row"><span>🛠 Trabajo / motivo</span><div>${esc(v.description||'Sin descripción')}</div></div>${address?`<div class="visit-detail-row"><span>📍 Domicilio</span><a href="${mapSearchUrl(address)}" target="_blank" rel="noopener noreferrer">${esc(address)}</a></div>`:''}${v.notes?`<div class="visit-detail-row"><span>📝 Notas internas</span><div class="visit-detail-notes">${esc(v.notes)}</div></div>`:''}${v.equipmentId?`<div class="visit-detail-row"><span>❄️ Equipo</span><button type="button" class="btn btn-small btn-blue" data-action="equipment-detail" data-id="${esc(v.equipmentId)}">${esc(equipmentName((db.equipment||[]).find(x=>x.id===v.equipmentId)||{}))}</button></div>`:''}${visitQuoteList(v)}</div><div class="form-actions">${address?`<a class="btn btn-blue" href="${mapDirectionsUrl(address)}" target="_blank" rel="noopener noreferrer">↗ Cómo llegar</a>`:''}<button type="button" class="btn" data-action="edit-visit" data-id="${esc(v.id)}">Editar</button><button type="button" class="btn btn-primary" data-action="quote-from-visit" data-id="${esc(v.id)}">Crear presupuesto</button></div>`,true);
 }
 function calendarDayDetail(date){
  const list=db.visits.filter(v=>v.date===date&&(filter==='todos'||v.status===filter)&&(!search||(v.client+' '+v.description+' '+v.address).toLowerCase().includes(search.toLowerCase()))).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
@@ -270,7 +373,26 @@ function printQuote(q,action='save'){
 }
 function handleAction(b,event){const a=b.dataset.action,id=b.dataset.id;
   
-  if(a==='client-history')return clientHistory(id);
+  if(a==='catalog-detail')return catalogDetail(id);
+ if(a==='catalog-associate')return equipmentModal(null,id);
+ if(a==='catalog-manual')return equipmentModal(null,null,catalogClientId);
+ if(a==='catalog-for-client'){catalogClientId=id;closeModal();setPage('catalogo');return}
+ if(a==='catalog-clear-client'){catalogClientId='';render();return}
+ if(a==='catalog-update')return catalogUpdate();
+ if(a==='catalog-find-web')return catalogWebSearch();
+ if(a==='client-equipment')return clientEquipments(id);
+ if(a==='equipment-detail')return equipmentDetail(id);
+ if(a==='equipment-edit')return equipmentModal(id);
+ if(a==='equipment-manual')return equipmentModal(null,null,id);
+ if(a==='equipment-visit')return equipmentVisit(id);
+ if(a==='equipment-delete'){
+    const item=(db.equipment||[]).find(x=>x.id===id);if(!item)return;
+    if(!confirm('¿Eliminar este equipo del cliente? Las visitas anteriores conservarán sus datos pero dejarán de estar vinculadas.'))return;
+    db.equipment=db.equipment.filter(x=>x.id!==id);
+    db.visits.forEach(v=>{if(v.equipmentId===id)v.equipmentId=''});
+    save();closeModal();render();toast('Equipo eliminado.');return
+ }
+ if(a==='client-history')return clientHistory(id);
  if(a==='remito-from-quote')return remitoFromQuote(id);
  if(a==='new-template')return templateModal();
  if(a==='edit-template')return templateModal(id);
@@ -290,9 +412,15 @@ function handleAction(b,event){const a=b.dataset.action,id=b.dataset.id;
  if(a==='pdf-remito-preview'){const r=id?db.remitos.find(x=>x.id===id):remitoDraft;if(r)printRemito(r);return}
  if(a==='save-pdf-remito'){const r=persistRemito();if(r){printRemito(r);setPage('remitos')}return}
  if(a==='new-quote')return openQuote();if(a==='edit-quote')return openQuote(id);if(a==='quote-from-client')return openQuote(null,id);if(a==='quote-from-visit'){const v=db.visits.find(x=>x.id===id);if(!v)return;closeModal();return openQuote(null,null,v)}
- if(a==='new-visit-client'){const c=db.clients.find(x=>x.id===id);if(!c)return;closeModal();visitModal();const f=$('#visit-form');if(f){f.elements.namedItem('clientId').value=c.id;f.elements.namedItem('client').value=c.name;f.elements.namedItem('address').value=c.address||''}return}
+ if(a==='new-visit-client'){
+    const c=db.clients.find(x=>x.id===id);if(!c)return;
+    closeModal();visitModal();
+    const f=$('#visit-form');
+    if(f){f.elements.namedItem('clientId').value=c.id;f.elements.namedItem('client').value=c.name;f.elements.namedItem('address').value=c.address||'';const selected=f.elements.namedItem('equipmentId');if(selected)selected.innerHTML='<option value="">Sin equipo asociado</option>'+equipmentForClient(c.id).map(item=>'<option value="'+esc(item.id)+'">'+esc(equipmentName(item)+' · '+(item.location||'Sin ubicación'))+'</option>').join('');}
+    return
+ }
  if(a==='new-client')return clientModal();if(a==='edit-client')return clientModal(id);
- if(a==='delete-client'){if(!confirm('¿Eliminar este cliente? Sus presupuestos anteriores se conservarán.'))return;db.clients=db.clients.filter(x=>x.id!==id);save();render();toast('Cliente eliminado.');return}
+ if(a==='delete-client'){if(equipmentForClient(id).length){toast('Este cliente tiene equipos asociados. Eliminá primero sus equipos para evitar perder el vínculo técnico.');return}if(!confirm('¿Eliminar este cliente? Sus presupuestos anteriores se conservarán.'))return;db.clients=db.clients.filter(x=>x.id!==id);save();render();toast('Cliente eliminado.');return}
  if(a==='toggle-calendar'){agendaView=agendaView==='calendario'?'lista':'calendario';if(!calendarMonth)calendarMonth=isoToday().slice(0,7);render();return}
  if(a==='calendar-mode'){calModeChange(b.dataset.mode);return}
  if(a==='calendar-open-day'){calShowDay(b.dataset.date);return}
@@ -334,17 +462,48 @@ document.addEventListener('click',e=>{
   if(b.dataset.action==='backdrop-close'&&e.target!==b)return;
   e.preventDefault();return handleAction(b,e);
 });
-document.addEventListener('input',e=>{const el=e.target;if(el.id==='search-list'){search=el.value;const orig=page;let html=orig==='agenda'?agenda():orig==='presupuestos'?quotes():orig==='remitos'?remitos():orig==='clientes'?clients():'';const doc=new DOMParser().parseFromString(html,'text/html'),box=doc.querySelector('#list-results');if(box&&$('#list-results'))$('#list-results').innerHTML=box.innerHTML}
+document.addEventListener('input',e=>{const el=e.target;if(el.id==='catalog-search'){
+   catalogQuery=el.value;
+   const result=$('#catalog-results');if(result)result.innerHTML=catalogResults();
+   return
+ }
+ if(el.id==='search-list'){search=el.value;const orig=page;let html=orig==='agenda'?agenda():orig==='presupuestos'?quotes():orig==='remitos'?remitos():orig==='clientes'?clients():'';const doc=new DOMParser().parseFromString(html,'text/html'),box=doc.querySelector('#list-results');if(box&&$('#list-results'))$('#list-results').innerHTML=box.innerHTML}
  if(el.closest('#quote-form')&&el.id!=='f-clientId'){grabDraft();if($('#current-total'))$('#current-total').textContent=fmt(quoteTotal(draft))}
  if(el.closest('#remito-form')&&el.id!=='remito-clientId'){grabRemitoDraft();refreshRemitoTotal()}});
 document.addEventListener('change',async e=>{const el=e.target;
+ if(el.id==='catalog-brand'){catalogBrand=el.value;const results=$('#catalog-results');if(results)results.innerHTML=catalogResults();return}
  if(el.id==='filter-list'){filter=el.value;render();$('#search-list')?.focus();return}
  if(el.id==='remito-clientId'&&remitoDraft){grabRemitoDraft();if(el.value){applyRemitoClient(remitoDraft,el.value);render()}return}
  if(el.id==='f-clientId'&&draft){grabDraft();if(el.value){applyClient(draft,el.value);render()}return}
- if(el.id==='f-visitClientId'&&el.value){const c=db.clients.find(x=>x.id===el.value);if(c){$('#visit-form [name=client]').value=c.name;$('#visit-form [name=address]').value=c.address||''}return}
- if(el.id==='import-json'&&el.files?.[0]){try{const raw=JSON.parse(await el.files[0].text());if(!raw||!Array.isArray(raw.clients)||!Array.isArray(raw.visits)||!Array.isArray(raw.quotes)||typeof raw.settings!=='object')throw Error('El archivo no es un respaldo EYR válido');if(!confirm('Importar reemplazará todos los datos actuales de este dispositivo. ¿Continuar?'))return;db={...blankDB(),...raw,remitos:Array.isArray(raw.remitos)?raw.remitos:[],serviceTemplates:Array.isArray(raw.serviceTemplates)?raw.serviceTemplates:[],settings:{...DEFAULT_SETTINGS,...raw.settings,lastRemitoNumber:Math.max(Number(raw.settings.lastRemitoNumber)||0,...(Array.isArray(raw.remitos)?raw.remitos:[]).map(r=>Number(r.number)||0))}};save();setPage('inicio');toast('Respaldo importado correctamente.')}catch(err){console.error(err);toast('Error al importar: archivo no válido.')}finally{el.value=''}return}
+ if(el.id==='f-visitClientId'){
+    const c=db.clients.find(x=>x.id===el.value);
+    if(c){$('#visit-form [name=client]').value=c.name;$('#visit-form [name=address]').value=c.address||''}
+    const selected=$('#visit-equipment-id');
+    if(selected)selected.innerHTML='<option value="">Sin equipo asociado</option>'+equipmentForClient(el.value).map(item=>'<option value="'+esc(item.id)+'">'+esc(equipmentName(item)+' · '+(item.location||'Sin ubicación'))+'</option>').join('');
+    return
+ }
+ if(el.id==='import-json'&&el.files?.[0]){try{const raw=JSON.parse(await el.files[0].text());if(!raw||!Array.isArray(raw.clients)||!Array.isArray(raw.visits)||!Array.isArray(raw.quotes)||typeof raw.settings!=='object')throw Error('El archivo no es un respaldo EYR válido');if(!confirm('Importar reemplazará todos los datos actuales de este dispositivo. ¿Continuar?'))return;db={...blankDB(),...raw,remitos:Array.isArray(raw.remitos)?raw.remitos:[],serviceTemplates:Array.isArray(raw.serviceTemplates)?raw.serviceTemplates:[],equipment:Array.isArray(raw.equipment)?raw.equipment:[],catalogOnline:Array.isArray(raw.catalogOnline)?raw.catalogOnline:[],settings:{...DEFAULT_SETTINGS,...raw.settings,lastRemitoNumber:Math.max(Number(raw.settings.lastRemitoNumber)||0,...(Array.isArray(raw.remitos)?raw.remitos:[]).map(r=>Number(r.number)||0))}};save();setPage('inicio');toast('Respaldo importado correctamente.')}catch(err){console.error(err);toast('Error al importar: archivo no válido.')}finally{el.value=''}return}
 });
 document.addEventListener('submit',e=>{const form=e.target;e.preventDefault();
+ if(form.id==='equipment-form'){
+   const f=new FormData(form),clientId=String(f.get('clientId')||''),client=db.clients.find(c=>c.id===clientId);
+   if(!client){toast('Elegí un cliente guardado.');return}
+   let existing=(db.equipment||[]).find(x=>x.id===form.dataset.id);
+   const m=findCatalogModel(form.dataset.catalogId)||existing?.specSnapshot||null;
+   let brand=m?.brand||String(f.get('brand')||'').trim();
+   let model=m?.model||String(f.get('model')||'').trim();
+   if(!brand||!model){toast('Completá marca y código exacto del modelo.');return}
+   if(!existing){existing={id:uid()};db.equipment.push(existing)}
+   Object.assign(existing,{
+      clientId, catalogId:m?.id||'',brand,model,
+      location:String(f.get('location')||'').trim(),
+      serial:String(f.get('serial')||'').trim(),
+      installedAt:String(f.get('installedAt')||''),
+      notes:String(f.get('notes')||'').trim(),
+      specSnapshot:m?JSON.parse(JSON.stringify(m)):null
+   });
+   save();closeModal();render();toast('Equipo asociado al cliente.');return
+ }
  if(form.id==='remito-form'){const r=persistRemito();if(r){toast('Remito guardado.');setPage('remitos')}return}
  if(form.id==='quote-form'){const q=persistQuote();if(q){toast('Presupuesto guardado.');setPage('presupuestos')}return}
  if(form.id==='settings-form'){const f=new FormData(form);for(const k of ['business','cuit','tax','address','phone','conditions'])db.settings[k]=String(f.get(k)||'').trim();db.settings.validity=Math.max(0,price(f.get('validity')));db.settings.autoBackup=f.get('autoBackup')==='on';save();toast('Datos de EYR actualizados.');render();return}
@@ -366,8 +525,9 @@ document.addEventListener('submit',e=>{const form=e.target;e.preventDefault();
   }
  if(form.id==='visit-form'){
    const f=new FormData(form),id=form.dataset.id;
-   const values={};for(const k of ['clientId','client','date','time','address','description','status','notes','reminderMinutes'])values[k]=String(f.get(k)||'').trim();
+   const values={};for(const k of ['clientId','client','date','time','address','description','status','notes','reminderMinutes','equipmentId'])values[k]=String(f.get(k)||'').trim();
    if(!values.client||!values.date||!values.description){toast('Completá cliente, fecha y trabajo.');return}
+   if(values.equipmentId&&!equipmentForClient(values.clientId).some(x=>x.id===values.equipmentId)){toast('El equipo seleccionado no pertenece al cliente.');return}
    let v=db.visits.find(x=>x.id===id);
    if(!v){v={id:uid()};db.visits.push(v)}
    Object.assign(v,values);save();closeModal();render();toast('Visita guardada.');return

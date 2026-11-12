@@ -152,3 +152,8 @@ input::placeholder,textarea::placeholder{color:#8aa9c1}
 .eyr-check{display:flex;align-items:center;gap:10px;margin:14px 0;color:#eef9ff;font-weight:600}
 .eyr-check input{width:18px;height:18px;accent-color:#00c4ff}
 @media(max-width:680px){.workarea main#view {padding-top:8px}.eyr-template-card .item-actions{width:100%}.eyr-picker button{flex:0 0 auto}}
+
+/* Catálogo técnico destacado en Inicio (sección adicional, sin botones repetidos). */
+.eyr-catalog-feature{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;border:1px solid rgba(63,198,255,.62);border-radius:18px;padding:17px 19px;background:linear-gradient(100deg,rgba(7,69,109,.88),rgba(7,18,43,.9));box-shadow:0 5px 27px rgba(0,139,218,.19);margin:18px 0}
+.eyr-catalog-feature h2{font-size:18px;margin:0 0 5px;color:#e2fbff}.eyr-catalog-feature p{font-size:12px;color:#b7d8ea;margin:0;line-height:1.45}.eyr-catalog-feature .btn{min-width:140px}
+@media(max-width:600px){.eyr-catalog-feature{padding:14px}.eyr-catalog-feature .btn{width:100%}}

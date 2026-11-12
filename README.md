@@ -114,3 +114,13 @@ En Agenda > Ver calendario ahora hay tres vistas: **Mes**, **Semana** (tira de s
 La portada aprobada Fuego & Hielo se presenta sobre la WebView en Android hasta que termina de dibujarse la app (con un límite de seguridad). Se conserva íntegra usando ajuste de aspecto. En Android 12+ el sistema puede mostrar inicialmente su icono estándar durante una fracción de segundo, antes de esta portada nativa.
 
 Las APK previas se firmaban con claves de depuración temporales. Para actualizar futuras instalaciones conservando los datos es obligatorio reutilizar una clave de firma privada estable en todas las versiones. No se debe publicar la clave privada en este repositorio público. El proyecto de Android admite firma con las credenciales GitHub Secrets `EYR_KEYSTORE_B64`, `EYR_KEYSTORE_PASSWORD`, `EYR_KEY_ALIAS`, `EYR_KEY_PASSWORD`. Antes de instalar una versión con nueva firma, exportá JSON e importalo después de esa única migración.
+
+
+## Catálogo técnico v2.0 (primer lanzamiento)
+
+- Nueva sección Catálogo técnico: búsqueda por marca, modelo, serie y refrigerante, filtros de marca y fichas con especificaciones y enlaces a documentación oficial.
+- Modelos iniciales con fuente verificada de Samsung y LG en `catalogo-modelos.json`. El conjunto inicial está también embebido en `catalogo-data.js` para consulta sin red.
+- Botón Buscar actualizaciones desde GitHub Pages: carga opcional de un JSON de catálogo más reciente sin recompilar Android. Valida fuentes oficiales y guarda resultados localmente. Sin automatismos ni servicio remoto obligatorio.
+- Asociación de equipos a clientes: ubicación, serie, fecha de instalación, observaciones; se conservan fichas en una instantánea para consultas posteriores. Un modelo no incluido puede registrarse manualmente y queda marcado sin especificaciones verificadas.
+- Equipos visibles desde Clientes y su historial, y relacionables con visitas. Se mantiene el almacenamiento local y el respaldo JSON.
+- **Seguridad técnica:** la app nunca deduce refrigerante ni conexiones de modelos similares. Siempre confirmar placa, modelo exacto y manual antes de trabajar.
