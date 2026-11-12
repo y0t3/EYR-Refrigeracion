@@ -168,7 +168,16 @@ function handleAction(b,event){const a=b.dataset.action,id=b.dataset.id;
  if(a==='export')return exportData();if(a==='choose-import')return $('#import-json')?.click();
  if(a==='close-modal')return closeModal();if(a==='backdrop-close'){if(event.target===b)closeModal();return}
 }
-document.addEventListener('click',e=>{const nav=e.target.closest('[data-page]');if(nav){e.preventDefault();return setPage(nav.dataset.page)}const b=e.target.closest('[data-action]');if(b){e.preventDefault();return handleAction(b,e)}});
+document.addEventListener('click',e=>{
+  const nav=e.target.closest('[data-page]');
+  if(nav){e.preventDefault();return setPage(nav.dataset.page)}
+  const b=e.target.closest('[data-action]');
+  if(!b)return;
+  // La capa de fondo del modal tiene data-action, pero jamás debe interceptar
+  // clicks dentro del formulario: bloqueaba los botones Guardar cliente/visita.
+  if(b.dataset.action==='backdrop-close'&&e.target!==b)return;
+  e.preventDefault();return handleAction(b,e);
+});
 document.addEventListener('input',e=>{const el=e.target;if(el.id==='search-list'){search=el.value;const orig=page;let html=orig==='agenda'?agenda():orig==='presupuestos'?quotes():orig==='remitos'?remitos():orig==='clientes'?clients():'';const doc=new DOMParser().parseFromString(html,'text/html'),box=doc.querySelector('#list-results');if(box&&$('#list-results'))$('#list-results').innerHTML=box.innerHTML}
  if(el.closest('#quote-form')&&el.id!=='f-clientId'){grabDraft();if($('#current-total'))$('#current-total').textContent=fmt(quoteTotal(draft))}
  if(el.closest('#remito-form')&&el.id!=='remito-clientId'){grabRemitoDraft();refreshRemitoTotal()}});
@@ -183,8 +192,22 @@ document.addEventListener('submit',e=>{const form=e.target;e.preventDefault();
  if(form.id==='remito-form'){const r=persistRemito();if(r){toast('Remito guardado.');setPage('remitos')}return}
  if(form.id==='quote-form'){const q=persistQuote();if(q){toast('Presupuesto guardado.');setPage('presupuestos')}return}
  if(form.id==='settings-form'){const f=new FormData(form);for(const k of ['business','cuit','tax','address','phone','conditions'])db.settings[k]=String(f.get(k)||'').trim();db.settings.validity=Math.max(0,price(f.get('validity')));save();toast('Datos de EYR actualizados.');render();return}
- if(form.id==='client-form'){const f=new FormData(form),id=form.dataset.id;let c=db.clients.find(x=>x.id===id);if(!c){c={id:uid()};db.clients.push(c)}for(const k of ['name','phone','cuit','iva','address','notes'])c[k]=String(f.get(k)||'').trim();if(!c.name){toast('Ingresá el nombre del cliente.');return}save();closeModal();render();toast('Cliente guardado.');return}
- if(form.id==='visit-form'){const f=new FormData(form),id=form.dataset.id;let v=db.visits.find(x=>x.id===id);if(!v){v={id:uid()};db.visits.push(v)}for(const k of ['clientId','client','date','time','address','description','status','notes'])v[k]=String(f.get(k)||'').trim();if(!v.client||!v.date||!v.description){toast('Completá cliente, fecha y trabajo.');return}save();closeModal();render();toast('Visita guardada.');return}
+ if(form.id==='client-form'){
+   const f=new FormData(form),id=form.dataset.id;
+   const values={};for(const k of ['name','phone','cuit','iva','address','notes'])values[k]=String(f.get(k)||'').trim();
+   if(!values.name){toast('Ingresá el nombre del cliente.');return}
+   let c=db.clients.find(x=>x.id===id);
+   if(!c){c={id:uid()};db.clients.push(c)}
+   Object.assign(c,values);save();closeModal();render();toast('Cliente guardado.');return
+  }
+ if(form.id==='visit-form'){
+   const f=new FormData(form),id=form.dataset.id;
+   const values={};for(const k of ['clientId','client','date','time','address','description','status','notes'])values[k]=String(f.get(k)||'').trim();
+   if(!values.client||!values.date||!values.description){toast('Completá cliente, fecha y trabajo.');return}
+   let v=db.visits.find(x=>x.id===id);
+   if(!v){v={id:uid()};db.visits.push(v)}
+   Object.assign(v,values);save();closeModal();render();toast('Visita guardada.');return
+  }
 });
 window.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 window.addEventListener('storage',e=>{if(e.key===KEY){db=load();if(page!=='editar-presupuesto'&&page!=='editar-remito')render()}});

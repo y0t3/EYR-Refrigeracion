@@ -66,10 +66,17 @@ Los PDF se crean íntegramente en el dispositivo. La aplicación no realiza fact
 
 Plantillas de tareas frecuentes, recordatorios, filtro mensual avanzado, numeración configurable, importación CSV y distintos estilos de cabecera del PDF.
 
+
 ## Remitos (v1.3)
 
-- Sección Remitos independiente de Presupuestos, con numeración propia, listado, edición, duplicación y eliminación.
-- El formulario pide cliente, CUIT/DNI, condición frente al IVA, domicilio, cantidades, descripciones y precios unitarios; calcula importes y total.
-- Cada PDF A4 incluye ORIGINAL y DUPLICADO con cuadros para firmas y aclaraciones.
-- El generador de PDF funciona sin conexión y los remitos se incluyen en las copias JSON.
-- Corrección de superposición de la barra de estado en Android 15 (áreas seguras nativas).
+- Nuevo módulo local de remitos, independiente de presupuestos, con numeración propia.
+- Cliente, CUIT/DNI, domicilio, condición frente al IVA y conceptos (cantidad, descripción, precio unitario).
+- Total automático. PDF A4 formal de **Original y Duplicado** con casilleros de firmas.
+- El generador se ejecuta en el dispositivo sin servicios externos; los remitos se incluyen en los respaldos JSON.
+- En Android 15 o superior se respetan las áreas de barra de estado y navegación.
+
+## v1.4 - Corrección Android y formularios
+
+- Barra de estado y navegación Android con fondo azul oscuro e indicadores blancos, respetando insets.
+- Corregida la delegación de clicks dentro de modales, que cancelaba el envío de los formularios de clientes y visitas.
+- La validación ya no crea registros incompletos.

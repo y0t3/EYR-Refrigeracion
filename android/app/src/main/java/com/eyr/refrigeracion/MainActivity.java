@@ -13,6 +13,8 @@ import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.View;
 import android.view.WindowInsets;
+import android.view.WindowInsetsController;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
@@ -42,8 +44,29 @@ public class MainActivity extends Activity {
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Los insets reservan el área de notificaciones; el fondo debe ser oscuro
+        // también en Android 15, donde la barra del sistema es transparente.
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         getWindow().setStatusBarColor(android.graphics.Color.rgb(3, 10, 24));
         getWindow().setNavigationBarColor(android.graphics.Color.rgb(3, 10, 24));
+        getWindow().getDecorView().setBackgroundColor(android.graphics.Color.rgb(3, 10, 24));
+        if (Build.VERSION.SDK_INT >= 29) {
+            getWindow().setStatusBarContrastEnforced(false);
+            getWindow().setNavigationBarContrastEnforced(false);
+        }
+        if (Build.VERSION.SDK_INT >= 30) {
+            WindowInsetsController controller = getWindow().getInsetsController();
+            if (controller != null) {
+                // Sin APPEARANCE_LIGHT_*: hora, señal y batería en blanco.
+                controller.setSystemBarsAppearance(0,
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS |
+                    WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS);
+            }
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(
+                getWindow().getDecorView().getSystemUiVisibility() &
+                ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        }
         webView = new WebView(this);
         webView.setBackgroundColor(android.graphics.Color.rgb(4, 17, 34));
         WebSettings settings = webView.getSettings();
@@ -53,7 +76,7 @@ public class MainActivity extends Activity {
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(true);
         settings.setDefaultTextEncodingName("utf-8");
-        settings.setUserAgentString(settings.getUserAgentString() + " EYRAndroid/1.1");
+        settings.setUserAgentString(settings.getUserAgentString() + " EYRAndroid/1.4");
         webView.addJavascriptInterface(new NativeBridge(), "EYRAndroid");
         webView.setWebViewClient(new WebViewClient() {
             @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
@@ -112,9 +135,10 @@ public class MainActivity extends Activity {
                 return true;
             }
         });
-        // Android 15 fuerza edge-to-edge: desplazamos toda la WebView dentro de los insets.
-        // El relleno se aplica al contenedor nativo, no a los estilos de la página.
+        // Android 15 (target 35) fuerza edge-to-edge: respetar barras de estado y navegación.
+        // El padding se aplica al contenedor, NO a la página HTML.
         FrameLayout safeRoot = new FrameLayout(this);
+        safeRoot.setBackgroundColor(android.graphics.Color.rgb(3, 10, 24));
         safeRoot.addView(webView, new FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
         if (Build.VERSION.SDK_INT >= 35) {
