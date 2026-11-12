@@ -71,7 +71,7 @@ console.log('OK: Informe, Fotos, Dictado, QR y Errores del display');
 
 const library=window.EYRErrorLibrary;
 assert(library,'No se cargó el catálogo oficial de errores');
-assert.equal(library.entries.length,16);
+assert.equal(library.entries.length,99);
 assert.equal(library.lookup('LG','CH05').title,'Comunicación entre unidades');
 assert.equal(library.lookup('Samsung','CF').kind,'aviso');
 assert.equal(library.lookup('Samsung','E5').title,'Sensor del intercambiador interior');
@@ -86,5 +86,37 @@ reportRecord.errorBrand='LG';
 reportRecord.errorCode='CH05';
 window.EYRWorkshop.openReport('visit-smoke');
 assert(nodes['#modal-root'].innerHTML.includes('Comunicación entre unidades'),'Falta detalle en informe');
-assert(nodes['#modal-root'].innerHTML.includes('Abrir documentación oficial'),'Falta fuente oficial');
+assert(nodes['#modal-root'].innerHTML.includes('Abrir manual del fabricante'),'Falta fuente oficial');
 console.log('OK: base oficial por marca, OCR y posible problema en informe');
+
+const examples=[
+ ['Surrey','EH60','551PXQ12N81F','Sensor de ambiente'],
+ ['BGH','E1','BP30CN','Sensor de ambiente'],
+ ['BGH','E1','BS26WFCR','EEPROM de placa interior'],
+ ['BGH','E1','BSI35WCCR','Comunicación interior/exterior'],
+ ['Carrier','E3','CWC12RA','Memoria E2RAM'],
+ ['Carrier','E3','53NQHE036','Ventilador interior'],
+ ['Hitachi','60','PSC-A128EX','Comunicación central-exterior (equipos activos)']
+];
+for(const [brand,code,model,expected] of examples){
+ const found=library.lookup(brand,code,model);
+ assert(found,brand+' '+code+' '+model+' no encontrado');
+ assert.equal(found.title,expected);
+ assert.equal(found.verifiedForExactModel,true);
+}
+assert.equal(library.lookup('BGH','E1',''),null,'No inferir un significado sin modelo');
+assert.equal(library.lookup('Carrier','E3',''),null);
+assert.equal(library.lookup('Hitachi','60','RAS22'),null);
+assert.equal(library.lookup('Philco','E1','96PHIN55HA2AN'),null);
+assert(library.candidates('BGH','E1').length>=3);
+assert.deepEqual(window.EYRWorkshop.possibleCodes('EH60 EC52 EH0B ELOC'),['EH60','EC52','EH0B','ELOC']);
+assert.deepEqual(window.EYRWorkshop.possibleCodes('60 61', 'Hitachi','PSC-A128EX'),['60','61']);
+assert.deepEqual(window.EYRWorkshop.possibleCodes('60 61', 'Hitachi',''),[],'No extraer temperaturas como alarmas sin modelo');
+const fallback=window.EYRWorkshop.errorMeaning('BGH','E1','');
+assert(fallback.includes('depende del modelo'),'Falta aviso de ambigüedad');
+assert(fallback.includes('BP30CN'),'Falta listado de modelos posibles');
+assert(window.EYRWorkshop.errorMeaning('Surrey','EH60','551PXQ12N81F').includes('Manual oficial del modelo'),'Falta señal de correspondencia del modelo');
+assert(window.EYRWorkshop.errorMeaning('Philco','E1','96PHIN55HA2AN').includes('No se debe asignar automáticamente'),'Falta aviso por ausencia de fuente Philco');
+window.EYRWorkshop.openStandalone();
+assert(nodes['#modal-root'].innerHTML.includes('work-error-library'),'Falta acceso a biblioteca desde lector');
+console.log('OK: 99 referencias, familias conflictivas, modelos y OCR extendido');

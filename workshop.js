@@ -62,21 +62,85 @@ function brandOptions(chosen){
 function errorMeaning(brand,code,model){
  const lib=errorLib(),normalized=lib?.normalizeCode(code)||String(code||'').trim().toUpperCase();
  if(!normalized)return '';
- if(!brand)return '<div class="eyr-error-result eyr-error-unverified"><strong>Código '+esc(normalized)+'</strong><p>Elegí primero la marca. El mismo código puede significar cosas distintas en otros equipos.</p></div>';
+ if(!brand)return '<div class="eyr-error-result eyr-error-unverified"><strong>Código '+esc(normalized)+'</strong><p>Seleccioná la marca. El mismo código puede indicar cosas distintas.</p></div>';
  const info=lib?.lookup(brand,normalized,model);
- if(!info)return '<div class="eyr-error-result eyr-error-unverified"><strong>'+esc(brand)+' · '+esc(normalized)+'</strong><p>No hay una explicación oficial incorporada para esta combinación de marca y código. Consultá el manual del modelo exacto antes de sacar conclusiones.</p></div>';
- return '<div class="eyr-error-result '+(info.kind==='aviso'?'eyr-error-info':'')+'"><small>📚 Referencia oficial de '+esc(info.brand)+' · '+(info.kind==='aviso'?'Aviso del equipo':'Posible incidencia')+'</small>'+
+ if(!info){
+  const alternatives=(lib?.candidates(brand,normalized)||[]).filter(x=>x.scope==='documented-series');
+  if(alternatives.length){
+   const cards=alternatives.slice(0,6).map(x=>'<div class="eyr-error-variant">'+
+    '<strong>'+esc(x.family||'Línea específica')+' · '+esc(x.title)+'</strong>'+
+    '<p>'+esc(x.description)+'</p>'+
+    '<small>Modelos documentados: '+esc((x.models||[]).join(' · '))+'</small>'+
+    '<a href="'+esc(x.source)+'" target="_blank" rel="noopener noreferrer">📄 Manual oficial de esta línea</a></div>').join('');
+   return '<div class="eyr-error-result eyr-error-unverified"><strong>'+esc(brand)+' · '+esc(normalized)+' · depende del modelo</strong>'+
+    '<p>Encontré '+alternatives.length+' '+(alternatives.length===1?'interpretación documentada':'interpretaciones documentadas')+
+    ', pero ninguna coincide todavía con el modelo ingresado <b>'+esc(model||'(sin modelo)')+'</b>. No asigné un diagnóstico.</p>'+
+    '<div class="eyr-error-variants">'+cards+'</div>'+
+    '<div class="eyr-error-caveat">Revisá la etiqueta del equipo y elegí el modelo exacto para confirmar qué tabla corresponde.</div></div>';
+  }
+  const philco=String(brand).toLowerCase()==='philco';
+  const msg=philco?'El manual oficial localizado describe síntomas y avisos de un portátil, pero no publica una tabla de códigos alfanuméricos aplicable a otros aires Philco. No se debe asignar automáticamente un significado.':
+    'Todavía no hay una interpretación verificable para esta combinación de marca y código. Consultá el manual específico.';
+  const source=philco?'<a class="eyr-error-source" href="https://philco.com.ar/soporte/faqs" target="_blank" rel="noopener noreferrer">🌐 Soporte y manuales Philco</a>':'';
+  return '<div class="eyr-error-result eyr-error-unverified"><strong>'+esc(brand)+' · '+esc(normalized)+'</strong><p>'+msg+'</p>'+source+'</div>';
+ }
+ const verified=info.verifiedForExactModel===true;
+ const label=verified?'✓ Manual oficial del modelo '+esc(info.model):'📚 Guía general '+esc(info.brand);
+ const caveat=verified?'Coincide el modelo con la lista del manual '+esc(info.family||'')+'. El código señala la condición detectada, pero no determina por sí solo qué pieza falló.':
+  'Referencia general de la marca. No se verificó su aplicación al modelo '+esc(model||'exacto')+'. Confirmar con el manual específico.';
+ return '<div class="eyr-error-result '+(info.kind==='aviso'?'eyr-error-info':'')+'"><small>'+label+' · '+(info.kind==='aviso'?'Aviso / función':'Posible incidencia')+'</small>'+
  '<strong>'+esc(info.code)+' · '+esc(info.title)+'</strong><p>'+esc(info.description)+'</p>'+
  '<div class="eyr-error-check"><b>Qué revisar:</b> '+esc(info.check)+'</div>'+
- '<div class="eyr-error-caveat">Guía general de la marca. Aplicabilidad al modelo '+esc(model||'exacto')+' todavía sin verificar; confirmar con su manual técnico.</div>'+
- '<a class="eyr-error-source" href="'+esc(info.source)+'" target="_blank" rel="noopener noreferrer">🌐 Abrir documentación oficial</a></div>';
+ '<div class="eyr-error-caveat">'+caveat+'</div>'+
+ '<a class="eyr-error-source" href="'+esc(info.source)+'" target="_blank" rel="noopener noreferrer">📄 Abrir manual del fabricante</a></div>';
 }
 function setReportErrorContext(r,brand,model){
  const lib=errorLib();
  r.errorBrand=lib?.normalizeBrand(brand)||'';
  r.errorModel=String(model||'').trim().slice(0,110);
  const info=lib?.lookup(r.errorBrand,r.errorCode,r.errorModel);
- r.errorMeaning=info?{code:info.code,title:info.title,description:info.description,source:info.source,kind:info.kind,scope:'guia-general-de-marca'}:null;
+ r.errorMeaning=info?{code:info.code,title:info.title,description:info.description,source:info.source,kind:info.kind,scope:info.validation||'guia-general-de-marca',family:info.family||'',verifiedForExactModel:!!info.verifiedForExactModel}:null;
+}
+function modelSuggestions(brand){
+ const coverage=errorLib()?.coverage?.();
+ const options=(coverage?.[brand]?.modelsList||[]);
+ return options.map(m=>'<option value="'+esc(m)+'"></option>').join('');
+}
+function showErrorCatalog(){
+ if(!active)return;
+ if(active.mode==='standalone')rememberStandalone();
+ else if(active.mode==='report')sync();
+ const lib=errorLib(),context=errorContext(),brand=context.brand;
+ const all=(lib?.entries||[]).filter(x=>x.brand===brand);
+ const byFamily=new Map();
+ for(const item of all){
+  const family=item.family||'Referencias generales de la marca';
+  if(!byFamily.has(family))byFamily.set(family,[]);
+  byFamily.get(family).push(item);
+ }
+ const body=[...byFamily.entries()].map(([family,records])=>{
+  const models=[...new Set(records.flatMap(r=>r.models||[]))];
+  const rows=records.map(x=>'<div class="eyr-error-catalog-row"><button type="button" class="btn btn-small btn-blue" data-action="work-error-catalog-select" data-code="'+esc(x.code)+'">'+esc(x.code)+'</button>'+
+   '<div><strong>'+esc(x.title)+'</strong><small>'+esc(x.description)+'</small></div></div>').join('');
+  return '<details class="eyr-error-catalog-family"><summary>'+esc(family)+' <small>· '+records.length+' códigos</small></summary>'+
+   (models.length?'<p class="eyr-work-help">Modelos incluidos: '+esc(models.join(', '))+'</p>':'<p class="eyr-work-help">Referencia general. Confirmar modelo.</p>')+
+   rows+'</details>';
+ }).join('');
+ const fallback=brand==='Philco'
+  ?'<div class="eyr-work-warning">No se encontró una tabla de códigos alfanuméricos suficientemente verificable para los splits Philco consultados. Sus manuales oficiales describen síntomas, pero no corresponde atribuir E1 o E2 de otras marcas.</div><a href="https://philco.com.ar/soporte/faqs" target="_blank" rel="noopener noreferrer">Consultar manuales y soporte Philco</a>'
+  :'<p>Elegí una marca primero para ver su biblioteca.</p>';
+ hooks.modal('📚 Biblioteca de errores '+(brand?'· '+brand:''),'<div class="eyr-work"><p class="eyr-work-help">'+all.length+' referencias técnicas. Cada familia tiene su propia tabla; algunas pueden compartir códigos con significados diferentes.</p>'+
+ (body||fallback)+'<div class="form-actions"><button class="btn" data-action="work-back-report">Volver al lector</button></div></div>',true);
+}
+function chooseCatalogError(code){
+ if(!active)return;
+ const normalized=errorLib()?.normalizeCode(code)||code;
+ if(active.mode==='standalone'){active.chosenCode=normalized;renderStandalone();}
+ else if(active.mode==='report'){
+  const r=record();if(!r)return;
+  const context=errorContext();r.errorCode=normalized;
+  setReportErrorContext(r,context.brand,context.model);hooks.saveDB();renderReport();
+ }
 }
 function rememberStandalone(){
  if(active?.mode!=='standalone')return;
@@ -117,12 +181,12 @@ function reportHTML(r,v){
  '<p class="eyr-work-help">El dictado depende del reconocimiento de voz instalado en el teléfono; revisá el texto antes de guardar.</p>'+
  '<h3>⚠️ Código mostrado en display</h3><div class="form-grid">'+
  '<div class="field"><label>Marca</label><select id="work-error-brand">'+brandOptions(brand)+'</select></div>'+
- '<div class="field"><label>Modelo (si lo conocés)</label><input id="work-error-model" value="'+esc(model)+'" maxlength="110" placeholder="Código de modelo"></div>'+
+ '<div class="field"><label>Modelo (según etiqueta)</label><input id="work-error-model" list="eyr-known-error-models" value="'+esc(model)+'" maxlength="110" placeholder="Código exacto de modelo"><datalist id="eyr-known-error-models">'+modelSuggestions(brand)+'</datalist></div>'+
  '<div class="field"><label>Código observado</label><input id="work-error-code" value="'+esc(r.errorCode||'')+'" maxlength="24" placeholder="Ej.: CH05, E5, CF"></div>'+
  '<div class="field"><label>Texto leído / anotación</label><input id="work-error-text" value="'+esc(r.errorText||'')+'" maxlength="1500" placeholder="Lectura original de la foto"></div></div>'+
  '<div class="eyr-work-photo-actions"><button type="button" class="btn btn-small btn-blue" data-action="work-error-camera">📷 Leer display</button>'+
  '<button type="button" class="btn btn-small" data-action="work-error-gallery">🖼️ Cargar foto</button>'+
- '<button type="button" class="btn btn-small" data-action="work-error-review">📚 Consultar código</button></div>'+
+ '<button type="button" class="btn btn-small" data-action="work-error-review">📚 Consultar código</button><button type="button" class="btn btn-small" data-action="work-error-library">📖 Ver biblioteca</button></div>'+
  found+
  '<div class="eyr-work-warning">La lectura de una foto no equivale a un diagnóstico. Las referencias generales por marca deben confirmarse contra el manual del modelo exacto.</div>'+
  '<div class="form-actions"><button class="btn" data-action="work-save">Guardar informe</button>'+
@@ -286,15 +350,27 @@ function onNativeVoice(value){
  const s=String(value?.text||'').trim();
  tx.value=(tx.value?tx.value.trim()+'\n':'')+s;sync();hooks.toast('Dictado agregado. Revisá el texto.');
 }
-function possibleCodes(raw){
- const text=String(raw||'').toUpperCase().replace(/\u00a0/g,' ');
- const re=/\b(?:CH\s*[-]?\s*\d{1,3}|[EFPUHC]\s*[-]?\s*\d{1,3}|CF|CL|CI|DF)\b/g;
- const codes=(text.match(re)||[]).map(x=>errorLib()?.normalizeCode(x)||x.replace(/[\s-]/g,'')).filter(Boolean);
- return [...new Set(codes)].slice(0,7);
+function possibleCodes(raw,brand='',model=''){
+ const text=String(raw||'').toUpperCase().replace(/\u00a0/g,' '),lib=errorLib(),found=[],seen=new Set();
+ // Un solo recorrido preserva el orden de lectura de la foto.
+ // Los códigos numéricos de Hitachi solo se habilitan para el controlador PSC-A128EX.
+ const numericHitachi=brand==='Hitachi'&&/^PSC-?A128EX$/i.test(String(model||''));
+ const expression=/\b(?:CH\s*[-]?\s*\d{1,3}|[EFPUHCS]\s*[-]?\s*\d{1,3}|[A-Z]{2,5}\d{0,3}[A-Z]?|\d{2})\b/g;
+ for(const hit of text.matchAll(expression)){
+  const rawCode=hit[0],code=lib?.normalizeCode(rawCode)||rawCode.replace(/[\s._-]/g,'');
+  if(!code||seen.has(code))continue;
+  const classic=/^(?:CH\d{1,3}|[EFPUHCS]\d{1,3})$/.test(code);
+  const digits=/^\d{2}$/.test(code);
+  if(digits&&!(numericHitachi&&lib?.candidates('Hitachi',code)?.length))continue;
+  if(!digits&&!classic&&!lib?.matches(code)?.length)continue;
+  seen.add(code);found.push(code);
+  if(found.length>=8)break;
+ }
+ return found;
 }
 function errorPicker(){
  if(!active)return;
- const raw=String(active.lastErrorOCR||''),matches=possibleCodes(raw),context=errorContext();
+ const raw=String(active.lastErrorOCR||''),context=errorContext(),matches=possibleCodes(raw,context.brand,context.model);
  const choices=matches.map(code=>'<div class="eyr-error-choice"><button type="button" class="btn btn-small btn-primary" data-action="work-error-select" data-code="'+esc(code)+'">✓ Confirmar '+esc(code)+'</button>'+
  errorMeaning(context.brand,code,context.model)+'</div>').join('');
  hooks.modal('Código detectado en el display','<div class="eyr-work"><p>Texto leído desde la foto:</p>'+
@@ -338,11 +414,11 @@ function renderStandalone(){
  '<div class="eyr-work-photo-actions"><button class="btn btn-blue" data-action="work-error-camera">📷 Leer display</button>'+
  '<button class="btn" data-action="work-error-gallery">🖼️ Cargar foto</button></div>'+
  '<div class="form-grid"><div class="field"><label>Marca</label><select id="work-standalone-brand">'+brandOptions(active.brand||'')+'</select></div>'+
- '<div class="field"><label>Modelo (si lo conocés)</label><input id="work-standalone-model" maxlength="110" value="'+esc(active.model||'')+'" placeholder="Código de modelo"></div>'+
+ '<div class="field"><label>Modelo (consultá etiqueta)</label><input id="work-standalone-model" list="eyr-known-error-models" maxlength="110" value="'+esc(active.model||'')+'" placeholder="Código exacto de modelo"><datalist id="eyr-known-error-models">'+modelSuggestions(active.brand)+'</datalist></div>'+
  '<div class="field full"><label>Código leído (confirmar)</label><input id="work-standalone-code" value="'+esc(active.chosenCode||'')+'" maxlength="24" placeholder="Ej.: CH05, E5, CF"></div></div>'+
- '<button class="btn btn-small btn-blue" data-action="work-error-review">📚 Consultar posible problema</button>'+
+ '<div class="eyr-work-photo-actions"><button class="btn btn-small btn-blue" data-action="work-error-review">📚 Consultar posible problema</button><button class="btn btn-small" data-action="work-error-library">📖 Ver biblioteca</button></div>'+
  errorMeaning(active.brand,active.chosenCode,active.model)+
- '<div class="eyr-work-warning">El significado mostrado es orientativo para la marca. Confirmá siempre su aplicabilidad al modelo antes de diagnosticar o intervenir el equipo.</div>'+
+ '<div class="eyr-work-warning">La interpretación debe coincidir con el modelo exacto del manual. Si no lo ingresás, EYR mostrará alternativas documentadas sin elegir una por vos.</div>'+
  '<div class="field"><label>Registrar en una visita</label><select id="work-standalone-visit">'+options+'</select></div>'+
  '<div class="form-actions"><button class="btn btn-primary" data-action="work-error-save">Guardar código en visita</button>'+
  '<button class="btn" data-action="work-close">Cerrar</button></div></div>',true);
@@ -462,6 +538,8 @@ function handle(action,el){
  if(action==='work-voice'){sync();if(window.EYRAndroid?.startVoiceInput)window.EYRAndroid.startVoiceInput();else hooks.toast('El dictado necesita la APK Android.');return true;}
  if(action==='work-error-camera'||action==='work-error-gallery'){errorCamera(action.endsWith('camera')?'camera':'gallery');return true;}
  if(action==='work-error-select'){selectError(el.dataset.code);return true;}
+ if(action==='work-error-library'){showErrorCatalog();return true;}
+ if(action==='work-error-catalog-select'){chooseCatalogError(el.dataset.code);return true;}
  if(action==='work-error-manual'){if(active?.mode==='report'){const r=record();r.errorText=String(active.lastErrorOCR||'');hooks.saveDB();renderReport();}else renderStandalone();return true;}
  if(action==='work-error-review'){
    if(active?.mode==='standalone'){rememberStandalone();renderStandalone();}

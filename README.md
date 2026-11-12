@@ -219,3 +219,19 @@ Las APK previas se firmaban con claves de depuración temporales. Para actualiza
 - Se mantiene el registro asociado a la visita, se agrega una descripción breve en el informe PDF si existe referencia oficial y no se envían imágenes ni datos a servidores.
 - Marcas con documentación pendiente de incorporar para equipos específicos: Surrey, BGH, Hitachi, Philco y Carrier. No utilizar significados de LG o Samsung para estas marcas.
 - Identificador y firma estable conservados. APK v2.7 (versionCode=18).
+
+
+## v2.8 · Biblioteca ampliada y protegida por modelo (12/11/2026)
+
+- 99 referencias: 10 LG, 6 Samsung, 23 Surrey, 35 BGH, 14 Carrier y 11 del controlador central Hitachi PSC-A128EX. Philco todavía no tiene una tabla de códigos alfanuméricos verificables en los manuales consultados; el registro manual y la consulta de soporte siguen disponibles.
+- El significado de BGH E1 varía: portátil BP30CN (sensor de ambiente), split BS (EEPROM), inverter BSI35WCCR (comunicación). Carrier E3 varía entre compacto CWC (memoria E2RAM) y conducto 53NQHE (ventilador interior). No se asigna un diagnóstico cuando no coincide el modelo.
+- Los códigos por serie solo se confirman cuando marca, código y modelo coinciden con la lista del manual. En otros modelos se muestran las alternativas junto con la familia y el manual del fabricante.
+- Fuentes oficiales:
+  - Surrey: https://www.surrey.com.ar/productos/manuales/551JPH09-01U.pdf ; https://www.surrey.com.ar/productos/manuales/Uno_551IDQ1201F-01IURM.pdf ; https://www.surrey.com.ar/productos/manuales/Manual_Portatil_551PXQ12N81F.pdf ; https://www.surrey.com.ar/productos/manuales/Manual_Split_Inverter_R-32_MIAGSU01.pdf
+  - BGH: https://bgh.com.ar/wp-content/uploads/2020/01/68b005234-man-uso-portatil-comp-bgh-bp30cn-merged-2-manuales-en-1-M4Q.pdf ; https://bgh.com.ar/wp-content/uploads/2020/07/Manual-AA-portatil-Modelo-BP35WCAR.pdf ; https://bgh.com.ar/wp-content/uploads/2020/07/Manual-AA-Modelos-BS26WFCRBS26WCCRBS35WFCRBS35WCCRBS53WFCRBS45CPBS55CP.pdf ; https://bgh.com.ar/wp-content/uploads/2020/10/manual-68B007053A-BGH-AB-ROS-INV.pdf
+  - Carrier: https://www.carrier.com.ar/wp-content/uploads/2018/06/53NQHE018-072-00MU-1.pdf ; https://www.carrier.com.ar/wp-content/uploads/2012/10/CWC-RA-00-MUI.pdf
+  - Hitachi: https://documentation.hitachiaircon.com/fr/fr/controles/psc-a128ex/download/R0000026321_JCH
+  - Philco: https://philco.com.ar/media/iurco/managementproductmanuals/167/Manual_de_usuario_91PHP32HA2AN.pdf (síntomas sin tabla numérica verificada).
+- OCR ampliado a EH60, EC52, EH0B, ELOC, EA, FL y formatos confirmados. Las alarmas numéricas Hitachi 60–65 solo se reconocen automáticamente con el controlador PSC-A128EX identificado.
+- Ver biblioteca permite recorrer códigos por familia y modelo sin foto. El cuadro de modelo sugiere los modelos incluidos en los manuales.
+- No se modifican los datos ni la firma: APK v2.8, versionCode 19, actualizable encima de v2.7.

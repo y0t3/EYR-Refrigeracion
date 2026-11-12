@@ -1,4 +1,4 @@
-const CACHE='eyr-refrigeracion-v2.7.0';
+const CACHE='eyr-refrigeracion-v2.8.0';
 const ASSETS=['./','./index.html','./styles.css','./eyr-theme.css','./app.js','./pdf.js','./remitos-pdf.js','./remitos.css','./calendar-views.css','./calendar-views.js','./catalogo.css','./label-scan.css','./label-scan.js','./workshop.css','./workshop.js','./error-codes.js','./workshop-pdf.js','./workshop-backup.js','./catalogo-data.js','./logo-data.js','./manifest.webmanifest','./assets/logo-original.jpg','./assets/logo-marca.jpg','./assets/icon-192.jpg','./assets/icon-192.png','./assets/icon-512.png','./assets/banner-eyr.jpg','./assets/banner-mobile.jpg','./assets/eyr-backdrop.jpg','./assets/logo-pdf.jpg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
