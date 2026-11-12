@@ -199,3 +199,9 @@ Las APK previas se firmaban con claves de depuración temporales. Para actualiza
 - **Ajustes → Copia completa ZIP con fotos:** respalda registros JSON y todos los JPG guardados en informes, y permite restaurarlos en otro dispositivo. El respaldo JSON tradicional **no incluye** fotografías. Se recomienda conservar el ZIP fuera del teléfono.
 - No se agrega Firebase ni servidor. Se mantienen el `applicationId`, las pantallas anteriores y la misma firma permanente Android.
 - APK Android v2.6 (`versionCode=17`).
+
+### Señalar desperfectos en fotos (v2.6)
+
+- Desde el informe técnico podés tocar **Marcar con flechas** sobre una foto y deslizar el dedo para señalar el problema.
+- Las flechas se guardan como coordenadas editables separadas de la fotografía; se pueden deshacer y se muestran al volver al informe y al generar el PDF.
+- Límite de cinco flechas por foto; la fotografía original se conserva sin editar en el almacenamiento local.

@@ -59,7 +59,7 @@ function reportHTML(r,v){
  const photos=r.photos||[],eq=db().equipment.find(x=>x.id===v.equipmentId);
  const images=photos.map(p=>'<div class="eyr-work-photo"><div class="eyr-work-photo-image"><img data-work-photo="'+esc(p.id)+'" alt="Fotografía de '+esc(p.kind)+'"><span>'+esc(({antes:'ANTES',despues:'DESPUÉS',detalle:'DETALLE'})[p.kind]||'FOTO')+'</span></div>'+
   '<input type="text" data-work-caption="'+esc(p.id)+'" value="'+esc(p.caption||'')+'" maxlength="110" placeholder="Descripción de la foto">'+
-  '<button class="btn btn-small btn-danger" data-action="work-remove-photo" data-id="'+esc(p.id)+'">Quitar foto</button></div>').join('');
+  '<div class="eyr-work-photo-actions"><button class="btn btn-small btn-blue" data-action="work-mark-photo" data-id="'+esc(p.id)+'">↗ Marcar con flechas</button><button class="btn btn-small btn-danger" data-action="work-remove-photo" data-id="'+esc(p.id)+'">Quitar</button></div></div>').join('');
  return '<div class="eyr-work"><div class="eyr-work-summary"><strong>'+esc(v.client||'Cliente')+'</strong><small>'+esc(v.date||'')+' · '+esc(v.description||'Trabajo técnico')+'</small>'+
  (eq?'<small>❄️ '+esc(eq.brand+' '+eq.model)+'</small>':'')+'</div>'+
  '<h3>📸 Registro fotográfico</h3><p class="eyr-work-help">Sacá fotos del antes, después o de un detalle. Las imágenes quedan guardadas solamente en este dispositivo.</p>'+
@@ -92,7 +92,19 @@ async function hydrate(){
  const images=Array.from(root.querySelectorAll('[data-work-photo]'));
  for(const img of images){
   const id=img.dataset.workPhoto;
-  try{const p=await store('get',null,id);if(p?.dataUrl&&img.isConnected)img.src=p.dataUrl;}
+  try{
+   const p=await store('get',null,id);
+   if(p?.dataUrl&&img.isConnected){
+    const meta=record()?.photos.find(x=>x.id===id);
+    if(!meta?.arrows?.length){img.src=p.dataUrl;continue;}
+    const source=new Image();source.onload=()=>{
+      const canvas=document.createElement('canvas');canvas.width=source.width;canvas.height=source.height;
+      const ctx=canvas.getContext('2d');ctx.drawImage(source,0,0);
+      for(const ar of meta.arrows)drawArrow(ctx,canvas.width,canvas.height,ar);
+      if(img.isConnected)img.src=canvas.toDataURL('image/jpeg',.78);
+    };source.src=p.dataUrl;
+   }
+  }
   catch(e){if(img.isConnected)img.alt='Foto no disponible';}
  }
 }
@@ -100,6 +112,61 @@ function openReport(visitId){
  const visit=db().visits.find(x=>x.id===visitId);
  if(!visit){hooks.toast('Primero registrá la visita');return;}
  active={mode:'report',visitId};reportByVisit(visitId,true);renderReport();
+}
+
+function drawArrow(ctx,width,height,a){
+ if(!a)return;
+ const x=a.x1*width,y=a.y1*height,xx=a.x2*width,yy=a.y2*height;
+ const angle=Math.atan2(yy-y,xx-x),head=Math.max(12,Math.min(width,height)*.035);
+ ctx.save();ctx.strokeStyle='#ff621e';ctx.fillStyle='#ff621e';ctx.lineWidth=Math.max(4,Math.min(width,height)*.009);
+ ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(xx,yy);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(xx,yy);ctx.lineTo(xx-head*Math.cos(angle-.55),yy-head*Math.sin(angle-.55));
+ ctx.lineTo(xx-head*Math.cos(angle+.55),yy-head*Math.sin(angle+.55));ctx.closePath();ctx.fill();ctx.restore();
+}
+function annotatePosition(event,canvas){
+ const rect=canvas.getBoundingClientRect();
+ return {x:Math.max(0,Math.min(1,(event.clientX-rect.left)/rect.width)),
+         y:Math.max(0,Math.min(1,(event.clientY-rect.top)/rect.height))};
+}
+async function markPhoto(id){
+ sync();const r=record(),p=r?.photos.find(x=>x.id===id);if(!p)return;
+ const imageData=(await store('get',null,id))?.dataUrl;
+ if(!imageData){hooks.toast('No encontramos esta foto');renderReport();return;}
+ hooks.modal('↗ Marcar desperfecto','<div class="eyr-work"><p class="eyr-work-help">Deslizá el dedo sobre la foto para dibujar flechas hacia el desperfecto. Podés agregar varias y deshacerlas sin modificar la foto original.</p>'+
+ '<canvas id="work-arrow-canvas" class="eyr-work-arrow-canvas"></canvas>'+
+ '<div class="form-actions"><button class="btn btn-blue" data-action="work-arrow-undo">↶ Deshacer flecha</button><button class="btn btn-primary" data-action="work-back-report">Guardar y volver</button></div></div>',true);
+ active.markedPhotoId=id;
+ const canvas=document.getElementById('work-arrow-canvas');if(!canvas)return;
+ const img=new Image();
+ img.onload=()=>{
+  const scale=Math.min(1,1100/Math.max(img.width,img.height));
+  canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));
+  const ctx=canvas.getContext('2d');let start=null,current=null;
+  const draw=()=>{
+   ctx.clearRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);
+   for(const ar of p.arrows||[])drawArrow(ctx,canvas.width,canvas.height,ar);
+   if(start&&current)drawArrow(ctx,canvas.width,canvas.height,{x1:start.x,y1:start.y,x2:current.x,y2:current.y});
+  };
+  draw();
+  canvas.addEventListener('pointerdown',e=>{e.preventDefault();start=annotatePosition(e,canvas);current=start;canvas.setPointerCapture(e.pointerId);draw();});
+  canvas.addEventListener('pointermove',e=>{if(!start)return;e.preventDefault();current=annotatePosition(e,canvas);draw();});
+  canvas.addEventListener('pointerup',e=>{
+   if(!start)return;e.preventDefault();const end=annotatePosition(e,canvas);
+   if(Math.hypot(end.x-start.x,end.y-start.y)>.02){
+    p.arrows=Array.isArray(p.arrows)?p.arrows:[];
+    if(p.arrows.length<5){p.arrows.push({x1:start.x,y1:start.y,x2:end.x,y2:end.y});hooks.saveDB();}
+    else hooks.toast('Máximo cinco flechas por foto');
+   }
+   start=null;current=null;draw();
+  });
+  active.redrawArrows=draw;
+ };
+ img.onerror=()=>hooks.toast('No se pudo abrir la foto');
+ img.src=imageData;
+}
+function undoArrow(){
+ const r=record(),p=r?.photos.find(x=>x.id===active?.markedPhotoId);
+ if(p?.arrows?.length){p.arrows.pop();hooks.saveDB();active.redrawArrows?.();}
 }
 function photoSelect(kind){
  const r=record();if(!r)return;
@@ -316,6 +383,8 @@ function handle(action,el){
  if(action==='work-photo-gallery'){beginPhoto('gallery');return true;}
  if(action==='work-back-report'){renderReport();return true;}
  if(action==='work-remove-photo'){removePhoto(el.dataset.id);return true;}
+ if(action==='work-mark-photo'){markPhoto(el.dataset.id).catch(e=>hooks.toast('No se pudo marcar la foto'));return true;}
+ if(action==='work-arrow-undo'){undoArrow();return true;}
  if(action==='work-save'){sync();hooks.toast('Informe guardado');return true;}
  if(action==='work-voice'){sync();if(window.EYRAndroid?.startVoiceInput)window.EYRAndroid.startVoiceInput();else hooks.toast('El dictado necesita la APK Android.');return true;}
  if(action==='work-error-camera'||action==='work-error-gallery'){errorCamera(action.endsWith('camera')?'camera':'gallery');return true;}

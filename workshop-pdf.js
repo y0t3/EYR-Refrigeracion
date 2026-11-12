@@ -9,7 +9,17 @@ function wrap(g,value,x,y,width,fontsize,line,maxY){g.font=fontsize+'px Arial';g
 function field(g,name,value,y){g.font='bold 18px Arial';g.fillStyle='#46718f';g.fillText(name.toUpperCase(),67,y);return wrap(g,value||'—',67,y+35,910,25,34,y+99)+25;}
 function footer(g,n,total){rule(g,1400);g.font='18px Arial';g.fillStyle='#526b7e';g.fillText('EYR · Informe de servicio técnico',67,1437);g.textAlign='right';g.fillText(String(n)+' / '+String(total),990,1437);g.textAlign='left';}
 function image(data){return new Promise((ok,fail)=>{const img=new Image();img.onload=()=>ok(img);img.onerror=()=>fail(Error('Imagen dañada'));img.src=data;});}
-function drawContain(g,img,x,y,w,h){const k=Math.min(w/img.width,h/img.height),iw=img.width*k,ih=img.height*k;g.drawImage(img,x+(w-iw)/2,y+(h-ih)/2,iw,ih);}
+function drawContain(g,img,x,y,w,h){const k=Math.min(w/img.width,h/img.height),iw=img.width*k,ih=img.height*k;
+ const pos={x:x+(w-iw)/2,y:y+(h-ih)/2,w:iw,h:ih};g.drawImage(img,pos.x,pos.y,iw,ih);return pos;}
+function arrow(g,pos,a){
+ if(!pos||!a)return;
+ const x=pos.x+a.x1*pos.w,y=pos.y+a.y1*pos.h,xx=pos.x+a.x2*pos.w,yy=pos.y+a.y2*pos.h;
+ const angle=Math.atan2(yy-y,xx-x),head=17;
+ g.save();g.strokeStyle='#ff621e';g.fillStyle='#ff621e';g.lineWidth=7;g.lineCap='round';
+ g.beginPath();g.moveTo(x,y);g.lineTo(xx,yy);g.stroke();
+ g.beginPath();g.moveTo(xx,yy);g.lineTo(xx-head*Math.cos(angle-.55),yy-head*Math.sin(angle-.55));
+ g.lineTo(xx-head*Math.cos(angle+.55),yy-head*Math.sin(angle+.55));g.closePath();g.fill();g.restore();
+}
 function ascii(s){return new TextEncoder().encode(s);}
 function join(parts){const out=new Uint8Array(parts.reduce((n,x)=>n+x.length,0));let i=0;for(const p of parts){out.set(p,i);i+=p.length;}return out;}
 function jpeg(c){const b64=c.toDataURL('image/jpeg',.78).split(',')[1],raw=atob(b64),out=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)out[i]=raw.charCodeAt(i);return out;}
@@ -53,7 +63,7 @@ async function report(rec,visit,photos,client,eq){
     const f=fotos[i+k];if(!f)continue;
     const y0=235+k*580;
     next.g.fillStyle='#e8f1f8';next.g.fillRect(60,y0,940,485);
-    try{drawContain(next.g,await image(f.dataUrl),65,y0+5,930,425);}
+    try{const pos=drawContain(next.g,await image(f.dataUrl),65,y0+5,930,425);for(const a of f.arrows||[])arrow(next.g,pos,a);}
     catch(e){next.g.fillStyle='#567';next.g.font='23px Arial';next.g.fillText('Imagen no disponible',90,y0+130);}
     next.g.fillStyle='#194c76';next.g.font='bold 22px Arial';
     const kind=({antes:'ANTES',despues:'DESPUÉS',detalle:'DETALLE'})[f.kind]||'FOTO';

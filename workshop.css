@@ -30,3 +30,6 @@
 .eyr-work-backup p,.eyr-work-backup small{font-size:12px;color:#b3d5e8;line-height:1.5}
 .eyr-work-backup .btn-row{margin:12px 0}
 @media(max-width:590px){.eyr-work-photo-actions .btn{flex:1 1 110px}.eyr-work .form-actions .btn{flex:1 1 130px}.eyr-work-photo-image img{height:170px}}
+
+.eyr-work-arrow-canvas{display:block;width:100%;height:auto;max-height:65vh;object-fit:contain;border:2px solid #2baaf3;border-radius:11px;background:#061528;touch-action:none;cursor:crosshair}
+.eyr-work-arrow-canvas:focus-visible{outline:2px solid #ffad50}
