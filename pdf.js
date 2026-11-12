@@ -35,8 +35,9 @@ function pdfQuote(q,company,total){
  function smallLabel(key,val){if(!val)return;ensure(17);tx(key+':',M,y,9.4,true);tx(val,M+Math.min(110,measure(key+':',9.4,true)+8),y,9.4);y+=18}
  newPage();smallLabel('Fecha',prettyDate(q.date));smallLabel('Cliente',q.client);if(q.cuit)smallLabel('CUIT / DNI',q.cuit);if(q.address)paragraph('Domicilio del servicio: '+q.address,9.4,0,C.ink,false,16);y+=8;
  ensure(54);line(M,y,R,y,C.line,1);y+=24;tx('PRESUPUESTO DE SERVICIO TÉCNICO',W/2,y,14.5,true,C.ink,'center');y+=17;line(M,y,R,y,C.line,1);y+=16;
- title('Descripción del trabajo');paragraph(q.title||'Servicio técnico',10.4,0,C.ink,true,15);
- if((q.tasks||[]).some(t=>String(t).trim())){y+=8;ensure(20);tx('Alcance de los trabajos',M,y,10.2,true);y+=19;for(const t of q.tasks.filter(x=>String(x).trim()))itemBullet(t)}
+ title('Descripción del trabajo');
+ const taskList=[...(q.title?[q.title]:[]),...(q.tasks||[])].map(t=>String(t||'').trim()).filter(Boolean);
+ if(taskList.length){for(const t of taskList)itemBullet(t)}
  y+=6;title('Detalle económico');
  if(q.mode==='rubros'){
  const types=[['manoobra','Mano de obra'],['materiales','Materiales'],['otros','Otros']];for(const [cat,label] of types){const amount=(q.items||[]).filter(i=>i.category===cat).reduce((s,i)=>s+(Number(i.qty)||0)*(Number(i.unit)||0),0);if(amount)tableRow(label,amount,true)}
