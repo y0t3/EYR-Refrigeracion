@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "philco-96phin39hc2awfpi",
+    "brand": "Philco",
+    "model": "96PHIN39HC2AWFPI",
+    "series": "Pure Energy Inverter Wi-Fi",
+    "type": "Split de pared · frío/calor · Inverter",
+    "refrigerant": "",
+    "coolingKW": "3,90 kW",
+    "coolingBTU": "",
+    "indoorSize": "888 × 313 × 205 mm",
+    "outdoorSize": "810 × 549 × 305 mm",
+    "indoorWeight": "11 kg",
+    "outdoorWeight": "24,5 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "220–240 V",
+    "notes": "Ficha oficial: 3.900 W frío y 4.000 W calor. Refrigerante y cañerías no confirmados en ficha oficial.",
+    "url": "https://philco.com.ar/product/96PHIN39HC2AWFPI",
+    "photo": "",
+    "photoCredit": ""
+  }
+}
