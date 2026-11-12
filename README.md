@@ -159,3 +159,11 @@ Las APK previas se firmaban con claves de depuración temporales. Para actualiza
 - Total: **55 modelos** en `catalogo-modelos.json` e `catalogo-indice.json`; se añadieron 11 archivos en `catalogo/fichas/`.
 - No cambian `catalogo-destacados.json` ni `catalogo-data.js`: siguen siendo **35 ejemplos offline, cinco por marca**. No requiere recompilar APK, instalar ni migrar datos.
 - Los campos sin evidencia técnica oficial se dejaron vacíos. Antes de instalar, cargar refrigerante o intervenir, verificar manual y placa de la unidad exacta.
+
+
+## v2.4 · WhatsApp directo para clientes
+
+- En Clientes y en Historial técnico, el número conserva su presentación y además permite abrir WhatsApp con un botón verde.
+- Android intenta abrir WhatsApp o WhatsApp Business en el número correspondiente; si no está instalado, usa el enlace oficial. La PWA usa `wa.me`.
+- Se admiten formatos argentinos habituales (+54 9, 011 15 y códigos de área). Los números incompletos se muestran sin botón para evitar abrir un destinatario erróneo.
+- No se edita el número original, no se agendan contactos y no cambian clientes, equipos, presupuestos, remitos, visitas ni respaldos.

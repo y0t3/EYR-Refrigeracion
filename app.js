@@ -47,6 +47,43 @@ const $ = s=>document.querySelector(s);
 const uid = () => (globalThis.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36).slice(2));
 const isoToday = () => {const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 const esc = v => String(v ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function whatsappNumber(phone){
+ const raw=String(phone||'').trim();
+ if(!raw||!/^\+?[\d\s().-]+$/.test(raw))return '';
+ const all=raw.replace(/\D/g,'');
+ if(all.length<10||all.length>16)return '';
+ let digits=all;
+ if(digits.startsWith('00'))digits=digits.slice(2);
+ if(digits.startsWith('54')||(!raw.startsWith('+')&&!all.startsWith('00'))){
+   if(digits.startsWith('54'))digits=digits.slice(2);
+   digits=digits.replace(/^0/,'');
+   if(/^9\d{10}$/.test(digits))return '54'+digits;
+   const mobile=digits.match(/^(\d{2,4})15(\d{6,8})$/);
+   if(mobile&&(mobile[1]+mobile[2]).length===10)digits=mobile[1]+mobile[2];
+   if(/^15\d{8}$/.test(digits))return '';
+   return /^\d{10}$/.test(digits)?'549'+digits:'';
+ }
+ return /^[1-9]\d{9,14}$/.test(digits)?digits:'';
+}
+function clientPhoneLink(c){
+ const phone=String(c?.phone||'').trim();
+ if(!phone)return '';
+ if(!whatsappNumber(phone))return '<div class="eyr-client-contact"><span class="eyr-contact-plain">📱 '+esc(phone)+'</span></div>';
+ const id=esc(c.id),name=esc(c.name);
+ const icon='<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 11.5a8.6 8.6 0 0 1-12.8 7.5L3.5 20l1.2-4.2A8.6 8.6 0 1 1 20.5 11.5Z"/><path d="M8.6 8.1c-.5.4-.6 1.3-.1 2.3 1 2 2.5 3.6 4.7 4.4 1 .4 2 .3 2.4-.3l.6-1.1-2.2-1.1-1 1-2.7-2.7 1-1-1.1-2.2Z"/></svg>';
+ return '<div class="eyr-client-contact"><span aria-hidden="true">📱</span><button type="button" class="eyr-phone-link" data-action="client-whatsapp" data-id="'+id+'" title="Abrir WhatsApp con '+name+'">'+esc(phone)+'</button><button type="button" class="eyr-whatsapp-button" data-action="client-whatsapp" data-id="'+id+'" aria-label="Escribir a '+name+' por WhatsApp" title="Hablar por WhatsApp">'+icon+'<span>WhatsApp</span></button></div>';
+}
+function openClientWhatsApp(id){
+ const client=db.clients.find(c=>c.id===id);
+ if(!client)return toast('No se encontró ese cliente.');
+ const number=whatsappNumber(client.phone);
+ if(!number)return toast('Ingresá el número completo con código de área para abrir WhatsApp.');
+ if(window.EYRAndroid&&typeof window.EYRAndroid.openWhatsApp==='function'){
+   try{window.EYRAndroid.openWhatsApp(number);return}catch(e){console.warn('WhatsApp Android',e)}
+ }
+ window.open('https://wa.me/'+number,'_blank','noopener,noreferrer');
+}
 const fmt = n => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(Number(n)||0);
 const dateText = v => {if(!v)return 'Sin fecha';const [y,m,d]=v.split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString('es-AR',{day:'2-digit',month:'short',year:'numeric'})};
 const dateLong = v => {if(!v)return '';const [y,m,d]=v.split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'})};
@@ -175,7 +212,7 @@ function clientHistory(id){
   const action=type==='visita'?'visit-detail':type==='presupuesto'?'preview-quote':'preview-remito';
   return '<button type="button" class="eyr-history-event" data-action="'+action+'" data-id="'+esc(v.id)+'"><span>'+esc(dateText(x.date))+'</span><strong>'+esc(title)+'</strong><small>'+esc(detail)+'</small></button>';
  }).join('');
- const body='<div class="eyr-history-header"><b>'+esc(c.name)+'</b><small>'+visits.length+' visitas · '+quotes.length+' presupuestos · '+remitos.length+' remitos · '+equipmentForClient(c.id).length+' equipos</small><p>'+esc([c.address,c.phone,c.cuit].filter(Boolean).join(' · '))+'</p></div><div class="eyr-catalog-client-cta"><span>❄️ Equipos del cliente: <strong>'+equipmentForClient(c.id).length+'</strong></span><button class="btn btn-small btn-blue" data-action="client-equipment" data-id="'+esc(c.id)+'">Ver equipos</button></div><div class="eyr-history-timeline">'+(rows||empty('Sin antecedentes','Los servicios y documentos que vayas registrando se mostrarán aquí.'))+'</div><div class="form-actions"><button class="btn btn-blue" data-action="new-visit-client" data-id="'+esc(c.id)+'">+ Visita</button><button class="btn" data-action="quote-from-client" data-id="'+esc(c.id)+'">+ Presupuesto</button><button class="btn" data-action="remito-from-client" data-id="'+esc(c.id)+'">+ Remito</button></div>';
+ const body='<div class="eyr-history-header"><b>'+esc(c.name)+'</b><small>'+visits.length+' visitas · '+quotes.length+' presupuestos · '+remitos.length+' remitos · '+equipmentForClient(c.id).length+' equipos</small><p>'+esc([c.address,c.cuit].filter(Boolean).join(' · '))+'</p>'+clientPhoneLink(c)+'</div><div class="eyr-catalog-client-cta"><span>❄️ Equipos del cliente: <strong>'+equipmentForClient(c.id).length+'</strong></span><button class="btn btn-small btn-blue" data-action="client-equipment" data-id="'+esc(c.id)+'">Ver equipos</button></div><div class="eyr-history-timeline">'+(rows||empty('Sin antecedentes','Los servicios y documentos que vayas registrando se mostrarán aquí.'))+'</div><div class="form-actions"><button class="btn btn-blue" data-action="new-visit-client" data-id="'+esc(c.id)+'">+ Visita</button><button class="btn" data-action="quote-from-client" data-id="'+esc(c.id)+'">+ Presupuesto</button><button class="btn" data-action="remito-from-client" data-id="'+esc(c.id)+'">+ Remito</button></div>';
  modal('Historial técnico · '+c.name,body,true);
 }
 function templateOptions(){
@@ -395,7 +432,7 @@ async function catalogUpdate(){
  }catch(e){console.warn('Actualización de ejemplos',e);toast('No se pudo actualizar. Los ejemplos actuales siguen disponibles.')}
  }
  
-function clientCard(c){let count=db.quotes.filter(q=>recordClientMatches(q,c)).length;const equipmentCount=equipmentForClient(c.id).length;return `<div class="list-item"><div class="item-main"><strong>${esc(c.name)}</strong><small>${[c.phone,c.address,c.cuit].filter(Boolean).map(esc).join(' · ')||'Sin datos adicionales'}</small><small>${count} presupuesto${count===1?'':'s'} · ${equipmentCount} equipo${equipmentCount===1?'':'s'}</small></div><div class="item-actions"><button class="btn btn-small btn-blue" data-action="client-equipment" data-id="${c.id}">❄️ Equipos</button><button class="btn btn-small btn-primary" data-action="client-history" data-id="${c.id}">🕒 Historial técnico</button><button class="btn btn-small btn-blue" data-action="quote-from-client" data-id="${c.id}">Presupuestar</button><button class="btn btn-small" data-action="remito-from-client" data-id="${c.id}">Remito</button><button class="btn btn-small" data-action="edit-client" data-id="${c.id}">Editar</button><button class="btn btn-small btn-danger" data-action="delete-client" data-id="${c.id}">Eliminar</button></div></div>`}
+function clientCard(c){let count=db.quotes.filter(q=>recordClientMatches(q,c)).length;const equipmentCount=equipmentForClient(c.id).length;return `<div class="list-item"><div class="item-main"><strong>${esc(c.name)}</strong>${clientPhoneLink(c)}${[c.address,c.cuit].filter(Boolean).length?`<small>${[c.address,c.cuit].filter(Boolean).map(esc).join(' · ')}</small>`:(!c.phone?'<small>Sin datos adicionales</small>':'')}<small>${count} presupuesto${count===1?'':'s'} · ${equipmentCount} equipo${equipmentCount===1?'':'s'}</small></div><div class="item-actions"><button class="btn btn-small btn-blue" data-action="client-equipment" data-id="${c.id}">❄️ Equipos</button><button class="btn btn-small btn-primary" data-action="client-history" data-id="${c.id}">🕒 Historial técnico</button><button class="btn btn-small btn-blue" data-action="quote-from-client" data-id="${c.id}">Presupuestar</button><button class="btn btn-small" data-action="remito-from-client" data-id="${c.id}">Remito</button><button class="btn btn-small" data-action="edit-client" data-id="${c.id}">Editar</button><button class="btn btn-small btn-danger" data-action="delete-client" data-id="${c.id}">Eliminar</button></div></div>`}
 function clients(){const arr=db.clients.filter(c=>(c.name+' '+c.phone+' '+c.cuit).toLowerCase().includes(search.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name));return `${headings('Clientes','Visitas, presupuestos, remitos y equipos registrados en un mismo lugar.','<button class="btn btn-primary" data-action="new-client">+ Nuevo cliente</button>')}<section class="panel"><div class="searchbar"><input id="search-list" placeholder="Buscar por nombre, teléfono o CUIT" value="${esc(search)}" aria-label="Buscar clientes"></div><div id="list-results">${arr.length?`<div class="item-list">${arr.map(clientCard).join('')}</div>`:empty('Sin clientes','Agregá el primer cliente o crealo desde un presupuesto.')}</div></section>`}
 function settings(){let s=db.settings;return `${headings('Configuración','Datos fijos de EYR y respaldo de información.')}
  <div class="grid-2"><form class="panel" id="settings-form"><div class="panel-head"><h2>Datos para los PDF</h2></div><div class="form-grid">${field('business','Nombre comercial',s.business,'full')}${field('cuit','CUIT',s.cuit)}${field('tax','Condición fiscal',s.tax)}${field('address','Domicilio',s.address,'full')}${field('phone','Teléfono',s.phone,'full')}${field('validity','Validez habitual (días)',s.validity,'','number')}${area('conditions','Condiciones predeterminadas',s.conditions,'full')}</div><div class="form-actions"><button class="btn btn-primary" type="submit">Guardar cambios</button></div></form>
@@ -513,6 +550,7 @@ function handleAction(b,event){const a=b.dataset.action,id=b.dataset.id;
     save();closeModal();render();toast('Equipo eliminado.');return
  }
  if(a==='client-history')return clientHistory(id);
+  if(a==='client-whatsapp')return openClientWhatsApp(id);
  if(a==='remito-from-quote')return remitoFromQuote(id);
  if(a==='new-template')return templateModal();
  if(a==='edit-template')return templateModal(id);

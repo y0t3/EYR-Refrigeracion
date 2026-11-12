@@ -251,7 +251,29 @@ public class MainActivity extends Activity {
         }
     }
 
+
+    /** Apertura externa sin envío automático de mensajes. */
+    private void launchClientWhatsApp(String number) {
+        if(number==null || !number.matches("[1-9][0-9]{9,14}")) {
+            showMessage("Número de WhatsApp incompleto o inválido");
+            return;
+        }
+        Uri deepLink=Uri.parse("whatsapp://send?phone="+number);
+        for(String pkg : new String[]{"com.whatsapp","com.whatsapp.w4b"}) {
+            Intent whatsapp=new Intent(Intent.ACTION_VIEW,deepLink);
+            whatsapp.setPackage(pkg);
+            try {startActivity(whatsapp);return;}
+            catch(ActivityNotFoundException ignored) {}
+            catch(Exception ex) {android.util.Log.w("EYRWhatsApp","No se pudo abrir "+pkg,ex);}
+        }
+        try {startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://wa.me/"+number)));}
+        catch(Exception ex) {showMessage("No se encontró una aplicación para abrir WhatsApp");}
+    }
+
     public class NativeBridge {
+        @JavascriptInterface public void openWhatsApp(String number) {
+            runOnUiThread(()->launchClientWhatsApp(number));
+        }
         @JavascriptInterface public void appReady(){splashReady();}
         @JavascriptInterface public void syncReminders(String visitsJson) {
             if(visitsJson==null||visitsJson.length()>4000000)return;
