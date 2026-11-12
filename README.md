@@ -102,3 +102,9 @@ En Agenda > Ver calendario ahora hay tres vistas: **Mes**, **Semana** (tira de s
 - Recordatorios locales **Android**, 1 o 24 horas antes, configurados por visita. Requieren permiso de notificaciones; Android puede retrasar las alarmas por ahorro de batería. En la PWA la agenda funciona, pero no se programan avisos nativos.
 - Respaldo local automático Android al guardar cambios en **Descargas/EYR Refrigeracion/EYR-Respaldo-Automatico.json**, con opción de desactivarlo desde Ajustes. El JSON es texto legible; protejé el teléfono. Se recomienda exportar una copia a otro lugar ante pérdida/rotura del equipo.
 - Mantenimiento de base de datos local anterior, sin borrar clientes ni documentación.
+
+## v1.8: ícono de notificaciones
+
+- Icono monocromático EYR, blanco sobre fondo transparente, creado en resoluciones Android mdpi–xxxhdpi para el símbolo de notificaciones y barra de estado.
+- Notificación desplegada con logo azul de la app a color (`largeIcon`) y acento celeste. Se mantiene intacto el ícono del lanzador y el contenido de los recordatorios.
+- Recordatorios existentes siguen programados; los avisos nuevos mostrarán los íconos correctos. No se modifican los datos locales.

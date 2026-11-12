@@ -6,6 +6,8 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -108,7 +110,9 @@ public final class EYRLocalServices {
             PendingIntent tap=PendingIntent.getActivity(context,0,open,
                 PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
             Notification.Builder builder=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,CHANNEL):new Notification.Builder(context);
-            builder.setSmallIcon(R.mipmap.ic_launcher)
+            builder.setSmallIcon(R.drawable.ic_stat_eyr)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),R.mipmap.ic_launcher))
+                .setColor(Color.rgb(0,190,245))
                 .setContentTitle("EYR · Próxima visita")
                 .setContentText(content)
                 .setStyle(new Notification.BigTextStyle().bigText(content))
