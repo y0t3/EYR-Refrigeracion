@@ -93,3 +93,12 @@ Plantillas de tareas frecuentes, recordatorios, filtro mensual avanzado, numerac
 ## Calendario v1.6
 
 En Agenda > Ver calendario ahora hay tres vistas: **Mes**, **Semana** (tira de siete días desplazable horizontalmente) y **Día** (franjas horarias con detalles de visitas). Las visitas se pueden abrir desde cualquiera de las vistas; los filtros por estado y búsqueda se mantienen. El botón Hoy vuelve a la fecha actual y las flechas recorren meses, semanas o días según la vista. Desde la vista diaria se puede agendar directamente una visita para ese día. Todo sigue guardado localmente.
+
+## Versión 1.7: clientes, trabajos frecuentes y Android local
+- Se eliminó la barra superior redundante y los accesos duplicados "Historial" y "Ubicación". Menú principal: Inicio, Agenda, Presupuestos, Remitos, Clientes, Trabajos frecuentes y Ajustes.
+- **Historial técnico de clientes** con visitas, presupuestos y remitos vinculados. Los registros antiguos sin identificador solo se relacionan por nombre cuando la coincidencia es única.
+- Visitas enlazadas con presupuestos y accesos directos para consultar el presupuesto desde la visita. Un presupuesto **aceptado** se convierte en remito (reutiliza cliente, descripción, cantidades, precios y total). La conversión consulta remitos existentes para evitar duplicados involuntarios.
+- Catálogo local de trabajos frecuentes con descripciones y precios sugeridos (opcionales/editables), disponible desde formularios de visitas, presupuestos y remitos.
+- Recordatorios locales **Android**, 1 o 24 horas antes, configurados por visita. Requieren permiso de notificaciones; Android puede retrasar las alarmas por ahorro de batería. En la PWA la agenda funciona, pero no se programan avisos nativos.
+- Respaldo local automático Android al guardar cambios en **Descargas/EYR Refrigeracion/EYR-Respaldo-Automatico.json**, con opción de desactivarlo desde Ajustes. El JSON es texto legible; protejé el teléfono. Se recomienda exportar una copia a otro lugar ante pérdida/rotura del equipo.
+- Mantenimiento de base de datos local anterior, sin borrar clientes ni documentación.

@@ -130,3 +130,25 @@ input::placeholder,textarea::placeholder{color:#8aa9c1}
 .preview-sheet .preview-header>div{text-align:left;font-size:10px;line-height:1.6;flex:1;min-width:0;overflow-wrap:anywhere}
 .preview-sheet .preview-header>div strong{font-size:13px}
 @media(max-width:540px){.preview-sheet .preview-header{gap:9px}.preview-sheet .preview-header img{width:87px;max-height:89px;flex-basis:87px}.preview-sheet .preview-header>div{font-size:9px}}
+
+/* v1.7: sin barra superior; aprovechamos toda la altura para contenido y banner. */
+.topbar {display:none!important}
+.workarea {padding-top:0!important}
+.workarea main#view {padding-top:12px}
+.eyr-picker {display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-top:12px}
+.eyr-picker select {flex:1 1 190px;min-width:0}
+.eyr-history-header{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:12px;background:rgba(22,95,143,.2);border:1px solid rgba(50,179,255,.4)}
+.eyr-history-header b{font-size:18px}
+.eyr-history-header small,.eyr-history-header p{color:#b9d7ee;margin:0}
+.eyr-history-timeline{max-height:55vh;overflow-y:auto;display:flex;flex-direction:column;gap:9px;margin:16px 0}
+.eyr-history-event{display:flex;flex-direction:column;text-align:left;gap:6px;padding:13px 15px;border:1px solid #2d719a;background:#071d35;border-radius:11px;color:#effaff;cursor:pointer}
+.eyr-history-event:hover{border-color:#00c4ff;background:#0f3152}
+.eyr-history-event>span{font-size:11px;color:#8ddaff}.eyr-history-event small{color:#b9d4e8;line-height:1.4}
+.eyr-related-links{display:flex;flex-wrap:wrap;gap:7px}
+.eyr-templates{display:flex;flex-direction:column;gap:12px}
+.eyr-template-card{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:15px;border:1px solid #2778aa;border-radius:12px;background:#081c35}
+.eyr-template-card strong{display:block;font-size:15px;color:#e9faff}
+.eyr-template-card small{display:block;margin-top:5px;color:#bed8e8}
+.eyr-check{display:flex;align-items:center;gap:10px;margin:14px 0;color:#eef9ff;font-weight:600}
+.eyr-check input{width:18px;height:18px;accent-color:#00c4ff}
+@media(max-width:680px){.workarea main#view {padding-top:8px}.eyr-template-card .item-actions{width:100%}.eyr-picker button{flex:0 0 auto}}

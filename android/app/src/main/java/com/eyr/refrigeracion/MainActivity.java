@@ -1,6 +1,8 @@
 package com.eyr.refrigeracion;
 
 import android.app.Activity;
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.ContentUris;
@@ -28,6 +30,9 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
@@ -42,6 +47,7 @@ public class MainActivity extends Activity {
     private static final int IMPORT_FILE = 34;
     private static final int EXPORT_FILE = 35;
     private WebView webView;
+    private final ExecutorService backupExecutor=Executors.newSingleThreadExecutor();
     private android.webkit.ValueCallback<Uri[]> uploadCallback;
     private byte[] pendingExport;
     private String pendingMime;
@@ -82,7 +88,7 @@ public class MainActivity extends Activity {
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(true);
         settings.setDefaultTextEncodingName("utf-8");
-        settings.setUserAgentString(settings.getUserAgentString() + " EYRAndroid/1.5");
+        settings.setUserAgentString(settings.getUserAgentString() + " EYRAndroid/1.7");
         webView.addJavascriptInterface(new NativeBridge(), "EYRAndroid");
         webView.setWebViewClient(new WebViewClient() {
             @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
@@ -161,7 +167,64 @@ public class MainActivity extends Activity {
 
     private void showMessage(String s) { runOnUiThread(() -> Toast.makeText(this,s,Toast.LENGTH_LONG).show()); }
 
+    private void askPermissionForReminders(String json) {
+        if(Build.VERSION.SDK_INT < 33) return;
+        if(!EYRLocalServices.hasActive(json))return;
+        if(checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED)return;
+        android.content.SharedPreferences prefs=getSharedPreferences("eyr-permissions",MODE_PRIVATE);
+        if(prefs.getBoolean("notifications_asked",false))return;
+        prefs.edit().putBoolean("notifications_asked",true).apply();
+        requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},201);
+    }
+    private void writeAutomaticBackup(String json) {
+        if(Build.VERSION.SDK_INT<29) {
+            // On older Android devices, use the app-specific external document directory.
+            try {
+                java.io.File base=getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);
+                if(base!=null){
+                    java.io.File dst=new java.io.File(base,"EYR-Respaldo-Automatico.json");
+                    try(java.io.FileOutputStream out=new java.io.FileOutputStream(dst,false)){
+                        out.write(json.getBytes(StandardCharsets.UTF_8));
+                    }
+                }
+            }catch(Exception ex){android.util.Log.w("EYRBackup","Respaldo automático",ex);}
+            return;
+        }
+        Uri uri=null;boolean created=false;
+        try{
+            String filename="EYR-Respaldo-Automatico.json";
+            uri=findSavedDocument(filename);
+            if(uri==null){
+                ContentValues info=new ContentValues();
+                info.put(MediaStore.MediaColumns.DISPLAY_NAME,filename);
+                info.put(MediaStore.MediaColumns.MIME_TYPE,"application/json");
+                info.put(MediaStore.MediaColumns.RELATIVE_PATH,Environment.DIRECTORY_DOWNLOADS+"/EYR Refrigeracion");
+                uri=getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI,info);
+                created=true;
+            }
+            if(uri==null)throw new java.io.IOException("No se pudo crear el respaldo");
+            try(OutputStream out=getContentResolver().openOutputStream(uri,"rwt")){
+                if(out==null)throw new java.io.IOException("Archivo inaccesible");
+                out.write(json.getBytes(StandardCharsets.UTF_8));
+            }
+        }catch(Exception ex){
+            if(created&&uri!=null)getContentResolver().delete(uri,null,null);
+            android.util.Log.w("EYRBackup","Respaldo automático",ex);
+        }
+    }
+
     public class NativeBridge {
+        @JavascriptInterface public void syncReminders(String visitsJson) {
+            if(visitsJson==null||visitsJson.length()>4000000)return;
+            runOnUiThread(()->{
+                EYRLocalServices.sync(MainActivity.this,visitsJson);
+                askPermissionForReminders(visitsJson);
+            });
+        }
+        @JavascriptInterface public void autoBackup(String data) {
+            if(data==null||data.length()>6000000)return;
+            backupExecutor.submit(()->writeAutomaticBackup(data));
+        }
         @JavascriptInterface public void saveFile(String dataUrl, String fileName, String mimeType, String action) {
             try {
                 int comma = dataUrl.indexOf(',');
@@ -274,5 +337,5 @@ public class MainActivity extends Activity {
               else{lastBackPress=now;showMessage("Tocá atrás otra vez para salir de EYR");}
           });
     }
-    @Override public void onDestroy(){if(webView!=null){webView.destroy();webView=null;}super.onDestroy();}
+    @Override public void onDestroy(){backupExecutor.shutdown();if(webView!=null){webView.destroy();webView=null;}super.onDestroy();}
 }
