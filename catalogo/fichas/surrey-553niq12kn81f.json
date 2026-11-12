@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "surrey-553niq12kn81f",
+    "brand": "Surrey",
+    "model": "553NIQ12KN81F",
+    "series": "Inverter Smart R32",
+    "type": "Split de pared · frío/calor · Inverter",
+    "refrigerant": "R32",
+    "coolingKW": "3,60 kW",
+    "coolingBTU": "",
+    "indoorSize": "",
+    "outdoorSize": "",
+    "indoorWeight": "8,2 kg",
+    "outdoorWeight": "20 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "",
+    "notes": "Sufijo exacto KN81F. Medidas, cañerías y carga a contrastar con placa/manual.",
+    "url": "https://www.surrey.com.ar/productos/residenciales/inverter_smart_r32",
+    "photo": "",
+    "photoCredit": ""
+  }
+}
