@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "philco-96phin55ha2an",
+    "brand": "Philco",
+    "model": "96PHIN55HA2AN",
+    "series": "Split Inverter",
+    "type": "Split de pared · frío/calor",
+    "refrigerant": "R32",
+    "coolingKW": "5,50 kW",
+    "coolingBTU": "",
+    "indoorSize": "910 × 305 × 195 mm",
+    "outdoorSize": "795 × 549 × 305 mm",
+    "indoorWeight": "9 kg",
+    "outdoorWeight": "25 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "",
+    "notes": "Fuente oficial Philco / Newsan Argentina. Verificar placa y manual de la unidad.",
+    "url": "https://philco.com.ar/product/96PHIN55HA2AN",
+    "photo": "https://magnoliapublic2.newsan.com.ar/dam/jcr%3Aa26ade93-aff6-4aaa-9f8e-212a49cd1e41/PHIN55HA2AN-1.jpg",
+    "photoCredit": "Fotografía del modelo publicada por Philco / Newsan"
+  }
+}

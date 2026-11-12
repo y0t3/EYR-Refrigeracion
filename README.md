@@ -143,3 +143,12 @@ Las APK previas se firmaban con claves de depuración temporales. Para actualiza
 - Migración de EYR v2.1: la colección antigua `catalogOnline` pasa a cinco destacados por marca, se elimina del almacenamiento persistente y **no se borran los equipos de clientes**. Los respaldos JSON de versiones anteriores siguen admitidos.
 - El Service Worker no cachea el índice, destacados remotos ni las fichas individuales en línea; el navegador puede aplicar caché de imágenes/HTTP temporal según sus propias reglas.
 - Fichas en GitHub Pages: `catalogo-modelos.json` se mantiene como archivo maestro de edición, `catalogo-indice.json` índice, `catalogo-destacados.json` destacados y `catalogo/fichas/` fichas individuales. Para ampliar, se publican esos archivos coordinadamente.
+
+
+## v2.3 · Cinco nuevas marcas en Catálogo técnico
+
+- Se suman **Surrey, BGH, Hitachi, Philco y Carrier**. Hay cinco ejemplos offline por marca, 35 en total, con **44 modelos** para buscar en GitHub Pages.
+- Se publican las 25 fichas nuevas como archivos individuales bajo `catalogo/fichas/`; consulta sin descargarlas todas.
+- Se amplía la lista de dominios de fabricantes y servicios oficiales permitidos y las fotos HTTPS verificadas para series y modelos puntuales.
+- En la migración desde v2.2 se añaden nuevas marcas sin reemplazar las selecciones previas ni modificar clientes, visitas, presupuestos, remitos o equipos guardados.
+- Los datos técnicos no confirmados permanecen vacíos («No verificado»), jamás se infieren por semejanza.

@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "hitachi-hspe3200fcinv",
+    "brand": "Hitachi",
+    "model": "HSPE3200FCINV",
+    "series": "Inverter R410A",
+    "type": "Split de pared · frío/calor",
+    "refrigerant": "R410A",
+    "coolingKW": "3,20 kW",
+    "coolingBTU": "",
+    "indoorSize": "790 × 255 × 197 mm",
+    "outdoorSize": "715 × 482 × 240 mm",
+    "indoorWeight": "7,5 kg",
+    "outdoorWeight": "22,8 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "",
+    "notes": "Ficha de Hitachi / Radio Victoria Argentina. Verificar variantes de lote y manual.",
+    "url": "https://hitachi.radiovictoria.com.ar/prod-3200-watts-frio-calor",
+    "photo": "",
+    "photoCredit": ""
+  }
+}

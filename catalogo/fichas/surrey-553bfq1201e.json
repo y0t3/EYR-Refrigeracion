@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "surrey-553bfq1201e",
+    "brand": "Surrey",
+    "model": "553BFQ1201E",
+    "series": "Split fijo 2019",
+    "type": "Split de pared · frío/calor",
+    "refrigerant": "",
+    "coolingKW": "3,49 kW",
+    "coolingBTU": "",
+    "indoorSize": "802 × 297 × 189 mm",
+    "outdoorSize": "720 × 495 × 270 mm",
+    "indoorWeight": "9,1 kg",
+    "outdoorWeight": "28,7 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "",
+    "notes": "Refrigerante no especificado en ficha pública. Modelo de línea anterior: comprobar placa.",
+    "url": "https://www.surrey.com.ar/productos/residenciales/split_fijo",
+    "photo": "",
+    "photoCredit": ""
+  }
+}

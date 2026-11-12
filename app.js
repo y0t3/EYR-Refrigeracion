@@ -214,14 +214,18 @@ function visitQuoteList(v){
  let catalogTransient=null, catalogSearchTimer=null, catalogCloudRequest=0;
  const catalogCloudBase='https://y0t3.github.io/EYR-Refrigeracion';
  function officialCatalogUrl(url){
-  try{const u=new URL(String(url||''));return u.protocol==='https:'&&['www.samsung.com','samsung.com','www.lg.com','lg.com','www.bgh.com.ar','bgh.com.ar'].includes(u.hostname)?u.href:''}
+  try{const u=new URL(String(url||''));return u.protocol==='https:'&&['www.samsung.com','samsung.com','www.lg.com','lg.com','www.bgh.com.ar','bgh.com.ar','www.surrey.com.ar','surrey.com.ar','grupobgh.com','www.grupobgh.com','hitachi.radiovictoria.com.ar','philco.com.ar','www.philco.com.ar','carrier.com.ar','www.carrier.com.ar','ecosmart.bgh.com.ar'].includes(u.hostname)?u.href:''}
   catch{return ''}
  }
  function validCatalogModel(m){
   return m&&typeof m==='object'&&/^[a-z0-9][a-z0-9_-]{3,90}$/.test(m.id||'')&&typeof m.brand==='string'&&m.brand.length<70&&typeof m.model==='string'&&m.model.length<100&&!!officialCatalogUrl(m.url);
  }
  function catalogItems(){
-  const featured=Array.isArray(db.catalogFeatured)&&db.catalogFeatured.length?db.catalogFeatured:window.EYR_CATALOG_BASE?.models||[];
+  const bundled=window.EYR_CATALOG_BASE?.models||[];
+  const remembered=Array.isArray(db.catalogFeatured)?db.catalogFeatured:[];
+  // En upgrades previos, mantener la selección descargada por marca y sumar nuevas marcas incluidas.
+  const chosenBrands=new Set(remembered.filter(validCatalogModel).map(m=>m.brand));
+  const featured=[...bundled.filter(m=>!chosenBrands.has(m.brand)),...remembered];
   return pickFivePerBrand(featured.filter(validCatalogModel)).sort((a,b)=>a.brand.localeCompare(b.brand,'es')||a.model.localeCompare(b.model,'es'));
  }
  function findCatalogModel(id){return catalogItems().find(m=>m.id===id)||(catalogTransient?.id===id?catalogTransient:null)}
@@ -288,7 +292,7 @@ function catalogPhotoUrl(m){
   const value=String(m?.photo||'');
   if(!value||value.length>500)return '';
   const u=new URL(value);
-  if(u.protocol!=='https:'||!['images.samsung.com','www.lg.com','lg.com','d2pr1pn9ywx3vo.cloudfront.net'].includes(u.hostname))return '';
+  if(u.protocol!=='https:'||!['images.samsung.com','www.lg.com','lg.com','d2pr1pn9ywx3vo.cloudfront.net','www.surrey.com.ar','surrey.com.ar','grupobgh.com','hitachi.radiovictoria.com.ar','magnoliapublic2.newsan.com.ar','magnoliapublic.newsan.com.ar'].includes(u.hostname))return '';
   return u.href;
  }catch{return ''}
 }

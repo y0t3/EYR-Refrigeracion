@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "bgh-bsi65wccr",
+    "brand": "BGH",
+    "model": "BSI65WCCR",
+    "series": "Silent Air Inverter",
+    "type": "Split de pared · frío/calor",
+    "refrigerant": "",
+    "coolingKW": "6,70 kW",
+    "coolingBTU": "",
+    "indoorSize": "",
+    "outdoorSize": "845 × 702 × 363 mm",
+    "indoorWeight": "13,3 kg",
+    "outdoorWeight": "47,2 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "",
+    "notes": "Refrigerante no verificado en esta fuente. El fabricante publica una medida interior ambigua para BSI65; no se extrapola.",
+    "url": "https://grupobgh.com/silent-air-bgh/bgh-silent-air-split-inverter/",
+    "photo": "https://grupobgh.com/wp-content/uploads/2020/10/Split-Inverter-Producto.jpg",
+    "photoCredit": "Imagen oficial representativa de la serie BGH Silent Air Inverter"
+  }
+}

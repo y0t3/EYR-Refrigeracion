@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "philco-96phin37ha2an",
+    "brand": "Philco",
+    "model": "96PHIN37HA2AN",
+    "series": "Split Inverter",
+    "type": "Split de pared · frío/calor",
+    "refrigerant": "R32",
+    "coolingKW": "3,75 kW",
+    "coolingBTU": "",
+    "indoorSize": "782 × 251 × 196 mm",
+    "outdoorSize": "712 × 459 × 276 mm",
+    "indoorWeight": "7 kg",
+    "outdoorWeight": "20 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "",
+    "notes": "Fuente oficial Philco / Newsan Argentina. Verificar placa y manual de la unidad.",
+    "url": "https://philco.com.ar/product/96PHIN37HA2AN",
+    "photo": "https://magnoliapublic2.newsan.com.ar/dam/jcr%3A3ef4b491-cb7b-4d32-ba08-f17be96b0740/PHIN37HA2AN-1.jpg",
+    "photoCredit": "Fotografía del modelo publicada por Philco / Newsan"
+  }
+}

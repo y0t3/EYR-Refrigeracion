@@ -7,40 +7,40 @@
       "brand": "Samsung",
       "model": "AR12ASHQAWK/BG",
       "series": "AR5000HM",
-      "refrigerant": "R410A",
-      "type": "Split de pared · frío/calor · Inverter"
+      "type": "Split de pared · frío/calor · Inverter",
+      "refrigerant": "R410A"
     },
     {
       "id": "samsung-ar40f12c0am2bg",
       "brand": "Samsung",
       "model": "AR40F12C0AM2BG",
       "series": "AR5000H 2025",
-      "refrigerant": "R32",
-      "type": "Split de pared · frío/calor · Inverter"
+      "type": "Split de pared · frío/calor · Inverter",
+      "refrigerant": "R32"
     },
     {
       "id": "samsung-ar40f18c0am2bg",
       "brand": "Samsung",
       "model": "AR40F18C0AM2BG",
       "series": "AR5000H 2025",
-      "refrigerant": "R32",
-      "type": "Split de pared · frío/calor · Inverter"
+      "type": "Split de pared · frío/calor · Inverter",
+      "refrigerant": "R32"
     },
     {
       "id": "samsung-ar40f24c0am2bg",
       "brand": "Samsung",
       "model": "AR40F24C0AM2BG",
       "series": "AR5000H 2025",
-      "refrigerant": "R32",
-      "type": "Split de pared · frío/calor · Inverter"
+      "type": "Split de pared · frío/calor · Inverter",
+      "refrigerant": "R32"
     },
     {
       "id": "lg-s3-w120a1da",
       "brand": "LG",
       "model": "S3-W120A1DA",
       "series": "Dual Inverter AI Air",
-      "refrigerant": "R32",
-      "type": "Split de pared · frío/calor · Inverter"
+      "type": "Split de pared · frío/calor · Inverter",
+      "refrigerant": "R32"
     },
     {
       "id": "lg-s3-w181l1da",
@@ -138,6 +138,206 @@
       "brand": "Samsung",
       "model": "AR24BSHQAWK2BG",
       "series": "AR24BSH",
+      "refrigerant": ""
+    },
+    {
+      "id": "surrey-553piq09n81f",
+      "brand": "Surrey",
+      "model": "553PIQ09N81F",
+      "series": "Inverter Smart R32",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": "R32"
+    },
+    {
+      "id": "surrey-553piq12n81f",
+      "brand": "Surrey",
+      "model": "553PIQ12N81F",
+      "series": "Inverter Smart R32",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": "R32"
+    },
+    {
+      "id": "surrey-553piq18n81f",
+      "brand": "Surrey",
+      "model": "553PIQ18N81F",
+      "series": "Inverter Smart R32",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": "R32"
+    },
+    {
+      "id": "surrey-553piq22n81f",
+      "brand": "Surrey",
+      "model": "553PIQ22N81F",
+      "series": "Inverter Smart R32",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": "R32"
+    },
+    {
+      "id": "surrey-553bfq1201e",
+      "brand": "Surrey",
+      "model": "553BFQ1201E",
+      "series": "Split fijo 2019",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": ""
+    },
+    {
+      "id": "bgh-bsi26wcdr",
+      "brand": "BGH",
+      "model": "BSI26WCDR",
+      "series": "Silent Air Inverter",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": ""
+    },
+    {
+      "id": "bgh-bsi35wccr",
+      "brand": "BGH",
+      "model": "BSI35WCCR",
+      "series": "Silent Air Inverter",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": ""
+    },
+    {
+      "id": "bgh-bsi53wccr",
+      "brand": "BGH",
+      "model": "BSI53WCCR",
+      "series": "Silent Air Inverter",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": ""
+    },
+    {
+      "id": "bgh-bsi65wccr",
+      "brand": "BGH",
+      "model": "BSI65WCCR",
+      "series": "Silent Air Inverter",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": ""
+    },
+    {
+      "id": "bgh-bs26wccr",
+      "brand": "BGH",
+      "model": "BS26WCCR",
+      "series": "Silent Air convencional",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": ""
+    },
+    {
+      "id": "hitachi-hsrpe3600fcinv",
+      "brand": "Hitachi",
+      "model": "HSRPE3600FCINV",
+      "series": "Inverter R32",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": "R32"
+    },
+    {
+      "id": "hitachi-hsrpe5800fcinv",
+      "brand": "Hitachi",
+      "model": "HSRPE5800FCINV",
+      "series": "Inverter R32",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": "R32"
+    },
+    {
+      "id": "hitachi-hsrpe6400fcinv",
+      "brand": "Hitachi",
+      "model": "HSRPE6400FCINV",
+      "series": "Inverter R32",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": "R32"
+    },
+    {
+      "id": "hitachi-hspe3200fcinv",
+      "brand": "Hitachi",
+      "model": "HSPE3200FCINV",
+      "series": "Inverter R410A",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": "R410A"
+    },
+    {
+      "id": "hitachi-hspe5400fcinv",
+      "brand": "Hitachi",
+      "model": "HSPE5400FCINV",
+      "series": "Inverter R410A",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": "R410A"
+    },
+    {
+      "id": "philco-96phin37ha2an",
+      "brand": "Philco",
+      "model": "96PHIN37HA2AN",
+      "series": "Split Inverter",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": "R32"
+    },
+    {
+      "id": "philco-96phin55ha2an",
+      "brand": "Philco",
+      "model": "96PHIN55HA2AN",
+      "series": "Split Inverter",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": "R32"
+    },
+    {
+      "id": "philco-96phs50ha4cn",
+      "brand": "Philco",
+      "model": "96PHS50HA4CN",
+      "series": "Split convencional",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": "R410A"
+    },
+    {
+      "id": "philco-96phs60ha4cn",
+      "brand": "Philco",
+      "model": "96PHS60HA4CN",
+      "series": "Split convencional",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": "R410A"
+    },
+    {
+      "id": "philco-phs80hc4bn",
+      "brand": "Philco",
+      "model": "PHS80HC4BN",
+      "series": "Split convencional",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": ""
+    },
+    {
+      "id": "carrier-53tqa1006",
+      "brand": "Carrier",
+      "model": "53TQA1006",
+      "series": "Modelo T",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": ""
+    },
+    {
+      "id": "carrier-53tqa1306",
+      "brand": "Carrier",
+      "model": "53TQA1306",
+      "series": "Modelo T",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": ""
+    },
+    {
+      "id": "carrier-53tqa1806",
+      "brand": "Carrier",
+      "model": "53TQA1806",
+      "series": "Modelo T",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": ""
+    },
+    {
+      "id": "carrier-53tqa2206",
+      "brand": "Carrier",
+      "model": "53TQA2206",
+      "series": "Modelo T",
+      "type": "Split de pared · frío/calor",
+      "refrigerant": ""
+    },
+    {
+      "id": "carrier-53hqv025",
+      "brand": "Carrier",
+      "model": "53HQV025",
+      "series": "XPower",
+      "type": "Split de pared · frío/calor",
       "refrigerant": ""
     }
   ]

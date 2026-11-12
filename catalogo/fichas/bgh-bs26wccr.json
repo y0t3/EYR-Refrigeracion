@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "bgh-bs26wccr",
+    "brand": "BGH",
+    "model": "BS26WCCR",
+    "series": "Silent Air convencional",
+    "type": "Split de pared · frío/calor",
+    "refrigerant": "",
+    "coolingKW": "2,70 kW",
+    "coolingBTU": "",
+    "indoorSize": "722 × 290 × 187 mm",
+    "outdoorSize": "720 × 495 × 270 mm",
+    "indoorWeight": "8,3 kg",
+    "outdoorWeight": "27,6 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "",
+    "notes": "Refrigerante y correspondencia de diámetros sin confirmar en la ficha; revisar manual/placa.",
+    "url": "https://grupobgh.com/silent-air-bgh/bgh-silent-air-split/",
+    "photo": "",
+    "photoCredit": ""
+  }
+}

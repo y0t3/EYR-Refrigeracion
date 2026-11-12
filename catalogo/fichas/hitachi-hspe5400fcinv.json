@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "hitachi-hspe5400fcinv",
+    "brand": "Hitachi",
+    "model": "HSPE5400FCINV",
+    "series": "Inverter R410A",
+    "type": "Split de pared · frío/calor",
+    "refrigerant": "R410A",
+    "coolingKW": "5,40 kW",
+    "coolingBTU": "",
+    "indoorSize": "890 × 300 × 223 mm",
+    "outdoorSize": "810 × 585 × 280 mm",
+    "indoorWeight": "10 kg",
+    "outdoorWeight": "33 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "",
+    "notes": "Ficha de Hitachi / Radio Victoria Argentina. Verificar variantes de lote y manual.",
+    "url": "https://hitachi.radiovictoria.com.ar/prod-5400-watts-frio-calor",
+    "photo": "",
+    "photoCredit": ""
+  }
+}

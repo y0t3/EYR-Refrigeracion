@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "philco-96phs50ha4cn",
+    "brand": "Philco",
+    "model": "96PHS50HA4CN",
+    "series": "Split convencional",
+    "type": "Split de pared · frío/calor",
+    "refrigerant": "R410A",
+    "coolingKW": "5,20 kW",
+    "coolingBTU": "",
+    "indoorSize": "896 × 300 × 214 mm",
+    "outdoorSize": "810 × 585 × 360 mm",
+    "indoorWeight": "10 kg",
+    "outdoorWeight": "38 kg",
+    "liquidPipe": "6,35 mm (1/4″)",
+    "gasPipe": "12,7 mm (1/2″)",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "",
+    "notes": "Fuente oficial Philco / Newsan Argentina. Verificar placa y manual de la unidad.",
+    "url": "https://philco.com.ar/product/96PHS50HA4CN",
+    "photo": "https://magnoliapublic2.newsan.com.ar/dam/jcr%3A899ac06b-4bd4-43dc-8b71-fd916c738db1/AA%20Split%20Philco%20%28PHS50HA4CN-PHS60HA4CN%29%201.jpg",
+    "photoCredit": "Fotografía del modelo publicada por Philco / Newsan"
+  }
+}

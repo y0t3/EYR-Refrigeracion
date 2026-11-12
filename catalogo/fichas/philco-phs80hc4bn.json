@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "philco-phs80hc4bn",
+    "brand": "Philco",
+    "model": "PHS80HC4BN",
+    "series": "Split convencional",
+    "type": "Split de pared · frío/calor",
+    "refrigerant": "",
+    "coolingKW": "8,00 kW",
+    "coolingBTU": "",
+    "indoorSize": "",
+    "outdoorSize": "",
+    "indoorWeight": "",
+    "outdoorWeight": "",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "",
+    "notes": "El catálogo oficial identifica el modelo de 8000 W; refrigerante, dimensiones y cañerías pendientes de verificar.",
+    "url": "https://philco.com.ar/products/aire-acondicionado",
+    "photo": "",
+    "photoCredit": ""
+  }
+}

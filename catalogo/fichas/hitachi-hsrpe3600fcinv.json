@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "hitachi-hsrpe3600fcinv",
+    "brand": "Hitachi",
+    "model": "HSRPE3600FCINV",
+    "series": "Inverter R32",
+    "type": "Split de pared · frío/calor",
+    "refrigerant": "R32",
+    "coolingKW": "3,60 kW",
+    "coolingBTU": "",
+    "indoorSize": "790 × 255 × 198 mm",
+    "outdoorSize": "660 × 482 × 240 mm",
+    "indoorWeight": "7,5 kg",
+    "outdoorWeight": "20,5 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "",
+    "notes": "Ficha de Hitachi / Radio Victoria Argentina. Verificar variantes de lote y manual.",
+    "url": "https://hitachi.radiovictoria.com.ar/prod-3600-watts-frocalor",
+    "photo": "https://hitachi.radiovictoria.com.ar/contenidos/1792438400.png",
+    "photoCredit": "Imagen del equipo publicada por Hitachi Argentina"
+  }
+}

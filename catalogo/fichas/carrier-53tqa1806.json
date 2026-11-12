@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "carrier-53tqa1806",
+    "brand": "Carrier",
+    "model": "53TQA1806",
+    "series": "Modelo T",
+    "type": "Split de pared · frío/calor",
+    "refrigerant": "",
+    "coolingKW": "",
+    "coolingBTU": "",
+    "indoorSize": "",
+    "outdoorSize": "",
+    "indoorWeight": "",
+    "outdoorWeight": "",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "",
+    "notes": "Capacidad informada: 4500 kcal/h. Carrier publica manual por código exacto. Refrigerante, dimensiones y cañerías: no verificados en la ficha consultada.",
+    "url": "https://www.carrier.com.ar/manuales/modelo-t/",
+    "photo": "",
+    "photoCredit": ""
+  }
+}

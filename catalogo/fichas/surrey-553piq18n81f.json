@@ -1,0 +1,27 @@
+{
+  "schema": 2,
+  "updated": "2026-11-12",
+  "model": {
+    "id": "surrey-553piq18n81f",
+    "brand": "Surrey",
+    "model": "553PIQ18N81F",
+    "series": "Inverter Smart R32",
+    "type": "Split de pared · frío/calor",
+    "refrigerant": "R32",
+    "coolingKW": "5,82 kW",
+    "coolingBTU": "",
+    "indoorSize": "975 × 308 × 218 mm",
+    "outdoorSize": "765 × 555 × 303 mm",
+    "indoorWeight": "10,4 kg",
+    "outdoorWeight": "24,6 kg",
+    "liquidPipe": "",
+    "gasPipe": "",
+    "maxPipe": "",
+    "maxElevation": "",
+    "electrical": "",
+    "notes": "Medidas del fabricante reordenadas como ancho × alto × profundidad. Para intervención consultar placa y manual.",
+    "url": "https://www.surrey.com.ar/productos/residenciales/inverter_smart_r32_2026",
+    "photo": "https://www.surrey.com.ar/images/productos/inverter_smart_r32_2026.png",
+    "photoCredit": "Imagen oficial de la serie Surrey 553PIQ (representativa)"
+  }
+}
