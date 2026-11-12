@@ -1,0 +1,40 @@
+name: EYR · Compilar APK Android
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Obtener código
+        uses: actions/checkout@v4
+      - name: Preparar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Preparar Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Instalar Android 35
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Preparar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+      - name: Incluir app local en APK
+        run: |
+          mkdir -p android/app/src/main/assets/assets
+          cp index.html styles.css eyr-theme.css app.js pdf.js logo-data.js manifest.webmanifest sw.js android/app/src/main/assets/
+          cp assets/* android/app/src/main/assets/assets/
+      - name: Compilar APK de prueba
+        run: gradle -p android --no-daemon assembleDebug --stacktrace
+      - name: Publicar APK para descargar
+        uses: actions/upload-artifact@v4
+        with:
+          name: EYR-Refrigeracion-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30

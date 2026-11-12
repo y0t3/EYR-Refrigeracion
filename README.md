@@ -2,7 +2,7 @@
 
 Aplicación web progresiva (PWA) para gestionar **clientes, visitas y presupuestos**, con identidad visual EYR y generación directa de PDF sin librerías ni servidores externos.
 
-## Funciones de la versión 1.0
+## Funciones de la versión 1.2 — Fuego & Hielo
 
 - Agenda de visitas con fecha, hora, cliente, domicilio, descripción y estado.
 - Fichero de clientes con CUIT/DNI, teléfono, domicilio y notas.
@@ -13,6 +13,16 @@ Aplicación web progresiva (PWA) para gestionar **clientes, visitas y presupuest
 - Almacenamiento local en `localStorage`, con **exportación/importación de respaldo `.json`**.
 - Uso sin conexión después de la primera visita mediante `service worker` (al instalar desde una URL HTTPS).
 - App para PC y celular, sin Firebase, APIs, cuentas ni suscripciones.
+
+## Diseño Fuego & Hielo y APK Android
+
+- Interfaz oscura de alto contraste, con fuego y agua decorativos, banner de los dos técnicos y navegación luminosa. Las tarjetas y botones son funcionales: la imagen del mockup no reemplaza a la app.
+- Ícono azul EYR para instalar en el celular; logo blanco EYR exclusivo para PDF.
+- Se incluye proyecto Android nativo ligero (WebView con archivos locales bajo HTTPS virtual). El APK funciona sin servidor y mantiene datos localmente.
+- **Compilación en GitHub Actions**: workflow `.github/workflows/android-apk.yml` produce el APK debug. En GitHub → **Actions** → **EYR · Compilar APK Android**, descargar el artefacto `EYR-Refrigeracion-APK` y extraer `app-debug.apk` para instalar.
+- En Android 10+ el botón PDF guarda en **Descargas / EYR Refrigeracion**. Importación JSON habilitada con selector de archivos nativo.
+- No hay sincronización: cada instalación usa un almacén distinto. Antes de cambiar de la PWA al APK, exportá el respaldo JSON e importalo en la APK.
+- La versión debug es para pruebas personales; para distribuirla ampliamente conviene generar una versión release firmada.
 
 ## Ejecutar
 
@@ -49,6 +59,8 @@ Los PDF se crean íntegramente en el dispositivo. La aplicación no realiza fact
 - `logo-data.js`: copia codificada del logo para insertarlo en PDF sin conexión.
 - `assets/`: logos EYR proporcionados por el propietario y variantes recortadas para interfaces.
 - `manifest.webmanifest` y `sw.js`: instalación y funcionamiento sin conexión.
+- `eyr-theme.css`: diseño Fuego & Hielo sobre la base existente.
+- `android/`: proyecto para APK de Android; `.github/workflows/android-apk.yml`: compilación automatizada.
 
 ## Mejoras posteriores posibles
 
