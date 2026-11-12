@@ -380,6 +380,9 @@ function catalogDetail(id){
  modal('Ficha técnica · '+m.model,`${catalogPhoto(m,'detail')}${inCloud?'<p class="eyr-cloud-label">☁️ Consulta temporal: esta ficha no queda guardada hasta que la asocies a un cliente.</p>':''}<p class="eyr-model-warning">Los datos corresponden al modelo exacto <strong>${esc(m.model)}</strong>. Antes de intervenir, verificá la placa, el manual y las instrucciones de seguridad.</p>${catalogSpecGrid(m)}${m.notes?'<p class="eyr-catalog-footer">🛠 '+esc(m.notes)+'</p>':''}${source?'<p><a class="eyr-catalog-source" target="_blank" rel="noopener noreferrer" href="'+esc(source)+'">🌐 Ficha oficial y documentación del fabricante</a></p>':''}<div class="form-actions"><button class="btn btn-primary" data-action="catalog-associate" data-id="${esc(m.id)}">+ Asociar a cliente</button><button class="btn" data-action="close-modal">Cerrar</button></div>`,true);
  }
  
+// Funciones auxiliares que utilizan Clientes, Nueva visita e Historial técnico.
+function equipmentForClient(clientId){return (db.equipment||[]).filter(x=>x.clientId===clientId)}
+function equipmentName(item){return (item.brand||'Equipo')+' '+(item.model||'sin modelo')}
 function equipmentModel(item){return item.specSnapshot||findCatalogModel(item.catalogId)||null}
 function clientEquipmentCards(clientId){
  const list=equipmentForClient(clientId);

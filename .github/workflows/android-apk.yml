@@ -40,10 +40,12 @@ jobs:
           mkdir -p android/app/src/main/assets/assets
           cp index.html styles.css eyr-theme.css remitos.css calendar-views.css calendar-views.js catalogo.css catalogo-data.js app.js pdf.js remitos-pdf.js logo-data.js manifest.webmanifest sw.js android/app/src/main/assets/
           cp assets/* android/app/src/main/assets/assets/
-      - name: Compilar APK de prueba y versión sin firmar
-        run: gradle -p android --no-daemon assembleDebug assembleRelease --stacktrace
+      - name: Pruebas automáticas de pantallas
+        run: node tests/smoke.js
+      - name: Compilar APK release
+        run: gradle -p android --no-daemon assembleRelease --stacktrace
       - name: Preparar firma permanente, si hay secretos configurados
-        if: ${{ env.EYR_KEYSTORE_B64 != '' }}
+        if: ${{ env.EYR_KEYSTORE_B64 != '' && env.EYR_KEYSTORE_PASSWORD != '' && env.EYR_KEY_ALIAS != '' && env.EYR_KEY_PASSWORD != '' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -54,43 +56,16 @@ jobs:
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose "android/app/build/outputs/apk/release/EYR-Refrigeracion-Estable.apk"
           rm -f "$RUNNER_TEMP/eyr-release.p12"
       - name: Publicar APK con firma permanente
-        if: ${{ env.EYR_KEYSTORE_B64 != '' }}
+        if: ${{ env.EYR_KEYSTORE_B64 != '' && env.EYR_KEYSTORE_PASSWORD != '' && env.EYR_KEY_ALIAS != '' && env.EYR_KEY_PASSWORD != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: EYR-Refrigeracion-ESTABLE
           path: android/app/build/outputs/apk/release/EYR-Refrigeracion-Estable.apk
           if-no-files-found: error
           retention-days: 30
-      - name: Publicar APK sin firmar para su firma privada
-        if: ${{ env.EYR_KEYSTORE_B64 == '' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: EYR-Release-SIN-FIRMA-No-Instalar
-          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
-          if-no-files-found: error
-          retention-days: 7
-      - name: Herramientas oficiales Android para firma privada
-        if: ${{ env.EYR_KEYSTORE_B64 == '' }}
-        shell: bash
+      - name: Avisar si falta firma estable
+        if: ${{ env.EYR_KEYSTORE_B64 == '' || env.EYR_KEYSTORE_PASSWORD == '' || env.EYR_KEY_ALIAS == '' || env.EYR_KEY_PASSWORD == '' }}
         run: |
-          mkdir -p "$RUNNER_TEMP/eyr-apksigner/lib"
-          cp "$ANDROID_HOME/build-tools/35.0.0/apksigner" "$RUNNER_TEMP/eyr-apksigner/"
-          cp "$ANDROID_HOME/build-tools/35.0.0/lib/apksigner.jar" "$RUNNER_TEMP/eyr-apksigner/lib/"
-          cp "$ANDROID_HOME/build-tools/35.0.0/zipalign" "$RUNNER_TEMP/eyr-apksigner/"
-          cd "$RUNNER_TEMP"
-          zip -qr "$GITHUB_WORKSPACE/eyr-apksigner-tools.zip" eyr-apksigner
-      - name: Exportar herramientas oficiales
-        if: ${{ env.EYR_KEYSTORE_B64 == '' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: Android-Tools-Para-Firma-Privada
-          path: eyr-apksigner-tools.zip
-          if-no-files-found: error
-          retention-days: 7
-      - name: Publicar APK para descargar
-        uses: actions/upload-artifact@v4
-        with:
-          name: EYR-APK-PRUEBA-FIRMA-TEMPORAL
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          retention-days: 30
+          echo "::warning::No se publicó APK: faltan credenciales de firma permanente."
+          echo "## No hay APK actualizable" >> "$GITHUB_STEP_SUMMARY"
+          echo "La APK de actualización solo se publica con la misma firma de la versión instalada. Configurar los cuatro secretos EYR_KEYSTORE_B64, EYR_KEYSTORE_PASSWORD, EYR_KEY_ALIAS y EYR_KEY_PASSWORD." >> "$GITHUB_STEP_SUMMARY"

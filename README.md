@@ -167,3 +167,12 @@ Las APK previas se firmaban con claves de depuración temporales. Para actualiza
 - Android intenta abrir WhatsApp o WhatsApp Business en el número correspondiente; si no está instalado, usa el enlace oficial. La PWA usa `wa.me`.
 - Se admiten formatos argentinos habituales (+54 9, 011 15 y códigos de área). Los números incompletos se muestran sin botón para evitar abrir un destinatario erróneo.
 - No se edita el número original, no se agendan contactos y no cambian clientes, equipos, presupuestos, remitos, visitas ni respaldos.
+
+
+## v2.4.1 · Recuperación de Clientes / Visitas y distribución con firma estable
+
+- Se restauran `equipmentForClient` y `equipmentName`, perdidas en la reorganización del catálogo técnico. Su ausencia impedía abrir Clientes, Nueva visita, Historial técnico y Equipos.
+- Se conserva el botón WhatsApp de la v2.4 sin alterar los datos locales.
+- El proceso de compilación ejecuta pruebas automáticas de inicio, Clientes, Nueva visita, Historial y Equipos.
+- GitHub Actions publica exclusivamente una APK con firma permanente si están configurados los cuatro secretos de la misma clave de firma original. No se distribuyen APK temporales ni sin firma.
+- Android exige que una actualización tenga la misma firma que la instalación existente. Si no se conserva esa clave, hace falta respaldo y migración de instalación; no se puede actualizar directamente con otra firma.
