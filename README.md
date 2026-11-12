@@ -80,3 +80,11 @@ Plantillas de tareas frecuentes, recordatorios, filtro mensual avanzado, numerac
 - Barra de estado y navegación Android con fondo azul oscuro e indicadores blancos, respetando insets.
 - Corregida la delegación de clicks dentro de modales, que cancelaba el envío de los formularios de clientes y visitas.
 - La validación ya no crea registros incompletos.
+
+## v1.5 - Presupuestos, envío y navegación
+
+- Encabezado de presupuestos más compacto: logo más grande y datos comerciales a su lado.
+- **Ver PDF** y **Enviar** en listados y vistas previas de presupuestos y remitos.
+- Android guarda el documento en Descargas/EYR Refrigeracion y abre el visor PDF o el selector de compartir (WhatsApp disponible según la instalación).
+- El botón Atrás cierra ventanas, vuelve a la pantalla anterior y evita salir por accidente; en Inicio se requiere pulsarlo dos veces para salir.
+- Se mantiene la misma base local y los respaldos JSON.

@@ -22,10 +22,17 @@ function pdfQuote(q,company,total){
  function tx(s,x,yy,size=10,bold=false,col=C.ink,align='left'){s=String(s??'');if(!s)return;if(align==='right')x-=measure(s,size,bold);else if(align==='center')x-=measure(s,size,bold)/2;op(`BT /F${bold?2:1} ${n(size)} Tf ${color(col)} rg 1 0 0 1 ${n(x)} ${n(H-yy)} Tm (${pdfesc(s)}) Tj ET\n`)}
  function newPage(){page={ops:[]};pages.push(page);fillrect(0,0,W,7,C.blue);
  // Logo preserves the source EYR letters and fire / ice artwork.
- op(`q 78 0 0 68 43 ${n(H-101)} cm /Im0 Do Q\n`);
- const head=company.business||'EYR Refrigeración';tx(head,R,48,12,true,C.ink,'right');tx('CUIT: '+(company.cuit||''),R,64,8.6,false,C.ink,'right');tx(company.tax||'',R,77,8.6,false,C.ink,'right');
- const addresses=splitLines(company.address||'',8.2,270);addresses.slice(0,2).forEach((s,i)=>tx(s,R,90+i*11,8.2,false,C.ink,'right'));
- tx('Tel.: '+(company.phone||''),R,112,8.4,false,C.ink,'right');line(M,127,R,127,C.line,1);y=144}
+ // Marca y datos forman un bloque compacto; evitamos el vacío entre ambas columnas.
+ const logoW=126, logoH=110, headerX=M+logoW+16;
+ op(`q ${n(logoW)} 0 0 ${n(logoH)} ${n(M)} ${n(H-137)} cm /Im0 Do Q\n`);
+ const head=company.business||'EYR Refrigeración';
+ tx(head,headerX,43,13.2,true,C.ink);
+ tx('CUIT: '+(company.cuit||''),headerX,62,9.1,false,C.ink);
+ tx(company.tax||'',headerX,78,9.1,false,C.ink);
+ const addresses=splitLines(company.address||'',8.8,R-headerX-2);
+ addresses.slice(0,2).forEach((text,i)=>tx(text,headerX,94+i*12,8.8,false,C.ink));
+ tx('Tel.: '+(company.phone||''),headerX,addresses.length>1?129:116,8.9,false,C.ink);
+ line(M,148,R,148,C.line,1);y=165}
  function ensure(needed=15){if(y+needed>MAX_Y)newPage()}
  function paragraph(s,size=9.7,indent=0,col=C.ink,bold=false,leading=15){for(let str of splitLines(s,size,R-M-indent,bold)){ensure(leading);tx(str,M+indent,y,size,bold,col);y+=leading}}
  function title(s){ensure(38);y+=5;tx(s,M,y+4,12.5,true,C.ink);y+=21;line(M,y,R,y,C.line,.65);y+=11}

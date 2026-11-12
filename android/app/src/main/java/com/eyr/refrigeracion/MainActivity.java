@@ -3,11 +3,15 @@ package com.eyr.refrigeracion;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
+import android.content.ContentUris;
+import android.content.ClipData;
+import android.database.Cursor;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Message;
+import android.os.SystemClock;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
@@ -41,6 +45,8 @@ public class MainActivity extends Activity {
     private android.webkit.ValueCallback<Uri[]> uploadCallback;
     private byte[] pendingExport;
     private String pendingMime;
+    private String pendingAction="save";
+    private long lastBackPress=0L;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,7 +82,7 @@ public class MainActivity extends Activity {
         settings.setAllowFileAccess(false);
         settings.setAllowContentAccess(true);
         settings.setDefaultTextEncodingName("utf-8");
-        settings.setUserAgentString(settings.getUserAgentString() + " EYRAndroid/1.4");
+        settings.setUserAgentString(settings.getUserAgentString() + " EYRAndroid/1.5");
         webView.addJavascriptInterface(new NativeBridge(), "EYRAndroid");
         webView.setWebViewClient(new WebViewClient() {
             @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
@@ -156,55 +162,117 @@ public class MainActivity extends Activity {
     private void showMessage(String s) { runOnUiThread(() -> Toast.makeText(this,s,Toast.LENGTH_LONG).show()); }
 
     public class NativeBridge {
-        @JavascriptInterface public void saveFile(String dataUrl, String fileName, String mimeType) {
+        @JavascriptInterface public void saveFile(String dataUrl, String fileName, String mimeType, String action) {
             try {
                 int comma = dataUrl.indexOf(',');
-                if (comma<0 || dataUrl.length()>12000000) throw new IllegalArgumentException("Archivo demasiado grande");
-                byte[] bytes = Base64.decode(dataUrl.substring(comma+1),Base64.DEFAULT);
-                final String safe = fileName.replaceAll("[^a-zA-Z0-9._ -]", "_");
-                final String mime = (mimeType!=null && mimeType.equals("application/pdf")) ? "application/pdf" : "application/json";
-                runOnUiThread(() -> saveBytes(bytes, safe, mime));
-            } catch(Exception ex) { showMessage("No se pudo guardar el archivo: " + ex.getMessage()); }
+                if (comma<0 || dataUrl.length()>12000000)
+                    throw new IllegalArgumentException("Archivo demasiado grande");
+                byte[] bytes=Base64.decode(dataUrl.substring(comma+1),Base64.DEFAULT);
+                final String safe=fileName.replaceAll("[^a-zA-Z0-9._ -]","_");
+                final String mime="application/pdf".equals(mimeType)?"application/pdf":"application/json";
+                final String mode="share".equals(action)||"view".equals(action)?action:"save";
+                runOnUiThread(()->saveBytes(bytes,safe,mime,mode));
+            }catch(Exception ex){showMessage("No se pudo preparar el documento: "+ex.getMessage());}
         }
     }
-    private void saveBytes(byte[] bytes,String name,String mime) {
-        if(Build.VERSION.SDK_INT>=29) {
-            Uri uri=null;
-            try {
-                ContentValues info = new ContentValues();
-                info.put(MediaStore.MediaColumns.DISPLAY_NAME,name);
-                info.put(MediaStore.MediaColumns.MIME_TYPE,mime);
-                info.put(MediaStore.MediaColumns.RELATIVE_PATH,Environment.DIRECTORY_DOWNLOADS + "/EYR Refrigeracion");
-                uri=getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, info);
-                if (uri==null) throw new FileNotFoundException("Sin acceso a Descargas");
-                try (OutputStream out=getContentResolver().openOutputStream(uri)) {
-                    if(out==null) throw new FileNotFoundException("No se pudo escribir el archivo");
+    private Uri findSavedDocument(String name){
+        String folder=Environment.DIRECTORY_DOWNLOADS+"/EYR Refrigeracion/";
+        String clause=MediaStore.MediaColumns.DISPLAY_NAME+"=? AND "+MediaStore.MediaColumns.RELATIVE_PATH+"=?";
+        try(Cursor cursor=getContentResolver().query(
+                MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                new String[]{MediaStore.MediaColumns._ID},
+                clause,new String[]{name,folder},MediaStore.MediaColumns._ID+" DESC")){
+            if(cursor!=null&&cursor.moveToFirst())
+                return ContentUris.withAppendedId(MediaStore.Downloads.EXTERNAL_CONTENT_URI,cursor.getLong(0));
+        }catch(Exception ignored){}
+        return null;
+    }
+    private void openPdf(Uri uri){
+        try{
+            Intent intent=new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(uri,"application/pdf");
+            intent.setClipData(ClipData.newRawUri("PDF EYR",uri));
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(intent);
+        }catch(Exception ex){showMessage("No se encontró un visor de PDF. Podés abrirlo desde Descargas.");}
+    }
+    private void sharePdf(Uri uri){
+        try{
+            Intent send=new Intent(Intent.ACTION_SEND);
+            send.setType("application/pdf");
+            send.putExtra(Intent.EXTRA_STREAM,uri);
+            send.setClipData(ClipData.newRawUri("Documento EYR",uri));
+            send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(send,"Enviar PDF por WhatsApp"));
+        }catch(Exception ex){showMessage("No hay una aplicación disponible para compartir este PDF.");}
+    }
+    private void afterPdfSaved(Uri uri,String mime,String mode){
+        if(!"application/pdf".equals(mime)||"save".equals(mode)){
+            showMessage("Guardado en Descargas / EYR Refrigeracion");return;
+        }
+        if("view".equals(mode))openPdf(uri);
+        else if("share".equals(mode))sharePdf(uri);
+    }
+    private void saveBytes(byte[] bytes,String name,String mime,String mode){
+        if(Build.VERSION.SDK_INT>=29){
+            Uri uri=null;boolean created=false;
+            try{
+                // Reutiliza el PDF del mismo cliente y número; no acumula copias idénticas.
+                uri=findSavedDocument(name);
+                if(uri==null){
+                    ContentValues info=new ContentValues();
+                    info.put(MediaStore.MediaColumns.DISPLAY_NAME,name);
+                    info.put(MediaStore.MediaColumns.MIME_TYPE,mime);
+                    info.put(MediaStore.MediaColumns.RELATIVE_PATH,Environment.DIRECTORY_DOWNLOADS+"/EYR Refrigeracion");
+                    uri=getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI,info);
+                    created=true;
+                }
+                if(uri==null)throw new FileNotFoundException("Sin acceso a Descargas");
+                try(OutputStream out=getContentResolver().openOutputStream(uri,"rwt")){
+                    if(out==null)throw new FileNotFoundException("No se pudo escribir el PDF");
                     out.write(bytes);
                 }
-                showMessage("Guardado en Descargas / EYR Refrigeracion");
-            } catch (Exception e) { if(uri!=null)getContentResolver().delete(uri,null,null);showMessage("Error al guardar: "+e.getMessage()); }
-        } else {
-            pendingExport=bytes;pendingMime=mime;
+                afterPdfSaved(uri,mime,mode);
+            }catch(Exception ex){
+                if(created&&uri!=null)getContentResolver().delete(uri,null,null);
+                showMessage("Error al guardar: "+ex.getMessage());
+            }
+        }else{
+            pendingExport=bytes;pendingMime=mime;pendingAction=mode;
             Intent intent=new Intent(Intent.ACTION_CREATE_DOCUMENT);
-            intent.setType(mime);intent.addCategory(Intent.CATEGORY_OPENABLE);intent.putExtra(Intent.EXTRA_TITLE,name);
-            try {startActivityForResult(intent,EXPORT_FILE);} catch(Exception e) {showMessage("No se pudo abrir el guardado");}
+            intent.setType(mime);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.putExtra(Intent.EXTRA_TITLE,name);
+            try{startActivityForResult(intent,EXPORT_FILE);}
+            catch(Exception ex){showMessage("No se pudo abrir el guardado");}
         }
     }
     @Override protected void onActivityResult(int code,int result,Intent data){
         super.onActivityResult(code,result,data);
-        if(code==IMPORT_FILE && uploadCallback!=null){
+        if(code==IMPORT_FILE&&uploadCallback!=null){
             uploadCallback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(result,data));
             uploadCallback=null;
-        } else if(code==EXPORT_FILE && pendingExport!=null){
-            if(result==RESULT_OK && data!=null && data.getData()!=null){
-                try(OutputStream out=getContentResolver().openOutputStream(data.getData())){
+        }else if(code==EXPORT_FILE&&pendingExport!=null){
+            if(result==RESULT_OK&&data!=null&&data.getData()!=null){
+                try(OutputStream out=getContentResolver().openOutputStream(data.getData(),"rwt")){
                     if(out==null)throw new FileNotFoundException("No se puede escribir");
-                    out.write(pendingExport);showMessage("Archivo guardado correctamente");
+                    out.write(pendingExport);
+                    afterPdfSaved(data.getData(),pendingMime,pendingAction);
                 }catch(Exception ex){showMessage("Error al guardar: "+ex.getMessage());}
             }
-            pendingExport=null;pendingMime=null;
+            pendingExport=null;pendingMime=null;pendingAction="save";
         }
     }
-    @Override public void onBackPressed(){if(webView!=null && webView.canGoBack())webView.goBack();else super.onBackPressed();}
+    @Override public void onBackPressed(){
+        if(webView==null){super.onBackPressed();return;}
+        webView.evaluateJavascript(
+          "(function(){try{return !!(window.EYRGoBack && window.EYRGoBack());}catch(e){return false;}})()",
+          result->{
+              if("true".equals(result))return;
+              long now=SystemClock.elapsedRealtime();
+              if(now-lastBackPress<2200L){finish();}
+              else{lastBackPress=now;showMessage("Tocá atrás otra vez para salir de EYR");}
+          });
+    }
     @Override public void onDestroy(){if(webView!=null){webView.destroy();webView=null;}super.onDestroy();}
 }
