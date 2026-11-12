@@ -20,3 +20,15 @@ dependencies {
     // FileProvider para fotos temporales en alta resolución sin guardar en galería.
     implementation 'androidx.core:core:1.13.1'
 }
+
+/* ML Kit 16.0.1 y AndroidX pueden traer distintas versiones de kotlin-stdlib.
+   Unificar las variantes jdk7/jdk8 evita Duplicate class en Gradle 8. */
+configurations.configureEach {
+    resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == 'org.jetbrains.kotlin' &&
+            details.requested.name.startsWith('kotlin-stdlib')) {
+            details.useVersion '1.8.22'
+            details.because 'Unificar Kotlin stdlib de OCR y AndroidX para Android'
+        }
+    }
+}
