@@ -1,0 +1,31 @@
+/* EYR v2.5 - Reconocimiento de etiquetas: azul hielo, naranja y lectura clara en celular */
+.eyr-catalog-top-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.eyr-label-scan{display:flex;flex-direction:column;gap:13px;line-height:1.5}
+.eyr-scan-intro{font-size:13px;color:#cae6fa;margin:1px 0 0}
+.eyr-scan-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.eyr-scan-option{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;min-height:124px;border:1px solid #2faff1;border-radius:15px;background:linear-gradient(140deg,rgba(3,54,98,.97),rgba(4,24,51,.94));box-shadow:inset 0 1px 0 rgba(138,233,255,.18);color:#e8f8ff;cursor:pointer;padding:15px 9px;font:inherit}
+.eyr-scan-option>span{font-size:30px}
+.eyr-scan-option strong{font-size:14px;color:#fff}
+.eyr-scan-option small{font-size:11px;color:#abd6ed;line-height:1.35}
+.eyr-scan-option:hover,.eyr-scan-option:focus-visible{border-color:#ffaf54;box-shadow:0 0 15px rgba(255,148,42,.20)}
+.eyr-scan-loading,.eyr-scan-filename,.eyr-scan-ok,.eyr-scan-note,.eyr-scan-error{border:1px solid rgba(75,165,215,.46);padding:10px 12px;border-radius:10px;font-size:12px;line-height:1.45;background:rgba(11,45,77,.7);color:#c9edff}
+.eyr-scan-loading{border-color:#f49a44;color:#ffe6b5}
+.eyr-scan-error{border-color:#db6666;background:rgba(102,19,35,.26);color:#ffd2d2}
+.eyr-scan-ok{border-color:#33b8a3;color:#a5ffde}
+.eyr-scan-text{border:1px solid #205277;border-radius:10px;background:#06192f;overflow:hidden}
+.eyr-scan-text summary{padding:10px 13px;cursor:pointer;font-weight:700;color:#a4eaff;font-size:12px}
+.eyr-scan-text pre{white-space:pre-wrap;overflow-wrap:anywhere;margin:0;padding:12px;background:#06152a;font-size:11px;line-height:1.5;color:#d9f0ff;max-height:150px;overflow:auto}
+.eyr-scan-subtitle,.eyr-scan-manual h3,.eyr-scan-spec h3{font-size:15px;color:#e4faff;margin:5px 0 1px}
+.eyr-scan-match{border:1px solid #2e9ed8;border-radius:12px;background:rgba(3,43,74,.8);padding:12px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.eyr-scan-match>div:first-child{min-width:0;flex:1 1 160px}
+.eyr-scan-match strong{display:block;overflow-wrap:anywhere;color:#fff;font-size:14px}
+.eyr-scan-match small{display:block;color:#b5d7ea;font-size:11px;margin-top:4px}
+.eyr-scan-match-tag{display:inline-block;color:#7ef1ce;border:1px solid rgba(94,235,190,.4);border-radius:999px;font-size:10px;font-weight:700;padding:2px 8px;margin-bottom:6px}
+.eyr-scan-match-actions,.eyr-scan-actions{display:flex;flex-wrap:wrap;gap:7px}
+.eyr-scan-manual{padding:15px;border:1px solid rgba(84,180,240,.5);border-radius:13px;background:rgba(10,36,67,.65);display:flex;flex-direction:column;gap:12px}
+.eyr-scan-manual .form-grid{margin-top:0}
+.eyr-scan-spec{padding:13px;border:1px solid #348dc2;border-radius:11px;background:#08233c}
+.eyr-quote-identified{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:rgba(10,76,111,.42);border:1px solid #2796bf;border-radius:13px;padding:12px;margin-top:12px}
+.eyr-quote-identified strong{display:block;overflow-wrap:anywhere;font-size:14px;color:#fff}
+.eyr-quote-identified small{display:block;margin-top:4px;font-size:11px;color:#acd5e7}
+@media(max-width:520px){.eyr-scan-option{min-height:116px}.eyr-scan-match-actions{width:100%}.eyr-scan-match-actions .btn{flex:1}.eyr-catalog-top-actions{width:100%}.eyr-catalog-top-actions .btn{flex:1}}

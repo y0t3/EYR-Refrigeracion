@@ -38,7 +38,7 @@ jobs:
       - name: Incluir app local en APK
         run: |
           mkdir -p android/app/src/main/assets/assets
-          cp index.html styles.css eyr-theme.css remitos.css calendar-views.css calendar-views.js catalogo.css catalogo-data.js app.js pdf.js remitos-pdf.js logo-data.js manifest.webmanifest sw.js android/app/src/main/assets/
+          cp index.html styles.css eyr-theme.css remitos.css calendar-views.css calendar-views.js catalogo.css label-scan.css label-scan.js catalogo-data.js app.js pdf.js remitos-pdf.js logo-data.js manifest.webmanifest sw.js android/app/src/main/assets/
           cp assets/* android/app/src/main/assets/assets/
       - name: Pruebas automáticas de pantallas
         run: node tests/smoke.js

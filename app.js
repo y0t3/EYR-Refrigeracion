@@ -366,7 +366,7 @@ function catalogCard(m){
  }
  function catalogo(){
   const who=catalogClientId?db.clients.find(c=>c.id===catalogClientId):null;
-  return `${headings('Catálogo técnico','Encontrá un aire por marca o código de modelo.')}<section class="panel"><div class="eyr-catalog-intro"><div><h2>❄️ Fichas técnicas EYR</h2><p>Los ejemplos funcionan sin conexión. Si buscás otro modelo, EYR consulta GitHub y lo muestra sin guardarlo. Solo queda registrado si lo asociás a un cliente.</p></div><button class="btn btn-small btn-blue" data-action="catalog-update">↻ Renovar ejemplos</button></div>${who?'<div class="eyr-catalog-client-cta"><span>Asociando a: <strong>'+esc(who.name)+'</strong></span><button class="btn btn-small" data-action="catalog-clear-client">Quitar selección</button></div>':''}<div class="eyr-catalog-tools"><input id="catalog-search" autocomplete="off" placeholder="Buscar marca o modelo en GitHub…" aria-label="Buscar modelo" value="${esc(catalogQuery)}"><select id="catalog-brand" aria-label="Filtrar marca">${catalogBrandOptions()}</select></div><div id="catalog-results">${catalogResults()}</div><div class="eyr-catalog-new"><strong>¿No encontraste el equipo?</strong><p class="eyr-catalog-footer">Podés anotarlo para un cliente sin inventar datos técnicos. La búsqueda online requiere Internet; las fichas guardadas de tus clientes no.</p><div class="eyr-model-actions"><button class="btn btn-small" data-action="catalog-manual">+ Registrar equipo manual</button><button class="btn btn-small" data-action="catalog-find-web">🔎 Buscar en la web</button></div></div><p class="eyr-catalog-footer">Ejemplos locales: ${allNumberOfFeatured()} · Actualización: ${esc(db.catalogUpdatedAt||window.EYR_CATALOG_BASE?.updated||'No consultada')} · Confirmá la placa y el manual antes de intervenir.</p></section>`;
+  return `${headings('Catálogo técnico','Encontrá un aire por marca o código de modelo.')}<section class="panel"><div class="eyr-catalog-intro"><div><h2>❄️ Fichas técnicas EYR</h2><p>Los ejemplos funcionan sin conexión. Si buscás otro modelo, EYR consulta GitHub y lo muestra sin guardarlo. Solo queda registrado si lo asociás a un cliente.</p></div><div class="eyr-catalog-top-actions"><button class="btn btn-primary" data-action="label-open" data-context="catalog">📷 Identificar por foto</button><button class="btn btn-small btn-blue" data-action="catalog-update">↻ Renovar ejemplos</button></div></div>${who?'<div class="eyr-catalog-client-cta"><span>Asociando a: <strong>'+esc(who.name)+'</strong></span><button class="btn btn-small" data-action="catalog-clear-client">Quitar selección</button></div>':''}<div class="eyr-catalog-tools"><input id="catalog-search" autocomplete="off" placeholder="Buscar marca o modelo en GitHub…" aria-label="Buscar modelo" value="${esc(catalogQuery)}"><select id="catalog-brand" aria-label="Filtrar marca">${catalogBrandOptions()}</select></div><div id="catalog-results">${catalogResults()}</div><div class="eyr-catalog-new"><strong>¿No encontraste el equipo?</strong><p class="eyr-catalog-footer">Podés anotarlo para un cliente sin inventar datos técnicos. La búsqueda online requiere Internet; las fichas guardadas de tus clientes no.</p><div class="eyr-model-actions"><button class="btn btn-small" data-action="catalog-manual">+ Registrar equipo manual</button><button class="btn btn-small" data-action="catalog-find-web">🔎 Buscar en la web</button></div></div><p class="eyr-catalog-footer">Ejemplos locales: ${allNumberOfFeatured()} · Actualización: ${esc(db.catalogUpdatedAt||window.EYR_CATALOG_BASE?.updated||'No consultada')} · Confirmá la placa y el manual antes de intervenir.</p></section>`;
  }
  function allNumberOfFeatured(){return catalogItems().length}
  
@@ -390,7 +390,7 @@ function clientEquipmentCards(clientId){
 }
 function clientEquipments(id){
  const c=db.clients.find(x=>x.id===id);if(!c)return;
- modal('Equipos · '+c.name,`<p class="eyr-catalog-footer">Equipos registrados para este cliente. Podés consultar sus datos y asociarlos a visitas.</p>${clientEquipmentCards(id)}<div class="form-actions"><button class="btn btn-primary" data-action="catalog-for-client" data-id="${esc(c.id)}">📚 Buscar equipo en catálogo</button><button class="btn" data-action="equipment-manual" data-id="${esc(c.id)}">+ Equipo manual</button></div>`,true);
+ modal('Equipos · '+c.name,`<p class="eyr-catalog-footer">Equipos registrados para este cliente. Podés consultar sus datos y asociarlos a visitas.</p>${clientEquipmentCards(id)}<div class="form-actions"><button class="btn btn-primary" data-action="label-open" data-context="client" data-id="${esc(c.id)}">📷 Identificar por foto</button><button class="btn btn-blue" data-action="catalog-for-client" data-id="${esc(c.id)}">📚 Buscar en catálogo</button><button class="btn" data-action="equipment-manual" data-id="${esc(c.id)}">+ Manual</button></div>`,true);
 }
 function equipmentModal(equipmentId,catalogId,preselectedClientId){
  const old=(db.equipment||[]).find(x=>x.id===equipmentId);
@@ -468,10 +468,23 @@ function remitoPreview(r){if(!r)return;const total=remitoTotal(r);const rows=(r.
 function newDraft(){return {visitId:'',id:null,number:db.settings.lastNumber+1,date:isoToday(),clientId:'',client:'',cuit:'',phone:'',address:'',tasks:[''],mode:'global',globalPrice:0,items:[{description:'',category:'materiales',qty:1,unit:0}],validity:db.settings.validity,advance:0,conditions:db.settings.conditions,exclusions:'',observations:'',status:'borrador'}}
 function openQuote(id,clientId,visit){closeModal();const old=db.quotes.find(q=>q.id===id);draft=old?JSON.parse(JSON.stringify(old)):newDraft();if(draft.title){draft.tasks=[draft.title,...(draft.tasks||[])];delete draft.title}if(clientId)applyClient(draft,clientId);if(visit){draft.client=visit.client||draft.client;draft.address=visit.address||draft.address;draft.tasks=[visit.description||'',...(draft.tasks||[]).filter(Boolean)].filter(Boolean);if(!draft.tasks.length)draft.tasks=[''];if(visit.clientId)applyClient(draft,visit.clientId);draft.visitId=visit.id}rememberScreen();page='editar-presupuesto';render();scrollTo(0,0)}
 function applyClient(o,id){const c=db.clients.find(x=>x.id===id);if(c){Object.assign(o,{clientId:c.id,client:c.name,cuit:c.cuit||'',phone:c.phone||'',address:c.address||''})}}
+
+/* La identificación queda como dato estructurado del presupuesto; la foto no se guarda. */
+function quoteEquipmentSection(q){
+ const e=q?.labelEquipment||null;
+ let selected='';
+ if(e)selected='<div class="eyr-quote-identified"><div><strong>❄️ '+esc(e.brand)+' · '+esc(e.model)+'</strong><small>'+esc(e.serial?'Serie: '+e.serial:'Sin número de serie')+' · '+(e.specSnapshot?'Ficha disponible':'Ficha técnica pendiente')+'</small></div>'+
+ '<div class="eyr-scan-match-actions">'+(e.specSnapshot?'<button class="btn btn-small btn-blue" data-action="label-quote-spec">📖 Ver ficha</button>':'')+
+ '<button class="btn btn-small" data-action="label-quote-clear">Quitar</button></div></div>';
+ return '<div class="form-section eyr-quote-label-section"><h3>📷 Identificar equipo desde etiqueta</h3>'+
+ '<p class="section-desc">Si el cliente mandó una foto por WhatsApp, elegila desde la galería. También podés fotografiar la placa en el lugar.</p>'+
+ '<button type="button" class="btn btn-blue" data-action="label-open" data-context="quote">📷 Sacar foto o cargar imagen</button>'+
+ selected+'<p class="eyr-catalog-footer">Se guarda el modelo como referencia del presupuesto. Para incluirlo en el PDF, agregalo también a las observaciones.</p></div>';
+}
 function quoteForm(){const q=draft;const clientOpts=`<option value="">Carga manual / nuevo cliente</option>${db.clients.map(c=>`<option value="${c.id}" ${q.clientId===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}`;
  return `${headings(q.id?'Editar presupuesto':'Nuevo presupuesto','Completá el servicio, elegí cómo mostrar los precios y generá tu PDF.')}
  <div class="quote-layout"><form class="panel" id="quote-form"><div class="form-section"><h3>1. Datos del presupuesto</h3><p class="section-desc">Los datos comerciales de EYR ya están incorporados al PDF.</p><div class="form-grid">${field('date','Fecha de emisión',q.date,'','date','required')}${field('number','Número',num(q.number),'','text','disabled')}<div class="field full"><label for="f-clientId">Cliente guardado (opcional)</label><select name="clientId" id="f-clientId">${clientOpts}</select></div>${field('client','Nombre o razón social del cliente',q.client,'full','text','required')}${field('cuit','CUIT / DNI (opcional)',q.cuit)}${field('phone','Teléfono (opcional)',q.phone)}${field('address','Domicilio de la intervención',q.address,'full')}<div class="field full"><label>Visita vinculada (opcional)</label><select name="visitId"><option value="">Sin visita relacionada</option>${db.visits.filter(v=>(!q.clientId&&!q.client)||(v.clientId&&v.clientId===q.clientId)||(nameKey(v.client)===nameKey(q.client))).map(v=>`<option value="${esc(v.id)}" ${q.visitId===v.id?"selected":""}>${esc(dateText(v.date)+" · "+v.client+" · "+v.description.slice(0,45))}</option>`).join("")}</select></div></div></div>
- <div class="form-section"><h3>2. Alcance de los trabajos</h3><p class="section-desc">Cada línea representa una tarea. Podés agregar tantas como necesites.</p><div id="task-rows">${(q.tasks||[]).map((t,i)=>`<div class="task-row"><input aria-label="Tarea ${i+1}" data-task="${i}" type="text" placeholder="Ej.: Instalación de unidad evaporadora" value="${esc(t)}"><button type="button" class="btn btn-danger" data-action="remove-task" data-index="${i}" aria-label="Eliminar tarea">×</button></div>`).join('')}</div><button type="button" class="btn btn-small" data-action="add-task">+ Agregar tarea</button><div class="eyr-picker"><select id="template-quote">${templateOptions()}</select><button type="button" class="btn btn-small btn-blue" data-action="use-template-quote">+ Trabajo frecuente</button></div></div>
+ ${quoteEquipmentSection(q)}<div class="form-section"><h3>2. Alcance de los trabajos</h3><p class="section-desc">Cada línea representa una tarea. Podés agregar tantas como necesites.</p><div id="task-rows">${(q.tasks||[]).map((t,i)=>`<div class="task-row"><input aria-label="Tarea ${i+1}" data-task="${i}" type="text" placeholder="Ej.: Instalación de unidad evaporadora" value="${esc(t)}"><button type="button" class="btn btn-danger" data-action="remove-task" data-index="${i}" aria-label="Eliminar tarea">×</button></div>`).join('')}</div><button type="button" class="btn btn-small" data-action="add-task">+ Agregar tarea</button><div class="eyr-picker"><select id="template-quote">${templateOptions()}</select><button type="button" class="btn btn-small btn-blue" data-action="use-template-quote">+ Trabajo frecuente</button></div></div>
  <div class="form-section"><h3>3. Presentación de los precios</h3><p class="section-desc">Elegí qué verá el cliente. No cambia la descripción de las tareas.</p><div class="segmented" role="group" aria-label="Forma de presentar importes">${[['global','Precio global'],['rubros','Por rubros'],['detallado','Detallado por ítem']].map(([v,t])=>`<button type="button" class="${q.mode===v?'active':''}" data-action="set-mode" data-mode="${v}">${t}</button>`).join('')}</div>${q.mode==='global'?`<div class="form-grid">${field('globalPrice','Importe total ($)',q.globalPrice,'','number','min="0" step="0.01"')}</div>`:`<div id="item-rows">${(q.items||[]).map((it,i)=>`<div class="line-item"><input aria-label="Descripción" data-item="${i}" data-key="description" placeholder="Material o servicio" value="${esc(it.description)}"><select aria-label="Rubro" data-item="${i}" data-key="category">${[['materiales','Materiales'],['manoobra','Mano de obra'],['otros','Otros']].map(([v,t])=>`<option value="${v}" ${it.category===v?'selected':''}>${t}</option>`).join('')}</select><input type="number" aria-label="Cantidad" data-item="${i}" data-key="qty" value="${esc(it.qty)}" min="0" step="0.01"><input type="number" aria-label="Precio unitario" data-item="${i}" data-key="unit" value="${esc(it.unit)}" min="0" step="0.01"><button type="button" class="btn btn-danger btn-small remove" data-action="remove-item" data-index="${i}">× Quitar</button></div>`).join('')}</div><button type="button" class="btn btn-small" data-action="add-item">+ Agregar material o servicio</button>`}<div class="total-box"><span><b>Total del presupuesto</b><br><small class="muted">Calculado automáticamente</small></span><strong id="current-total">${fmt(quoteTotal(q))}</strong></div></div>
  <div class="form-section"><h3>4. Condiciones y observaciones</h3><p class="section-desc">El texto predeterminado puede editarse para cada presupuesto.</p><div class="form-grid">${field('validity','Validez del presupuesto (días)',q.validity,'','number','min="0"')}${field('advance','Anticipo solicitado (%)',q.advance,'','number','min="0" max="100"')}${area('conditions','Condiciones comerciales y técnicas',q.conditions,'full')}${area('exclusions','No incluye / exclusiones (opcional)',q.exclusions,'full',3)}${area('observations','Observaciones adicionales (opcional)',q.observations,'full',3)}<div class="field full"><label for="f-status">Estado del presupuesto</label><select name="status" id="f-status">${['borrador','enviado','aceptado','rechazado'].map(x=>`<option value="${x}" ${x===q.status?'selected':''}>${statusLabel[x]}</option>`).join('')}</select></div></div></div>
  <div class="form-actions"><button type="button" class="btn" data-page="presupuestos">Cancelar</button><button type="button" class="btn" data-action="preview-draft">Vista previa</button><button class="btn btn-blue" type="submit">Guardar presupuesto</button><button type="button" class="btn btn-primary" data-action="save-pdf-draft">Guardar y generar PDF ↓</button></div></form>
@@ -529,7 +542,80 @@ function printQuote(q,action='save'){
   if(action==='save')toast('Presupuesto guardado. Usá Ver PDF o Enviar para abrirlo.');
  }catch(e){console.error(e);toast('No se pudo generar el PDF: '+e.message)}
 }
+
+/* Puente entre OCR nativo, fichas ya existentes y formularios EYR. */
+function applyScannedLabel(context,clientId,record,serial){
+ const verified=validCatalogModel(record)?record:null;
+ if(verified)catalogTransient=verified;
+ if(context==='quote'){
+  closeModal();
+  if(!draft){toast('El presupuesto ya no está abierto.');return}
+  draft.labelEquipment={brand:String(record.brand||''),model:String(record.model||''),
+   serial:String(serial||''),catalogId:verified?.id||'',
+   specSnapshot:verified?JSON.parse(JSON.stringify(verified)):null};
+  render();toast('Modelo asociado al presupuesto.');return;
+ }
+ if(context==='client'||catalogClientId){
+  closeModal();
+  const target=context==='client'?clientId:catalogClientId;
+  equipmentModal(null,verified?.id||null,target);
+  const form=$('#equipment-form');
+  if(form){
+   if(!verified){
+    if(form.elements.namedItem('brand'))form.elements.namedItem('brand').value=record.brand||'';
+    if(form.elements.namedItem('model'))form.elements.namedItem('model').value=record.model||'';
+   }
+   if(form.elements.namedItem('serial'))form.elements.namedItem('serial').value=serial||'';
+  }
+  return;
+ }
+ closeModal();
+ if(verified)catalogDetail(verified.id);
+ else if(db.clients.length){
+   equipmentModal(null,null,null);
+   const form=$('#equipment-form');
+   if(form){
+    if(form.elements.namedItem('brand'))form.elements.namedItem('brand').value=record.brand||'';
+    if(form.elements.namedItem('model'))form.elements.namedItem('model').value=record.model||'';
+    if(form.elements.namedItem('serial'))form.elements.namedItem('serial').value=serial||'';
+   }
+ }else toast('Modelo leído. Registrá un cliente si querés guardar su equipo.');
+}
+function setupLabelScanner(){
+ if(!window.EYRLabelScan)return;
+ window.EYRLabelScan.init({
+  modal,closeModal,
+  localModels:catalogItems,
+  remoteModels:()=>catalogIndex?.models||[],
+  ensureIndex:catalogEnsureIndex,
+  resolveModel:async id=>{
+   const saved=findCatalogModel(id);
+   if(saved)return saved;
+   const entry=catalogIndex?.models.find(m=>m.id===id);
+   if(!entry)throw Error('No se encontró el modelo en el catálogo.');
+   const doc=await catalogFetchJson('catalogo/fichas/'+encodeURIComponent(id)+'.json');
+   const m=doc?.model;
+   if(doc?.schema!==2||!validCatalogModel(m)||m.id!==id||m.brand!==entry.brand||m.model!==entry.model)
+     throw Error('La ficha en línea no coincide con el modelo.');
+   catalogTransient=m;return m;
+  },
+  specHTML:m=>catalogPhoto(m,'detail')+catalogSpecGrid(m)+
+   (officialCatalogUrl(m.url)?'<p><a class="eyr-catalog-source" href="'+esc(officialCatalogUrl(m.url))+'" target="_blank" rel="noopener noreferrer">🌐 Ver fuente oficial</a></p>':''),
+  apply:applyScannedLabel
+ });
+}
 function handleAction(b,event){const a=b.dataset.action,id=b.dataset.id;
+  if(a==='label-open'){if(b.dataset.context==='quote')grabDraft();window.EYRLabelScan?.begin(b.dataset.context||'catalog',id||'');return;}
+  if(a==='label-quote-clear'){grabDraft();delete draft.labelEquipment;render();return;}
+  if(a==='label-quote-spec'){
+   const item=draft?.labelEquipment;
+   const m=item?.specSnapshot||findCatalogModel(item?.catalogId);
+   if(m)modal('Ficha técnica · '+m.model,catalogPhoto(m,'detail')+catalogSpecGrid(m),true);
+   else toast('No hay ficha verificada para este modelo.');
+   return;
+  }
+  if(a.startsWith('label-')){window.EYRLabelScan?.handle(a,id);return;}
+
   
   if(a==='catalog-detail')return catalogDetail(id);
  if(a==='catalog-cloud-detail')return catalogCloudDetail(id);
@@ -640,6 +726,7 @@ document.addEventListener('input',e=>{const el=e.target;if(el.id==='catalog-sear
  if(el.closest('#quote-form')&&el.id!=='f-clientId'){grabDraft();if($('#current-total'))$('#current-total').textContent=fmt(quoteTotal(draft))}
  if(el.closest('#remito-form')&&el.id!=='remito-clientId'){grabRemitoDraft();refreshRemitoTotal()}});
 document.addEventListener('change',async e=>{const el=e.target;
+ if(el.id==='eyr-label-file'){window.EYRLabelScan?.browserFile(el.files?.[0]);return;}
  if(el.id==='catalog-brand'){catalogBrand=el.value;catalogRefreshResults();if(catalogQuery.trim().length>=2&&!catalogIndex&&catalogIndexStatus!=='offline')catalogEnsureIndex();return}
  if(el.id==='filter-list'){filter=el.value;render();$('#search-list')?.focus();return}
  if(el.id==='remito-clientId'&&remitoDraft){grabRemitoDraft();if(el.value){applyRemitoClient(remitoDraft,el.value);render()}return}
@@ -705,6 +792,7 @@ document.addEventListener('submit',e=>{const form=e.target;e.preventDefault();
 window.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
 window.addEventListener('storage',e=>{if(e.key===KEY){db=load();if(page!=='editar-presupuesto'&&page!=='editar-remito')render()}});
 if(!navigator.userAgent.includes('EYRAndroid')&&'serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(e=>console.warn('Modo offline no disponible:',e));
+setupLabelScanner();
 render();
 if(window.EYRAndroid&&typeof window.EYRAndroid.appReady==='function'){
   requestAnimationFrame(()=>requestAnimationFrame(()=>window.EYRAndroid.appReady()));

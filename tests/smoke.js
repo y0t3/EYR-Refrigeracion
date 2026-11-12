@@ -2,7 +2,7 @@
 const fs=require('node:fs');
 const assert=require('node:assert/strict');
 const code=fs.readFileSync('app.js','utf8').replace(/\}\)\(\);\s*$/,
-  'window.__SMOKE={db,render,clients,clientCard,clientHistory,clientEquipments,visitModal,whatsappNumber};})();');
+  'window.__SMOKE={db,render,clients,clientCard,clientHistory,clientEquipments,visitModal,whatsappNumber,openQuote};})();');
 assert(code.includes('window.__SMOKE='),'No se pudo cargar la app para prueba');
 const nodes={'#view':{innerHTML:''},'#modal-root':{innerHTML:''},'#toast':{textContent:'',classList:{add(){},remove(){}}}};
 const window={addEventListener(){},EYRAndroid:null,EYR_CATALOG_BASE:{models:[]}};
@@ -10,6 +10,9 @@ const document={querySelector:q=>nodes[q]||null,querySelectorAll:()=>[],addEvent
 const navigator={userAgent:'EYR-TEST'};
 const location={protocol:'file:'};
 const localStorage={getItem:()=>null,setItem(){}};
+// Cargar primero la nueva pantalla y el motor de búsqueda de etiquetas.
+const scanner=fs.readFileSync('label-scan.js','utf8');
+new Function('window','document',scanner)(window,document);
 new Function('window','document','navigator','location','localStorage','scrollTo','confirm','alert',code)(
   window,document,navigator,location,localStorage,()=>{},()=>true,()=>{});
 const app=window.__SMOKE;assert(app,'La aplicación no inicia');
@@ -31,3 +34,19 @@ assert.equal(app.whatsappNumber('011 15 4567 8901'),'5491145678901');
 assert.equal(app.whatsappNumber('+54 9 11 4567 8901'),'5491145678901');
 assert.equal(app.whatsappNumber('15 4567 8901'),'');
 console.log('OK: inicio, Clientes, WhatsApp, Nueva visita, Historial y Equipos');
+
+const mockModel={id:'surrey-etiqueta-test',brand:'Surrey',model:'553NIQ12KN81F',
+  url:'https://www.surrey.com.ar/test',series:'Serie de prueba',refrigerant:'R32'};
+window.EYR_CATALOG_BASE.models.push(mockModel);
+const recognizer=window.EYRLabelScan;
+assert(recognizer,'Falta módulo de etiquetas');
+assert.equal(recognizer.exactMatches('Marca: Surrey\\nMODEL: 553NIQ12KN81F',[mockModel]).length,1);
+assert.equal(recognizer.exactMatches('Marca: Surrey\\nMODEL: OTROCODIGO',[mockModel]).length,0);
+app.openQuote?.();
+assert(nodes['#view'].innerHTML.includes('data-context="quote"'),'No se ofrece foto en Presupuesto');
+recognizer.begin('quote','');
+assert(nodes['#modal-root'].innerHTML.includes('label-gallery'),'No se ofrece cargar foto');
+assert(nodes['#modal-root'].innerHTML.includes('label-camera'),'No se ofrece cámara');
+recognizer.onNativeResult({text:'Surrey\nMODEL: 553NIQ12KN81F\nSERIE: X12345',source:'gallery'});
+assert(nodes['#modal-root'].innerHTML.includes('surrey-etiqueta-test'),'No se reconoció el modelo en catálogo');
+console.log('OK: identificación por foto, catálogo y presupuesto');

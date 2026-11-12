@@ -26,6 +26,14 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.graphics.BitmapFactory;
+import androidx.core.content.FileProvider;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.text.TextRecognizer;
+import com.google.mlkit.vision.text.TextRecognition;
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
+import org.json.JSONObject;
+import java.io.File;
+import java.io.IOException;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -50,6 +58,8 @@ public class MainActivity extends Activity {
     private static final String ROOT = ORIGIN + "/assets/";
     private static final int IMPORT_FILE = 34;
     private static final int EXPORT_FILE = 35;
+    private static final int LABEL_PICK_IMAGE = 36;
+    private static final int LABEL_TAKE_PHOTO = 37;
     private WebView webView;
     private ImageView startupImage;
     private final Handler splashHandler = new Handler(Looper.getMainLooper());
@@ -57,6 +67,9 @@ public class MainActivity extends Activity {
     private boolean splashDismissed=false;
     private final ExecutorService backupExecutor=Executors.newSingleThreadExecutor();
     private android.webkit.ValueCallback<Uri[]> uploadCallback;
+    private Uri labelPhotoUri;
+    private File labelPhotoFile;
+    private boolean labelScanRequested=false;
     private byte[] pendingExport;
     private String pendingMime;
     private String pendingAction="save";
@@ -252,6 +265,80 @@ public class MainActivity extends Activity {
     }
 
 
+
+    /** EYR v2.5: foto de la etiqueta local, sin permisos de galería ni subida a servidores. */
+    private void startLabelScan(String source) {
+        if(labelScanRequested) return;
+        final boolean useCamera="camera".equals(source);
+        labelScanRequested=true;
+        try {
+            if(useCamera){
+                File dir=new File(getCacheDir(),"eyr-label-ocr");
+                if(!dir.exists()&&!dir.mkdirs())throw new IOException("No se pudo preparar la cámara");
+                labelPhotoFile=File.createTempFile("etiqueta_",".jpg",dir);
+                labelPhotoUri=FileProvider.getUriForFile(this,
+                    getPackageName()+".fileprovider",labelPhotoFile);
+                Intent camera=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                camera.putExtra(MediaStore.EXTRA_OUTPUT,labelPhotoUri);
+                camera.setClipData(ClipData.newUri(getContentResolver(),"Etiqueta EYR",labelPhotoUri));
+                camera.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                startActivityForResult(camera,LABEL_TAKE_PHOTO);
+            }else{
+                clearLabelPhoto();
+                Intent picker=new Intent(Intent.ACTION_GET_CONTENT);
+                picker.setType("image/*");
+                picker.addCategory(Intent.CATEGORY_OPENABLE);
+                startActivityForResult(Intent.createChooser(picker,"Elegir foto de etiqueta"),LABEL_PICK_IMAGE);
+            }
+        }catch(Exception ex){
+            labelScanRequested=false;
+            clearLabelPhoto();
+            dispatchLabelResult("", "No se pudo abrir la cámara o galería.",false,useCamera?"camera":"gallery");
+        }
+    }
+    private void clearLabelPhoto(){
+        labelPhotoUri=null;
+        if(labelPhotoFile!=null){try{labelPhotoFile.delete();}catch(Exception ignored){}}
+        labelPhotoFile=null;
+    }
+    private void dispatchLabelResult(String text,String error,boolean cancelled,String source){
+        JSONObject result=new JSONObject();
+        try{
+            result.put("text",text==null?"":text);
+            result.put("error",error==null?"":error);
+            result.put("cancelled",cancelled);
+            result.put("source",source);
+        }catch(Exception ex){return;}
+        final String script="if(window.EYRLabelScan&&window.EYRLabelScan.onNativeResult)window.EYRLabelScan.onNativeResult("+result.toString()+");";
+        runOnUiThread(()->{if(webView!=null)webView.evaluateJavascript(script,null);});
+    }
+    private void recognizeLabelImage(Uri uri,String source) {
+        if(uri==null){
+            clearLabelPhoto();
+            dispatchLabelResult("","No se recibió una imagen.",false,source);
+            return;
+        }
+        final TextRecognizer recognizer=TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
+        try{
+            InputImage image=InputImage.fromFilePath(this,uri);
+            recognizer.process(image)
+                .addOnSuccessListener(found->{
+                    dispatchLabelResult(found.getText(),null,false,source);
+                })
+                .addOnFailureListener(ex->{
+                    dispatchLabelResult("","No se pudo leer la foto. Probá con otra imagen más nítida.",false,source);
+                })
+                .addOnCompleteListener(done->{
+                    recognizer.close();
+                    clearLabelPhoto();
+                });
+        }catch(Exception ex){
+            recognizer.close();
+            clearLabelPhoto();
+            dispatchLabelResult("","No se pudo abrir la imagen. Probá en JPG o PNG.",false,source);
+        }
+    }
+
     /** Apertura externa sin envío automático de mensajes. */
     private void launchClientWhatsApp(String number) {
         if(number==null || !number.matches("[1-9][0-9]{9,14}")) {
@@ -271,6 +358,9 @@ public class MainActivity extends Activity {
     }
 
     public class NativeBridge {
+        @JavascriptInterface public void scanLabel(String source) {
+            runOnUiThread(()->startLabelScan(source));
+        }
         @JavascriptInterface public void openWhatsApp(String number) {
             runOnUiThread(()->launchClientWhatsApp(number));
         }
@@ -373,6 +463,16 @@ public class MainActivity extends Activity {
     }
     @Override protected void onActivityResult(int code,int result,Intent data){
         super.onActivityResult(code,result,data);
+        if(code==LABEL_PICK_IMAGE||code==LABEL_TAKE_PHOTO){
+            labelScanRequested=false;
+            final String source=code==LABEL_TAKE_PHOTO?"camera":"gallery";
+            final Uri selected=code==LABEL_TAKE_PHOTO?labelPhotoUri:(data==null?null:data.getData());
+            if(result!=RESULT_OK){
+                clearLabelPhoto();
+                dispatchLabelResult("",null,true,source);
+            }else recognizeLabelImage(selected,source);
+            return;
+        }
         if(code==IMPORT_FILE&&uploadCallback!=null){
             uploadCallback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(result,data));
             uploadCallback=null;
@@ -398,5 +498,5 @@ public class MainActivity extends Activity {
               else{lastBackPress=now;showMessage("Tocá atrás otra vez para salir de EYR");}
           });
     }
-    @Override public void onDestroy(){splashHandler.removeCallbacksAndMessages(null);backupExecutor.shutdown();if(webView!=null){webView.destroy();webView=null;}super.onDestroy();}
+    @Override public void onDestroy(){splashHandler.removeCallbacksAndMessages(null);backupExecutor.shutdown();clearLabelPhoto();if(webView!=null){webView.destroy();webView=null;}super.onDestroy();}
 }

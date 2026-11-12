@@ -6,11 +6,17 @@ android {
         applicationId 'com.eyr.refrigeracion'
         minSdk 26
         targetSdk 35
-        versionCode 15
-        versionName '2.4.1'
+        versionCode 16
+        versionName '2.5'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+}
+dependencies {
+    // Modelo OCR latino integrado: funciona sin datos móviles ni descargar modelos.
+    implementation 'com.google.mlkit:text-recognition:16.0.1'
+    // FileProvider para fotos temporales en alta resolución sin guardar en galería.
+    implementation 'androidx.core:core:1.13.1'
 }

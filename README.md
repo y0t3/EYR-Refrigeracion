@@ -176,3 +176,14 @@ Las APK previas se firmaban con claves de depuración temporales. Para actualiza
 - El proceso de compilación ejecuta pruebas automáticas de inicio, Clientes, Nueva visita, Historial y Equipos.
 - GitHub Actions publica exclusivamente una APK con firma permanente si están configurados los cuatro secretos de la misma clave de firma original. No se distribuyen APK temporales ni sin firma.
 - Android exige que una actualización tenga la misma firma que la instalación existente. Si no se conserva esa clave, hace falta respaldo y migración de instalación; no se puede actualizar directamente con otra firma.
+
+
+## v2.5 · Identificación de modelos desde fotos de etiquetas
+
+- Acceso **Sacar foto** (cámara) o **Cargar foto** (imagen de WhatsApp/galería) desde **Catálogo técnico**, **Clientes → Equipos** y **Nuevo presupuesto**.
+- El OCR local usa Google ML Kit Text Recognition v2 con modelo latino **integrado en APK**. No se sube la imagen a servidores y no se guarda automáticamente en el registro del cliente; la foto temporal de cámara se elimina al finalizar.
+- Se detectan códigos exactos entre los cinco ejemplos por marca sin conexión y el índice completo de GitHub cuando hay internet. Solo se muestra una ficha oficial si el código **coincide exactamente** con la entrada del catálogo.
+- Si la foto es borrosa o el código no está en catálogo, el usuario puede corregir marca, modelo y número de serie y guardarlos como datos sin especificaciones técnicas inventadas.
+- En Clientes, la coincidencia abre **Asociar equipo** con modelo y serie precompletados. En Presupuestos se asocia una referencia estructurada al borrador, con ficha técnica verificable, sin modificar automáticamente el PDF. En Catálogo permite consultar la ficha.
+- En la versión web la selección de foto funciona, pero la lectura OCR automática es exclusiva de la APK Android.
+- Permanece el `applicationId` y certificado de firma estable; versión Android `2.5` (`versionCode=16`).
