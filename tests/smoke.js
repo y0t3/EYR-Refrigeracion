@@ -2,7 +2,7 @@
 const fs=require('node:fs');
 const assert=require('node:assert/strict');
 const code=fs.readFileSync('app.js','utf8').replace(/\}\)\(\);\s*$/,
-  'window.__SMOKE={db,render,home,clients,clientCard,clientHistory,clientEquipments,visitModal,whatsappNumber,openQuote,visitDetail,equipmentDetail,moneyValue,moneyDisplay,formatLiveMoney,quoteTotal,remitoTotal,quoteForm};})();');
+  'window.__SMOKE={db,render,home,clients,clientCard,clientHistory,clientEquipments,visitModal,whatsappNumber,openQuote,visitDetail,equipmentDetail,moneyValue,moneyDisplay,formatLiveMoney,quoteTotal,remitoTotal,quoteForm,quotePreview,remitoPreview};})();');
 assert(code.includes('window.__SMOKE='),'No se pudo cargar la app para prueba');
 const nodes={'#view':{innerHTML:''},'#modal-root':{innerHTML:''},'#toast':{textContent:'',classList:{add(){},remove(){}}}};
 const window={addEventListener(){},EYRAndroid:null,EYR_CATALOG_BASE:{models:[]}};
@@ -154,3 +154,19 @@ app.formatLiveMoney(moneyInput);
 assert.equal(moneyInput.value,'2.500.000');
 assert.equal(moneyInput.caret,moneyInput.value.length);
 console.log('OK: sincronizar teléfonos y separadores de miles en presupuestos y remitos');
+
+const moneyQuote={id:null,number:2,date:'2026-11-13',client:'Cliente prueba',tasks:['Aire acondicionado'],
+ mode:'detallado',items:[{description:'Instalación',category:'manoobra',qty:1,unit:'250.000'}],
+ validity:15,advance:0,conditions:'Trabajo de prueba'};
+app.quotePreview(moneyQuote);
+const detailHTML=nodes['#modal-root'].innerHTML;
+assert(detailHTML.includes('250.000'),'La vista previa debe usar $250.000 por ítem');
+assert(!detailHTML.includes('1 × $ 250)'),'La vista previa no puede mostrar $250');
+assert(detailHTML.match(/250\.000/g)?.length>=2,'Tanto detalle como total deben contener $250.000');
+moneyQuote.mode='rubros';
+app.quotePreview(moneyQuote);
+assert(nodes['#modal-root'].innerHTML.includes('250.000'),'Por rubros debe conservar miles');
+const moneyRemito={id:'r-test',number:2,date:'2026-11-13',client:'Prueba',items:[{description:'Instalación',qty:1,unit:'250.000'}]};
+app.remitoPreview(moneyRemito);
+assert(nodes['#modal-root'].innerHTML.match(/250\.000/g)?.length>=2,'Remito: detalle y total');
+console.log('OK: detalle y total en pesos argentinos, vista previa y remitos');

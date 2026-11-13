@@ -262,3 +262,12 @@ Las APK previas se firmaban con claves de depuración temporales. Para actualiza
 - Los campos monetarios de Presupuestos, Remitos y trabajos frecuentes ahora incorporan miles al escribir, por ejemplo: 850000 -> 850.000 y 2200000 -> 2.200.000.
 - Para centavos se usa coma: 1.250,50. Los valores se conservan numéricos en cálculos y PDF; cantidades y porcentajes no se modifican.
 - Android **v3.0** (versionCode 21), mismo identificador y firma estable, instalable encima de v2.9.
+
+
+## v3.0.1 · Corrección de detalle económico en presupuestos y remitos (13/11/2026)
+
+- **Corrección del error informado en vista previa:** al escribir `250.000` en el precio unitario, ahora el detalle económico, el subtotal y el total general muestran todos **$250.000**. Antes algunos componentes usaban `Number('250.000')` y mostraban incorrectamente $250 mientras el total calculado era correcto.
+- Actualizados cálculos para **vista previa detallada**, **por rubros**, **PDF de presupuestos**, **PDF de remitos** (original y duplicado) y **remito generado desde un presupuesto**. Se usa un convertidor de importes compatible con puntos de miles, coma decimal y números ya almacenados.
+- El valor guardado continúa siendo numérico; los formularios mantienen separador de miles y teclado decimal. No se alteran registros, fotografías, firma de APK ni sincronización cercana v3.0.
+- Pruebas de regresión de vista previa y PDFs con una línea de instalación por `250.000`, tanto antes como después de guardar.
+- Android **v3.0.1**, `versionCode=22`, actualizable sin desinstalar.

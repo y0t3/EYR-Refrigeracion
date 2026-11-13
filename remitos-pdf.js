@@ -4,6 +4,13 @@
 const W=595.28,H=841.89,M=36,R=W-M,FS=840;
 const INK=[.12,.15,.20],GRAY=[.43,.48,.54],LINE=[.72,.75,.78],PALE=[.968,.978,.988],WHITE=[1,1,1];
 const num=v=>Number.isFinite(Number(v))?Number(v):0;
+const amountValue=v=>{
+ if(typeof v==='number')return Number.isFinite(v)?v:0;
+ const raw=String(v??'').trim();
+ if(!raw||!/^[\d.,\s]+$/.test(raw))return 0;
+ const n=Number(raw.replace(/\s|\./g,'').replace(',','.'));
+ return Number.isFinite(n)?n:0;
+};
 const money=v=>'$'+new Intl.NumberFormat('es-AR',{minimumFractionDigits:0,maximumFractionDigits:2}).format(num(v));
 const date=v=>{const m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?m[3]+'/'+m[2]+'/'+m[1]:String(v||'')};
 function latin(s){const rep={0x2018:39,0x2019:39,0x201c:34,0x201d:34,0x2013:45,0x2014:45,0x2022:149,0x2026:133,0x00a0:32,0x20ac:128};const b=[];for(const ch of String(s??'')){const n=ch.codePointAt(0);b.push(n<=255?n:(rep[n]??63))}return Uint8Array.from(b)}
@@ -15,7 +22,7 @@ function width(text,size,bold=false){if(typeof document!=='undefined'){const e=w
 function wrap(src,size,max,bold=false){const result=[];for(const part of String(src??'').replace(/\r/g,'').split('\n')){let line='';for(let word of part.trim().split(/\s+/).filter(Boolean)){const t=line?line+' '+word:word;if(width(t,size,bold)<=max){line=t;continue}if(line){result.push(line);line=''}while(word.length>1&&width(word,size,bold)>max){let q=word.length-1;while(q>1&&width(word.slice(0,q),size,bold)>max)q--;result.push(word.slice(0,q));word=word.slice(q)}line=word}result.push(line)}return result}
 function createRemitoPDF(remito,company){
  if(!remito||!Array.isArray(remito.items))throw Error('Remito inválido');
- const entries=remito.items.filter(it=>String(it.description||'').trim()&&num(it.qty)>0).map(it=>({...it,qty:num(it.qty),unit:num(it.unit)}));
+ const entries=remito.items.filter(it=>String(it.description||'').trim()&&num(it.qty)>0).map(it=>({...it,qty:num(it.qty),unit:amountValue(it.unit)}));
  if(!entries.length)throw Error('Agregá al menos un concepto');
  const total=entries.reduce((a,it)=>a+it.qty*it.unit,0);const pages=[];let p=null,y=0,copy='ORIGINAL',copyPage=0;
  function op(s){p.ops.push(s)}

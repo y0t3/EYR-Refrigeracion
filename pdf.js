@@ -3,7 +3,14 @@
 'use strict';
 const W=595.28,H=841.89,M=43,R=W-M,MAX_Y=770;
 const C={ink:[.09,.16,.25],muted:[.36,.44,.52],blue:[.13,.39,.64],orange:[.90,.39,.19],line:[.83,.87,.91],pale:[.94,.97,.99]};
-const money=n=>new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(Number(n)||0);
+const amountValue=v=>{
+ if(typeof v==='number')return Number.isFinite(v)?v:0;
+ const raw=String(v??'').trim();
+ if(!raw||!/^[\d.,\s]+$/.test(raw))return 0;
+ const n=Number(raw.replace(/\s|\./g,'').replace(',','.'));
+ return Number.isFinite(n)?n:0;
+};
+const money=n=>new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',maximumFractionDigits:0}).format(amountValue(n));
 const prettyDate=v=>{if(!v)return '';let [y,m,d]=v.split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'})};
 const plusDays=(v,n)=>{let [y,m,d]=(v||'2000-01-01').split('-').map(Number);let z=new Date(y,m-1,d+Number(n||0));return `${z.getFullYear()}-${String(z.getMonth()+1).padStart(2,'0')}-${String(z.getDate()).padStart(2,'0')}`};
 function latin(s){const repl={0x2018:39,0x2019:39,0x201C:34,0x201D:34,0x2013:45,0x2014:45,0x2022:149,0x20AC:128,0x2026:133,0x00A0:32};const out=[];for(let ch of String(s)){let code=ch.codePointAt(0);out.push(code<=255?code:(repl[code]??63))}return Uint8Array.from(out)}
@@ -47,9 +54,9 @@ function pdfQuote(q,company,total){
  if(taskList.length){for(const t of taskList)itemBullet(t)}
  y+=6;title('Detalle económico');
  if(q.mode==='rubros'){
- const types=[['manoobra','Mano de obra'],['materiales','Materiales'],['otros','Otros']];for(const [cat,label] of types){const amount=(q.items||[]).filter(i=>i.category===cat).reduce((s,i)=>s+(Number(i.qty)||0)*(Number(i.unit)||0),0);if(amount)tableRow(label,amount,true)}
+ const types=[['manoobra','Mano de obra'],['materiales','Materiales'],['otros','Otros']];for(const [cat,label] of types){const amount=(q.items||[]).filter(i=>i.category===cat).reduce((s,i)=>s+(Number(i.qty)||0)*amountValue(i.unit),0);if(amount)tableRow(label,amount,true)}
  }else if(q.mode==='detallado'){
- const types={materiales:'Materiales',manoobra:'Mano de obra',otros:'Otros'};for(const item of q.items||[]){if(!item.description)continue;let amount=(Number(item.qty)||0)*(Number(item.unit)||0),quantity=Number(item.qty)||0;tableRow(`${item.description} (${quantity} × ${money(item.unit)}) · ${types[item.category]||'Otros'}`,amount)}
+ const types={materiales:'Materiales',manoobra:'Mano de obra',otros:'Otros'};for(const item of q.items||[]){if(!item.description)continue;let amount=(Number(item.qty)||0)*amountValue(item.unit),quantity=Number(item.qty)||0;tableRow(`${item.description} (${quantity} × ${money(item.unit)}) · ${types[item.category]||'Otros'}`,amount)}
  }
  totalBox('TOTAL GENERAL',total);
  title('Condiciones comerciales');paragraph(`Presupuesto válido por ${Math.max(0,Number(q.validity)||0)} días corridos, hasta el ${prettyDate(plusDays(q.date,q.validity))}.`,9.4,0,C.ink,false,15);

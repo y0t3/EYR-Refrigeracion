@@ -46,6 +46,7 @@ jobs:
           node tests/workshop.js
           node tests/diagnostico.js
           node tests/peer-sync.js
+          node tests/money-regression.js
       - name: Compilar APK release
         run: gradle -p android --no-daemon assembleRelease --stacktrace
       - name: Preparar firma permanente, si hay secretos configurados
