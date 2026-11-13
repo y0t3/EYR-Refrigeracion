@@ -6,8 +6,8 @@ android {
         applicationId 'com.eyr.refrigeracion'
         minSdk 26
         targetSdk 35
-        versionCode 20
-        versionName '2.9'
+        versionCode 21
+        versionName '3.0'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -23,6 +23,7 @@ dependencies {
     // QR integrados y lectura local sin descargar modelos.
     implementation 'com.google.mlkit:barcode-scanning:17.3.0'
     implementation 'com.google.zxing:core:3.5.3'
+    implementation 'com.google.android.gms:play-services-nearby:19.5.1'
 }
 
 /* ML Kit 16.0.1 y AndroidX pueden traer distintas versiones de kotlin-stdlib.

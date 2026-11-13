@@ -77,6 +77,7 @@ public class MainActivity extends Activity {
     private static final int WORK_PHOTO_PICK = 39;
     private static final int WORK_VOICE = 40;
     private WebView webView;
+    private NearbySyncManager nearbySync;
     private ImageView startupImage;
     private final Handler splashHandler = new Handler(Looper.getMainLooper());
     private long splashShownAt;
@@ -131,6 +132,7 @@ public class MainActivity extends Activity {
         settings.setDefaultTextEncodingName("utf-8");
         settings.setUserAgentString(settings.getUserAgentString() + " EYRAndroid/1.9");
         webView.addJavascriptInterface(new NativeBridge(), "EYRAndroid");
+        nearbySync=new NearbySyncManager(this,webView);
         webView.setWebViewClient(new WebViewClient() {
             @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 Uri u = request.getUrl();
@@ -528,6 +530,21 @@ public class MainActivity extends Activity {
     }
 
     public class NativeBridge {
+        @JavascriptInterface public void nearbyStart(String mode){
+            if(mode==null)return;
+            runOnUiThread(()->{if(nearbySync!=null)nearbySync.start(mode);});
+        }
+        @JavascriptInterface public void nearbyConnect(String endpointId){
+            if(endpointId==null)return;
+            runOnUiThread(()->{if(nearbySync!=null)nearbySync.connect(endpointId);});
+        }
+        @JavascriptInterface public void nearbySend(String json){
+            if(json==null||json.length()>7000000)return;
+            if(nearbySync!=null)nearbySync.send(json);
+        }
+        @JavascriptInterface public void nearbyStop(){
+            runOnUiThread(()->{if(nearbySync!=null)nearbySync.stop();});
+        }
         @JavascriptInterface public void startVoiceInput(){runOnUiThread(MainActivity.this::beginVoiceInput);}
         @JavascriptInterface public void generateEquipmentQR(String equipmentId){makeEquipmentQR(equipmentId);}
         @JavascriptInterface public void captureWorkPhoto(String source){runOnUiThread(()->startWorkPhoto(source));}
@@ -635,6 +652,10 @@ public class MainActivity extends Activity {
             catch(Exception ex){showMessage("No se pudo abrir el guardado");}
         }
     }
+    @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        if(nearbySync!=null)nearbySync.permissionsResult(requestCode,grantResults);
+    }
     @Override protected void onActivityResult(int code,int result,Intent data){
         super.onActivityResult(code,result,data);
         if(code==WORK_VOICE){
@@ -687,5 +708,5 @@ public class MainActivity extends Activity {
               else{lastBackPress=now;showMessage("Tocá atrás otra vez para salir de EYR");}
           });
     }
-    @Override public void onDestroy(){splashHandler.removeCallbacksAndMessages(null);backupExecutor.shutdown();clearLabelPhoto();clearWorkPhoto();if(webView!=null){webView.destroy();webView=null;}super.onDestroy();}
+    @Override public void onDestroy(){splashHandler.removeCallbacksAndMessages(null);if(nearbySync!=null)nearbySync.close();backupExecutor.shutdown();clearLabelPhoto();clearWorkPhoto();if(webView!=null){webView.destroy();webView=null;}super.onDestroy();}
 }

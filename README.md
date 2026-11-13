@@ -245,3 +245,20 @@ Las APK previas se firmaban con claves de depuración temporales. Para actualiza
 - **Guardar en visita:** al seleccionar una visita, se guardan marca, modelo, código, OCR textual y referencia bibliográfica; se respeta el informe existente (notas y fotografías). Las dos fotos utilizadas para leer **no se almacenan ni se envían**. Para guardar evidencias fotográficas debe utilizarse el registro de fotos de la visita.
 - El recorrido es **local-first**; las referencias incorporadas en APK se consultan sin conexión. El catálogo remoto es opcional. El resultado puede registrarse aunque no exista ficha técnica coincidente.
 - Se mantiene cámara/galería/OCR anterior, todas las pantallas, aplicación y clave de firma permanente. Android v2.9 (versionCode=20).
+
+## v3.0 · Sincronización cercana de teléfonos y precios legibles (13/11/2026)
+
+### Sincronización Android
+- Botón **Sincronizar** en Inicio y Configuración: un teléfono toca Compartir datos y otro Buscar teléfono. Con Bluetooth y Wi-Fi activados, ambos comparan el mismo código de seguridad para aceptar el enlace.
+- Google Nearby Connections en modo P2P_POINT_TO_POINT: datos cifrados entre teléfonos cercanos, sin Firebase ni servidor propio. Requiere Servicios de Google Play. No actualiza teléfonos que estén lejos ni funciona automáticamente sin abrir la app.
+- Intercambia y combina en ambos teléfonos clientes, agenda, equipos, presupuestos, remitos, trabajos frecuentes y texto de informes, sin reemplazar toda la base del otro.
+- Las fechas de modificación y las marcas de eliminación permiten distinguir nuevos, actualizados y borrados. Si dos personas editan el mismo registro, EYR conserva la modificación más reciente y avisa del conflicto.
+- Los posibles números de presupuesto o remito repetidos al trabajar ambos offline **se avisan**, sin renumerar automáticamente documentos anteriores.
+- Las **fotos JPG de informes permanecen en el celular de origen**, no se transfieren en esta sincronización. Se conserva la copia ZIP completa para trasladar las imágenes. Los informes recibidos no crean referencias a fotografías ausentes.
+- El intercambio usa archivos temporales privados transferidos mediante Nearby, validados antes de aplicar cambios. Se recomienda mantener copias ZIP/JSON adicionales.
+- Permisos de dispositivos cercanos solo cuando se utiliza esta función. Los equipos deben estar próximos con la app abierta. Sin Servicios de Google Play el método de respaldo sigue disponible.
+
+### Miles y centavos en pesos argentinos
+- Los campos monetarios de Presupuestos, Remitos y trabajos frecuentes ahora incorporan miles al escribir, por ejemplo: 850000 -> 850.000 y 2200000 -> 2.200.000.
+- Para centavos se usa coma: 1.250,50. Los valores se conservan numéricos en cálculos y PDF; cantidades y porcentajes no se modifican.
+- Android **v3.0** (versionCode 21), mismo identificador y firma estable, instalable encima de v2.9.

@@ -2,7 +2,7 @@
 const fs=require('node:fs');
 const assert=require('node:assert/strict');
 const code=fs.readFileSync('app.js','utf8').replace(/\}\)\(\);\s*$/,
-  'window.__SMOKE={db,render,home,clients,clientCard,clientHistory,clientEquipments,visitModal,whatsappNumber,openQuote,visitDetail,equipmentDetail};})();');
+  'window.__SMOKE={db,render,home,clients,clientCard,clientHistory,clientEquipments,visitModal,whatsappNumber,openQuote,visitDetail,equipmentDetail,moneyValue,moneyDisplay,formatLiveMoney,quoteTotal,remitoTotal,quoteForm};})();');
 assert(code.includes('window.__SMOKE='),'No se pudo cargar la app para prueba');
 const nodes={'#view':{innerHTML:''},'#modal-root':{innerHTML:''},'#toast':{textContent:'',classList:{add(){},remove(){}}}};
 const window={addEventListener(){},EYRAndroid:null,EYR_CATALOG_BASE:{models:[]}};
@@ -20,6 +20,8 @@ new Function('window',errorCodes)(window);
 new Function('window','document','indexedDB','crypto',workshop)(window,document,undefined,{randomUUID:()=> 'smoke-uuid'});
 const duo=fs.readFileSync('diagnostico-duo.js','utf8');
 new Function('window','document',duo)(window,document);
+const peer=fs.readFileSync('peer-sync.js','utf8');
+new Function('window','document','localStorage','crypto',peer)(window,document,localStorage,{randomUUID:()=> 'smoke-device-uuid'});
 new Function('window','document','navigator','location','localStorage','scrollTo','confirm','alert',code)(
   window,document,navigator,location,localStorage,()=>{},()=>true,()=>{});
 const app=window.__SMOKE;assert(app,'La aplicación no inicia');
@@ -133,3 +135,22 @@ assert(nodes['#modal-root'].innerHTML.includes('Foto 2 · Display del aire'),'No
 window.EYRDoublePhoto.onNativeResult({source:'duo-error-gallery',text:'E1'});
 assert(nodes['#modal-root'].innerHTML.includes('Sensor de ambiente'),'No presenta la interpretación para BGH BP30CN');
 console.log('OK: integración de dos fotos desde Inicio');
+
+assert(app.home().includes('data-action="peer-open"'),'No aparece el botón Sincronizar de Inicio');
+assert(window.EYRPeerSync,'Falta motor de sincronización');
+assert.equal(app.moneyValue('850.000'),850000);
+assert.equal(app.moneyValue('2.200.000'),2200000);
+assert.equal(app.moneyValue('850.000,50'),850000.5);
+assert.equal(app.moneyDisplay(850000),'850.000');
+assert.equal(app.moneyDisplay(2200000),'2.200.000');
+assert.equal(app.quoteTotal({mode:'detallado',items:[{qty:2,unit:'850.000'},{qty:1,unit:'500.000'}]}),2200000);
+assert.equal(app.quoteTotal({mode:'global',globalPrice:'1.250.000'}),1250000);
+assert.equal(app.remitoTotal({items:[{qty:2,unit:'850.000'},{qty:1,unit:'500.000'}]}),2200000);
+const moneyInput={dataset:{money:'1'},value:'850000',selectionStart:6,setSelectionRange(a,b){this.caret=a}};
+app.formatLiveMoney(moneyInput);
+assert.equal(moneyInput.value,'850.000');
+moneyInput.value='2500000';moneyInput.selectionStart=7;
+app.formatLiveMoney(moneyInput);
+assert.equal(moneyInput.value,'2.500.000');
+assert.equal(moneyInput.caret,moneyInput.value.length);
+console.log('OK: sincronizar teléfonos y separadores de miles en presupuestos y remitos');
