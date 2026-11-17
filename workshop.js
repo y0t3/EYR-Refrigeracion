@@ -189,6 +189,7 @@ function reportHTML(r,v){
  '<button type="button" class="btn btn-small" data-action="work-error-review">📚 Consultar código</button><button type="button" class="btn btn-small" data-action="work-error-library">📖 Ver biblioteca</button></div>'+
  found+
  '<div class="eyr-work-warning">La lectura de una foto no equivale a un diagnóstico. Las referencias generales por marca deben confirmarse contra el manual del modelo exacto.</div>'+
+ '<div class="eyr-formal-quick"><div><strong>📄 Informe técnico formal</strong><p>EYR redacta un documento para el cliente o aseguradora usando tus respuestas.</p></div><button type="button" class="btn btn-primary" data-action="formal-open" data-id="'+esc(v.id)+'">Crear informe formal</button></div>'+
  '<div class="form-actions"><button class="btn" data-action="work-save">Guardar informe</button>'+
  '<button class="btn btn-blue" data-action="work-pdf" data-mode="view">👁 Ver informe PDF</button>'+
  '<button class="btn btn-primary" data-action="work-pdf" data-mode="share">↗ Compartir PDF</button></div></div>';

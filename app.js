@@ -166,6 +166,7 @@ function home(){
  return `<div class="hero-eyr"><picture><source media="(max-width: 600px)" srcset="assets/banner-mobile.jpg"><img src="assets/banner-eyr.jpg" alt="EYR Refrigeración: fuego, hielo y dos técnicos con anteojos azules y la frase Es una app de Orellana.. no la entenderías!"></picture></div>
   <div class="eyr-welcome"><h1>❄️ ¡Hola, Orellana! ❄️</h1><p>${new Date().toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p><div class="welcome-glow"></div></div>
   <div class="quick-grid" aria-label="Accesos directos"><button type="button" class="quick-card warm" data-page="agenda"><span class="quick-icon">📅</span><span class="quick-name">Agenda de visitas</span></button><button type="button" class="quick-card" data-page="presupuestos"><span class="quick-icon">📄</span><span class="quick-name">Presupuestos</span></button><button type="button" class="quick-card warm" data-page="remitos"><span class="quick-icon">📦</span><span class="quick-name">Remitos</span></button><button type="button" class="quick-card" data-page="clientes"><span class="quick-icon">👥</span><span class="quick-name">Clientes</span></button><button type="button" class="quick-card warm" data-page="frecuentes"><span class="quick-icon">🛠️</span><span class="quick-name">Trabajos frecuentes</span></button><button type="button" class="quick-card" data-page="configuracion"><span class="quick-icon">⚙️</span><span class="quick-name">Configuración</span></button></div>
+  <div class="eyr-formal-quick"><div><strong>📄 Informe técnico formal</strong><p>Respondé preguntas sencillas y obtené un informe profesional para el cliente o aseguradora.</p></div><button class="btn btn-primary" data-action="formal-open">Crear informe</button></div>
   <div class="eyr-peer-home"><div><b>📱 Sincronizar teléfonos EYR</b><p>Pasá los cambios de agenda y clientes entre los dos celulares sin archivos ni internet, cuando estén cerca.</p></div><button class="btn btn-primary" data-action="peer-open">Sincronizar</button></div>
   <div class="eyr-duo-home"><div><strong>📷 Diagnóstico con dos fotos</strong><p>Foto de la etiqueta + foto del display: identificá el equipo y consultá el error en una misma pantalla.</p></div><button class="btn btn-primary" data-action="duo-open">Empezar diagnóstico</button></div>
   <div class="eyr-work-home-tools"><button type="button" class="btn btn-blue" data-action="work-open-error">⚠️ Leer error del display</button><button type="button" class="btn" data-action="work-scan-qr">▦ Escanear QR EYR</button></div>
@@ -533,7 +534,7 @@ function visitModal(id,initialDate){const v=db.visits.find(x=>x.id===id)||{id:''
 function visitDetail(id){
  const v=db.visits.find(x=>x.id===id);if(!v){toast('Esa visita ya no está en la agenda.');return}
  const address=String(v.address||'').trim();
- modal('Detalle de la visita',`<div class="visit-detail"><div class="visit-detail-header"><strong>${esc(v.client||'Cliente')}</strong>${tag(v.status)}</div><div class="visit-detail-row"><span>📅 Fecha y hora</span><strong>${esc(dateText(v.date))} · ${esc(v.time||'Sin hora')}</strong></div><div class="visit-detail-row"><span>🛠 Trabajo / motivo</span><div>${esc(v.description||'Sin descripción')}</div></div>${address?`<div class="visit-detail-row"><span>📍 Domicilio</span><a href="${mapSearchUrl(address)}" target="_blank" rel="noopener noreferrer">${esc(address)}</a></div>`:''}${v.notes?`<div class="visit-detail-row"><span>📝 Notas internas</span><div class="visit-detail-notes">${esc(v.notes)}</div></div>`:''}${v.equipmentId?`<div class="visit-detail-row"><span>❄️ Equipo</span><button type="button" class="btn btn-small btn-blue" data-action="equipment-detail" data-id="${esc(v.equipmentId)}">${esc(equipmentName((db.equipment||[]).find(x=>x.id===v.equipmentId)||{}))}</button></div>`:''}${visitQuoteList(v)}</div><div class="form-actions">${address?`<a class="btn btn-blue" href="${mapDirectionsUrl(address)}" target="_blank" rel="noopener noreferrer">↗ Cómo llegar</a>`:''}<button type="button" class="btn btn-primary" data-action="work-open-report" data-id="${esc(v.id)}">📸 Informe y fotos</button><button type="button" class="btn" data-action="edit-visit" data-id="${esc(v.id)}">Editar</button><button type="button" class="btn btn-primary" data-action="quote-from-visit" data-id="${esc(v.id)}">Crear presupuesto</button></div>`,true);
+ modal('Detalle de la visita',`<div class="visit-detail"><div class="visit-detail-header"><strong>${esc(v.client||'Cliente')}</strong>${tag(v.status)}</div><div class="visit-detail-row"><span>📅 Fecha y hora</span><strong>${esc(dateText(v.date))} · ${esc(v.time||'Sin hora')}</strong></div><div class="visit-detail-row"><span>🛠 Trabajo / motivo</span><div>${esc(v.description||'Sin descripción')}</div></div>${address?`<div class="visit-detail-row"><span>📍 Domicilio</span><a href="${mapSearchUrl(address)}" target="_blank" rel="noopener noreferrer">${esc(address)}</a></div>`:''}${v.notes?`<div class="visit-detail-row"><span>📝 Notas internas</span><div class="visit-detail-notes">${esc(v.notes)}</div></div>`:''}${v.equipmentId?`<div class="visit-detail-row"><span>❄️ Equipo</span><button type="button" class="btn btn-small btn-blue" data-action="equipment-detail" data-id="${esc(v.equipmentId)}">${esc(equipmentName((db.equipment||[]).find(x=>x.id===v.equipmentId)||{}))}</button></div>`:''}${visitQuoteList(v)}</div><div class="form-actions">${address?`<a class="btn btn-blue" href="${mapDirectionsUrl(address)}" target="_blank" rel="noopener noreferrer">↗ Cómo llegar</a>`:''}<button type="button" class="btn btn-primary" data-action="formal-open" data-id="${esc(v.id)}">📄 Informe técnico formal</button><button type="button" class="btn btn-primary" data-action="work-open-report" data-id="${esc(v.id)}">📸 Informe y fotos</button><button type="button" class="btn" data-action="edit-visit" data-id="${esc(v.id)}">Editar</button><button type="button" class="btn btn-primary" data-action="quote-from-visit" data-id="${esc(v.id)}">Crear presupuesto</button></div>`,true);
 }
 function calendarDayDetail(date){
  const list=db.visits.filter(v=>v.date===date&&(filter==='todos'||v.status===filter)&&(!search||(v.client+' '+v.description+' '+v.address).toLowerCase().includes(search.toLowerCase()))).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
@@ -675,6 +676,13 @@ function setupDoublePhoto(){
   openReport:visitId=>window.EYRWorkshop?.openReport(visitId)
  });
 }
+function setupFormalReports(){
+ window.EYRFormalReport?.init({
+  getDB:()=>db,saveDB:save,modal,closeModal,toast,download,
+  confirm:message=>confirm(message),
+  photoStore:(...args)=>window.EYRWorkshop?.photoStore?.(...args)
+ });
+}
 function setupWorkshop(){
  if(!window.EYRWorkshop)return;
  window.EYRWorkshop.init({
@@ -683,6 +691,7 @@ function setupWorkshop(){
  });
 }
 function handleAction(b,event){const a=b.dataset.action,id=b.dataset.id;
+  if(a&&a.startsWith('formal-')&&window.EYRFormalReport?.handle(a,b))return;
   if(a&&a.startsWith('peer-')&&window.EYRPeerSync?.handle(a,b))return;
   if(a&&a.startsWith('duo-')&&window.EYRDoublePhoto?.handle(a,b))return;
   if(a&&a.startsWith('work-')&&window.EYRWorkshop?.handle(a,b))return;
@@ -879,6 +888,7 @@ window.addEventListener('storage',e=>{if(e.key===KEY){db=load();if(page!=='edita
 if(!navigator.userAgent.includes('EYRAndroid')&&'serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(e=>console.warn('Modo offline no disponible:',e));
 setupLabelScanner();
 setupWorkshop();
+setupFormalReports();
 setupDoublePhoto();
 setupPeerSync();
 render();

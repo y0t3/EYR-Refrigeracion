@@ -271,3 +271,22 @@ Las APK previas se firmaban con claves de depuración temporales. Para actualiza
 - El valor guardado continúa siendo numérico; los formularios mantienen separador de miles y teclado decimal. No se alteran registros, fotografías, firma de APK ni sincronización cercana v3.0.
 - Pruebas de regresión de vista previa y PDFs con una línea de instalación por `250.000`, tanto antes como después de guardar.
 - Android **v3.0.1**, `versionCode=22`, actualizable sin desinstalar.
+
+
+## v3.1 · Informe técnico formal asistido, local y revisable
+
+- Integra el formato de los informes **EYR Surrey 619AEQ1208** y **EYR LG LS-H186G3L0** elaborados el 16/11/2026: franja superior azul petróleo/turquesa, encabezado Informe técnico, datos de EYR, cliente, tabla del equipo, observaciones, diagnóstico, reparabilidad, conclusión en recuadro celeste, recomendaciones, declaración de finalidad, firmas y páginas numeradas. El anexo fotográfico se genera opcionalmente a partir del archivo local de fotos del informe de visita.
+
+- Accesos en **Inicio → Informe técnico formal**, **Agenda → visita → Informe técnico formal** y **Visita → Informe y fotos → Crear informe formal**.
+
+- **Asistente en tres pasos**: 1. Datos de equipo, síntomas, componentes y estado; 2. Repuestos, adaptaciones, causa evaluada, recomendación y destinatario; 3. revisión y edición de cinco secciones en lenguaje técnico profesional, PDF y envío.
+
+- El técnico puede escribir en lenguaje cotidiano («motor forzador quemado y plaqueta dañada») y tocar **Detectar componentes en mis notas**. El analizador local propone componentes/estados para revisión, sin dar por verificada ninguna conclusión, causalidad ni falta de repuestos.
+
+- **Control de afirmaciones**: no se afirma baja tensión, inexistencia de repuestos, falta de viabilidad de una adaptación o irreparabilidad si el técnico no lo selecciona expresamente. La relación causal, cuando se declara, se describe como compatible u orientativa. El lenguaje nunca constituye una certificación autónoma de EYR.
+
+- Los datos del cliente/equipo se toman de la visita y se pueden corregir; el informe formal se guarda dentro del registro `reports[].formal`, sin reemplazar observaciones ni fotos de la herramienta anterior. La revisión final es editable y los informes se generan íntegramente sin servidor ni servicios de IA externos.
+
+- **PDF** con anexos fotográficos y flechas de señalización opcionales, directamente desde el teléfono. Si las fotos están solo en el otro celular y no se importaron, se omiten sin alterar el informe. 
+
+- Android v3.1, `versionCode=23`; misma firma permanente, instalaciones sobre v3.0.1 sin pérdida de datos.

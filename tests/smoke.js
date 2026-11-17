@@ -18,6 +18,8 @@ const workshop=fs.readFileSync('workshop.js','utf8');
 const errorCodes=fs.readFileSync('error-codes.js','utf8');
 new Function('window',errorCodes)(window);
 new Function('window','document','indexedDB','crypto',workshop)(window,document,undefined,{randomUUID:()=> 'smoke-uuid'});
+const formal=fs.readFileSync('informe-formal.js','utf8');
+new Function('window','document',formal)(window,document);
 const duo=fs.readFileSync('diagnostico-duo.js','utf8');
 new Function('window','document',duo)(window,document);
 const peer=fs.readFileSync('peer-sync.js','utf8');
@@ -170,3 +172,18 @@ const moneyRemito={id:'r-test',number:2,date:'2026-11-13',client:'Prueba',items:
 app.remitoPreview(moneyRemito);
 assert(nodes['#modal-root'].innerHTML.match(/250\.000/g)?.length>=2,'Remito: detalle y total');
 console.log('OK: detalle y total en pesos argentinos, vista previa y remitos');
+
+assert(app.home().includes('data-action="formal-open"'),'Falta acceso al informe formal desde Inicio');
+app.visitDetail('visit-smoke');
+assert(nodes['#modal-root'].innerHTML.includes('Informe técnico formal'),'Falta el informe formal desde la visita');
+window.EYRFormalReport.open('visit-smoke');
+assert(nodes['#modal-root'].innerHTML.includes('Detectar componentes'),'No inicia el asistente formal');
+assert(nodes['#modal-root'].innerHTML.includes('TEST-001'),'No precarga el modelo de la visita');
+const baseFormal=window.EYRFormalReport.fresh({id:'v',client:'Prueba'},{},{brand:'LG',model:'LG-TEST'});
+baseFormal.findings=[{part:'forzador',state:'quemado'},{part:'plaqueta',state:'quemado'}];
+assert(!window.EYRFormalReport.generate(baseFormal).conclusion.includes('no reparable'),
+ 'No debe afirmar irreparabilidad sin verificar repuestos y adaptación');
+baseFormal.stock='sin-repuestos';baseFormal.adaptation='no-viable';
+assert(window.EYRFormalReport.generate(baseFormal).conclusion.includes('no reparable'),
+ 'Falta conclusión de no reparabilidad cuando se documentan las condiciones');
+console.log('OK: formulario y redacción técnica formal sin falsas atribuciones');

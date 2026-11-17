@@ -1,0 +1,34 @@
+/* EYR v3.1 · Informe técnico formal y redactor guiado */
+.eyr-formal{display:flex;flex-direction:column;gap:15px;color:#e7f5ff;line-height:1.5}
+.eyr-formal h3{font-size:16px;margin:8px 0 0;color:#b6e9ff}
+.eyr-formal p{margin:0}
+.eyr-formal-visit{padding:13px;background:linear-gradient(110deg,rgba(12,80,119,.76),rgba(6,36,68,.87));border:1px solid rgba(94,176,224,.45);border-radius:12px}
+.eyr-formal-visit strong{display:block;color:#fff;font-size:16px}
+.eyr-formal-visit small{display:block;color:#b0d3e7;font-size:12px;margin-top:4px}
+.eyr-formal-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.eyr-formal-steps span{font-size:11px;line-height:1.25;text-align:center;padding:10px 6px;background:rgba(8,35,62,.7);border:1px solid rgba(66,136,181,.3);color:#9ebed0;border-radius:9px}
+.eyr-formal-steps .on{border-color:#4ac1f1;color:#fff;background:rgba(20,101,145,.6);font-weight:700}
+.eyr-formal-lead{font-size:13px;color:#c2e8fa}
+.eyr-formal-help{font-size:12px;color:#aacfe4}
+.eyr-formal .field{min-width:0}
+.eyr-formal .field label{display:block;margin-bottom:5px;font-size:12px;color:#c0e5f6}
+.eyr-formal input:not([type=checkbox]),.eyr-formal select,.eyr-formal textarea{background:#071d35;border:1px solid rgba(94,181,229,.54);border-radius:9px;color:#eefaff;padding:11px;min-width:0;width:100%;font:inherit;font-size:14px}
+.eyr-formal textarea{min-height:95px;resize:vertical;line-height:1.65}
+.eyr-formal .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.eyr-formal .form-grid .full{grid-column:1/-1}
+.eyr-formal-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.eyr-formal-checks label{display:flex;align-items:flex-start;gap:8px;padding:10px;border:1px solid rgba(69,150,198,.42);border-radius:10px;background:rgba(5,38,68,.55);font-size:12px;cursor:pointer}
+.eyr-formal-checks input,.eyr-formal-photo-option input{accent-color:#1ba8eb;flex-shrink:0;min-width:19px;min-height:19px}
+.eyr-formal-parts{display:flex;flex-direction:column;gap:10px}
+.eyr-formal-part{display:grid;grid-template-columns:1.2fr 1fr auto;gap:8px;padding:10px;border:1px solid rgba(74,152,204,.47);background:rgba(7,37,67,.61);border-radius:11px}
+.eyr-formal-part .btn{align-self:end;white-space:nowrap;min-height:41px}
+.eyr-formal-photo-option{display:flex;align-items:flex-start;gap:11px;border-radius:10px;border:1px solid rgba(65,156,214,.38);background:rgba(5,34,59,.55);padding:13px;cursor:pointer;font-size:13px}
+.eyr-formal-review{display:flex;flex-direction:column;gap:11px}
+.eyr-formal-review textarea{min-height:128px}
+.eyr-formal-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.eyr-formal-actions .btn{flex:1 1 145px;white-space:normal;line-height:1.3;min-height:45px}
+.eyr-formal-quick{display:flex;flex-wrap:wrap;gap:9px;align-items:center;border:1px solid rgba(72,185,233,.6);border-radius:12px;padding:14px;background:rgba(8,65,102,.40)}
+.eyr-formal-quick>div{flex:1 1 210px}
+.eyr-formal-quick strong{display:block;font-size:15px;color:#ddf7ff}
+.eyr-formal-quick p{font-size:12px;color:#b0d6eb;margin:5px 0 0}
+@media(max-width:680px){.eyr-formal .form-grid,.eyr-formal-checks{grid-template-columns:1fr}.eyr-formal-part{grid-template-columns:1fr 1fr}.eyr-formal-part .btn{grid-column:1/-1}.eyr-formal-steps span{font-size:10px}.eyr-formal .form-grid .full{grid-column:1}}
